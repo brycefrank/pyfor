@@ -3,6 +3,7 @@ import numpy as np
 
 def elev_points(tiff, cloud):
     """Normalizes a point cloud."""
+    #TODO: Match tiff and cloud projections.
     import gdal
     import affine
 
@@ -30,6 +31,7 @@ def elev_points(tiff, cloud):
     for coord in cloud.scaled_xy:
         try:
             if i % 10000 == 0:
+                #TODO: Modulo may be slowing this down.
                 z_list.append(retrieve_pixel_value(coord, raster_object))
                 print(i, "points normalized out of", cloud_length)
                 i+=1
@@ -54,7 +56,6 @@ def elev_points(tiff, cloud):
 
 def df_to_las(df, out_path, header, zcol='z'):
     """Exports normalized points to new las."""
-    # FIXME: Not working.
     import laspy
 
     outfile = laspy.file.File(out_path, mode="w", header = header)

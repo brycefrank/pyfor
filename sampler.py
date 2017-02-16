@@ -123,6 +123,7 @@ class Sampler:
 
         plot_shp = self.plot_shp
         plot_geoms = self.get_geom(plot_shp)
+        print(plot_geoms[0])
         self.all_cells = []
         if plot_shp == None:
             print("Consider adding a plot shapefile path.")
@@ -162,6 +163,7 @@ class Sampler:
 
     def df_sort(self, plot_set):
         """Takes all of the unique vertices and makes a new dataframe"""
+        #FIXME: Does not work if plot hangs over extent (and it probably shouldn't)
         import pandas as pd
 
         cloud_df = self.cloud.dataframe
@@ -200,7 +202,7 @@ class Sampler:
         print(plot, "took", time.time() - start, "seconds OLD")
         return new_df
 
-    def test_extract_plot(self, square_df, plot_index):
+    def old_extract_plot(self, square_df, plot_index):
 
         #TODO: This is a little faster (3 seconds) but needs more wrangling to be functional.
         start = time.time()
@@ -226,13 +228,15 @@ class Sampler:
         # new_df = plot_df.loc[plot_points, :]
         # return new_df
 
-    def clip_plots(self):
+    def clip_plots(self, path):
         import normalize
         header = self.cloud.header
         unique_plot_points = self.extract_points()
-        i = 1
+        i=0
         for point_set in unique_plot_points:
-            print(self.df_sort(point_set))
-            path = "plot" + str(i) + ".las"
-            normalize.df_to_las(self.extract_plot(self.df_sort(point_set), i - 1), path, header, 'norm')
-            i += 1
+            print("Writing a plot to .las", i)
+            #FIXME: This gives weird file names.
+            filename = "plot" + str(i) + ".las"
+            file_path = filename
+            i+=1
+            normalize.df_to_las(self.extract_plot(self.df_sort(point_set), i), file_path, header, 'z')

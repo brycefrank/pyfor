@@ -1,33 +1,43 @@
+import pointcloud
+import sampler
+
+cloud1 = pointcloud.CloudInfo(r"C:\pyformaster\samplelas\WA_Olympic_Peninsula_2013_000191\WA_Olympic_Peninsula_2013_000191.las")
+
+cloud1.wkt = """PROJCS["NAD83 / UTM zone 10N",
+    GEOGCS["NAD83",
+        DATUM["North_American_Datum_1983",
+            SPHEROID["GRS 1980",6378137,298.257222101,
+                AUTHORITY["EPSG","7019"]],
+            AUTHORITY["EPSG","6269"]],
+        PRIMEM["Greenwich",0,
+            AUTHORITY["EPSG","8901"]],
+        UNIT["degree",0.01745329251994328,
+            AUTHORITY["EPSG","9122"]],
+        AUTHORITY["EPSG","4269"]],
+    UNIT["metre",1,
+        AUTHORITY["EPSG","9001"]],
+    PROJECTION["Transverse_Mercator"],
+    PARAMETER["latitude_of_origin",0],
+    PARAMETER["central_meridian",-123],
+    PARAMETER["scale_factor",0.9996],
+    PARAMETER["false_easting",500000],
+    PARAMETER["false_northing",0],
+    AUTHORITY["EPSG","26910"],
+    AXIS["Easting",EAST],
+    AXIS["Northing",NORTH]]"""
 
 
-list2 = [10,20,30,40,50]
+normcloud = pointcloud.CloudInfo(r"C:\pyformaster\pyfordata\Ancillary_Data\mydata\mynorm.las")
+normcloud.grid_constructor(10)
+normcloud.cell_sort()
 
 
+sample1 = sampler.Sampler(normcloud)
 
-def factorial(n):
-    if n == 0:
-        return 1
-    else:
-        return n * factorial(n-1)
+sample1.plot_shp = r"C:\pyformaster\pyfordata\Ancillary_Data\gis\fieldplotsbuff.shp"
 
-def thing(n):
-    if n == 0:
+sample1.grid_path = r"C:\pyformaster\pyfordata\Ancillary_Data\gis\mygrid.shp"
 
-        return 1
-    else:
-        return n - thing(n-1)
+# sample1.clip_plots(r"C:\pyformaster\pyfordata\Ancillary_Data\mydata\plots_clip")
 
-def list_append(n, list1, start="end"):
-    step = list1[1] - list1[0]
-    if start == "end":
-        last = list1[-1]
-        for i in range(n):
-            list1.append(last + (i+1)*step)
-        return list1
-    if start == "beginning":
-        first = list1[0]
-        for i in range(n):
-            list1.insert(0, first - (i+1)*step)
-        return list1
-
-print(list_append(3, list2, start="beginning"))
+print(sample1.extract_points())
