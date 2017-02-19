@@ -1,5 +1,5 @@
-import pointcloud
-import sampler
+from pyfor import pointcloud
+from pyfor import sampler
 
 cloud1 = pointcloud.CloudInfo(r"C:\pyformaster\samplelas\WA_Olympic_Peninsula_2013_000191\WA_Olympic_Peninsula_2013_000191.las")
 
@@ -27,17 +27,22 @@ cloud1.wkt = """PROJCS["NAD83 / UTM zone 10N",
     AXIS["Northing",NORTH]]"""
 
 
-normcloud = pointcloud.CloudInfo(r"C:\pyformaster\pyfordata\Ancillary_Data\mydata\mynorm.las")
+
+# Index the normalized cloud.
+normcloud = pointcloud.CloudInfo(r"C:\pyformaster\samplelas\WA_Olympic_Peninsula_2013_000191\WA_Olympic_Peninsula_2013_000191.las")
 normcloud.grid_constructor(10)
 normcloud.cell_sort()
 
 
-sample1 = sampler.Sampler(normcloud)
+normcloud.dem_path = r"C:\pyformaster\pyfordata\Ancillary_Data\mydata\mydem.tiff"
+normcloud.normalize()
 
-sample1.plot_shp = r"C:\pyformaster\pyfordata\Ancillary_Data\gis\fieldplotsbuff.shp"
+
+sample1 = sampler.Sampler(normcloud)
+sample1.plot_shp = r"C:\pyformaster\pyfordata\Ancillary_Data\gis\newplots1.shp"
 
 sample1.grid_path = r"C:\pyformaster\pyfordata\Ancillary_Data\gis\mygrid.shp"
 
-# sample1.clip_plots(r"C:\pyformaster\pyfordata\Ancillary_Data\mydata\plots_clip")
-
-print(sample1.extract_points())
+sample1.clip_plots(r"C:\pyformaster\pyfordata\Ancillary_Data\mydata\plots_clip")
+#
+# print(sample1.extract_points())

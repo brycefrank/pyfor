@@ -62,3 +62,5 @@ def df_to_las(df, out_path, header, zcol='z'):
     outfile.x = df['x']
     outfile.y = df['y']
     outfile.z = df[zcol]
+    # outfile.intensity = df['int']
+    # outfile.return_num = df['ret']

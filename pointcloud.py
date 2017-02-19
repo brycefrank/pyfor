@@ -14,9 +14,12 @@ class CloudInfo:
         self.las = laspy.file.File(filename, mode='r')
 
         # Creates NumPy array of XYZ (Might delete this)
-        # TODO: include all .las data.
+        # TODO: include all .las data like intensity values
         self.scaled_xyz = np.column_stack((self.las.x, self.las.y, self.las.z))
         self.scaled_xy = np.column_stack((self.las.x, self.las.y))
+
+
+
 
         # Gets extent and creates a grid variable for later.
         # TODO: implement just using header
@@ -33,9 +36,15 @@ class CloudInfo:
 
         self.dem_path = None
 
-        # Constructs Dataframe from lasfile
+        ## NEW SECTION TRYING FULL STACK 2/18/2017 ##
+        # self.new_stack = np.column_stack((self.las.x, self.las.y, self.las.z, self.las.intensity, self.las.return_num))
+        # self.dataframe = pd.DataFrame(self.new_stack, columns=['x','y','z','int','ret'])
+        # self.dataframe['classifaction'] = 1
+
+        # OLD SECTION
         self.dataframe = pd.DataFrame(self.scaled_xyz, columns=['x', 'y', 'z'])
         self.dataframe['classification'] = 1  # Per las documentation, unclassified points are labeled as 1.
+
 
         # self.las.close() # Not sure if this is needed yet.
 
@@ -215,7 +224,7 @@ class CloudInfo:
         self.point_cloud_to_dem(tiff_path)
 
     def normalize(self, export=False, path=None):
-        import normalize
+        from pyfor import normalize
         normalize.elev_points(self.dem_path, self)
         if export:
             normalize.df_to_las(self.dataframe, path, self.header)

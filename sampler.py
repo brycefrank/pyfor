@@ -229,14 +229,17 @@ class Sampler:
         # return new_df
 
     def clip_plots(self, path):
-        import normalize
+        #TODO: Add leading zero's to file names for ordering purposes.
+        from pyfor import normalize
         header = self.cloud.header
         unique_plot_points = self.extract_points()
-        i=0
+        print(len(unique_plot_points))
+        print(unique_plot_points)
+        i=1
         for point_set in unique_plot_points:
             print("Writing a plot to .las", i)
             #FIXME: This gives weird file names.
             filename = "plot" + str(i) + ".las"
             file_path = filename
+            normalize.df_to_las(self.extract_plot(self.df_sort(point_set), i-1), file_path, header, 'norm')
             i+=1
-            normalize.df_to_las(self.extract_plot(self.df_sort(point_set), i), file_path, header, 'z')
