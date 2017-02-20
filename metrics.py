@@ -4,7 +4,7 @@ import numpy as np
 from scipy import stats
 import laspy
 
-
+#TODO: Implement pandas dataframes.
 
 ## FUSION Metrics ##
 
@@ -179,10 +179,7 @@ print(a)
 
 for i in a:
     dta = CloudData(folder+'\\'+i)
-    print(dta.total_count(), dta.mean(2))
-
-
-
+    print(dta.returns_abv_mode())
 
 
 

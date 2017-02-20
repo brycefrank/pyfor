@@ -15,8 +15,8 @@ class CloudInfo:
 
         # Creates NumPy array of XYZ (Might delete this)
         # TODO: include all .las data like intensity values
-        self.scaled_xyz = np.column_stack((self.las.x, self.las.y, self.las.z))
-        self.scaled_xy = np.column_stack((self.las.x, self.las.y))
+        #self.scaled_xyz = np.column_stack((self.las.x, self.las.y, self.las.z))
+        #self.scaled_xy = np.column_stack((self.las.x, self.las.y))
 
 
 
@@ -29,21 +29,17 @@ class CloudInfo:
         self.grid = None
         self.grid_x = None
         self.grid_y = None
-
-        # TODO: Get wkt projection
-
         self.wkt = None
-
         self.dem_path = None
 
         ## NEW SECTION TRYING FULL STACK 2/18/2017 ##
-        # self.new_stack = np.column_stack((self.las.x, self.las.y, self.las.z, self.las.intensity, self.las.return_num))
-        # self.dataframe = pd.DataFrame(self.new_stack, columns=['x','y','z','int','ret'])
-        # self.dataframe['classifaction'] = 1
+        self.new_stack = np.column_stack((self.las.x, self.las.y, self.las.z, self.las.intensity, self.las.return_num))
+        self.dataframe = pd.DataFrame(self.new_stack, columns=['x','y','z','int','ret'])
+        self.dataframe['classification'] = 1
 
         # OLD SECTION
-        self.dataframe = pd.DataFrame(self.scaled_xyz, columns=['x', 'y', 'z'])
-        self.dataframe['classification'] = 1  # Per las documentation, unclassified points are labeled as 1.
+        #self.dataframe = pd.DataFrame(self.scaled_xyz, columns=['x', 'y', 'z'])
+        #self.dataframe['classification'] = 1  # Per las documentation, unclassified points are labeled as 1.
 
 
         # self.las.close() # Not sure if this is needed yet.
@@ -86,12 +82,9 @@ class CloudInfo:
 
         print("Sorting cells into grid.")
 
-        x_list = self.scaled_xyz[:,0]
-        y_list = self.scaled_xyz[:,1]
+        x_list = self.new_stack[:,0]
+        y_list = self.new_stack[:,1]
 
-
-        # bins_x = np.digitize(x_list, self.grid_x)
-        # bins_y = np.digitize(y_list, self.grid_y)
 
         bins_x = np.digitize(x_list, self.grid_x) # a list of cell id numbers
         x = np.array(self.grid_x)
@@ -104,19 +97,20 @@ class CloudInfo:
         self.dataframe['cell_x'] = x
         self.dataframe['cell_y'] = y
 
+
     def ground_classify(self):
         """Classifies points in self.dataframe as 2 using a simple ground filter."""
         print("Classifying points as ground.")
-        df = self.dataframe
+
+        #Retrieve necessary dataframe fields.
+        df = self.dataframe[['z', 'cell_x', 'cell_y']]
         # Construct list of ID's to adjust
         grouped = df.groupby(['cell_x', 'cell_y'])
         ground_id = [df.idxmin()['z'] for key, df in grouped]
+
         # Adjust to proper classification
-        for coordinate in ground_id:
-            df.set_value(coordinate, 'classification', 2) # Per las documentation, ground points are labeled 2.
-        self.dataframe = df
-        no_ground_points = df[df["classification"]==2].count()["classification"]
-        print("%d points classified as ground points." %no_ground_points)
+        for coord_id in ground_id:
+            self.dataframe.set_value(coord_id, 'classification', 2) # Per las documentation, ground points are labeled 2.
 
     def point_cloud_to_dem(self, path=None):
         """Holds a variety of functions that create a point cloud from a classified DEM."""

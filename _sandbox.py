@@ -29,20 +29,30 @@ cloud1.wkt = """PROJCS["NAD83 / UTM zone 10N",
 
 
 # Index the normalized cloud.
-normcloud = pointcloud.CloudInfo(r"C:\pyformaster\samplelas\WA_Olympic_Peninsula_2013_000191\WA_Olympic_Peninsula_2013_000191.las")
-normcloud.grid_constructor(10)
-normcloud.cell_sort()
+
+import time
+
+rawcloud = pointcloud.CloudInfo(r"C:\pyformaster\samplelas\WA_Olympic_Peninsula_2013_000191\WA_Olympic_Peninsula_2013_000191.las")
+rawcloud.grid_constructor(10)
+rawcloud.cell_sort()
+rawcloud.ground_classify()
 
 
-normcloud.dem_path = r"C:\pyformaster\pyfordata\Ancillary_Data\mydata\mydem.tiff"
-normcloud.normalize()
+rawcloud.dem_path = r"C:\pyformaster\pyfordata\Ancillary_Data\mydata\mydem.tiff"
+start = time.time()
+rawcloud.normalize()
+end = time.time()
+
+print(end-start)
 
 
-sample1 = sampler.Sampler(normcloud)
-sample1.plot_shp = r"C:\pyformaster\pyfordata\Ancillary_Data\gis\newplots1.shp"
-
-sample1.grid_path = r"C:\pyformaster\pyfordata\Ancillary_Data\gis\mygrid.shp"
-
-sample1.clip_plots(r"C:\pyformaster\pyfordata\Ancillary_Data\mydata\plots_clip")
 #
-# print(sample1.extract_points())
+#
+# sample1 = sampler.Sampler(normcloud)
+# sample1.plot_shp = r"C:\pyformaster\pyfordata\Ancillary_Data\gis\newplots1.shp"
+#
+# sample1.grid_path = r"C:\pyformaster\pyfordata\Ancillary_Data\gis\mygrid.shp"
+#
+# sample1.clip_plots(r"C:\pyformaster\pyfordata\Ancillary_Data\mydata\plots_clip")
+# #
+# # print(sample1.extract_points())

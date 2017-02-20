@@ -7,6 +7,8 @@ def elev_points(tiff, cloud):
     import gdal
     import affine
 
+    xy_array = cloud.dataframe.as_matrix(columns=['x', 'y'])
+
     # A bunch of geospatial information.
     raster_file = tiff
     raster_object = gdal.Open(raster_file)
@@ -14,43 +16,36 @@ def elev_points(tiff, cloud):
     geo_trans = raster_object.GetGeoTransform()
     forward_transform = affine.Affine.from_gdal(*geo_trans)
     reverse_transform = ~forward_transform
-    cloud_length = len(cloud.scaled_xy)
+    cloud_length = len(xy_array)
 
     i = 0
     z_list = []
 
-    def retrieve_pixel_value(geo_coord, data_source):
+    def retrieve_pixel_value(geo_coord):
         """Return floating-point value that corresponds to given point."""
+        #TODO: this could at least be vectorized since reverse_transform is a constant
         x, y = geo_coord[0], geo_coord[1]
         px, py = reverse_transform * (x, y)
         px, py = int(px + 0.5), int(py + 0.5)
         pixel_coord = px, py
 
         return raster_array[pixel_coord[1]][pixel_coord[0]]
-    # TODO: make this a numpy operation
-    for coord in cloud.scaled_xy:
+    #TODO: make this a numpy operation
+    #TODO: or make multiprocessing work...
+    for coord in xy_array:
         try:
-            if i % 10000 == 0:
-                #TODO: Modulo may be slowing this down.
-                z_list.append(retrieve_pixel_value(coord, raster_object))
-                print(i, "points normalized out of", cloud_length)
-                i+=1
-            else:
-                z_list.append(retrieve_pixel_value(coord, raster_object))
-                i+=1
+            z_list.append(retrieve_pixel_value(coord))
         except IndexError:
             # TODO: consider alternatives to this method.
             # Should be resolved after clipping method is complete.
             z_list.append(0)
 
+
     cloud.dataframe['elev'] = z_list
     cloud.dataframe['norm'] = cloud.dataframe['z'] - cloud.dataframe['elev']
 
     # Some cleaning processes
-
-
     cloud.dataframe.dropna(inplace=True)
-    # TODO: A very poor way to get rid of "edge errors"
     cloud.dataframe = cloud.dataframe[cloud.dataframe.elev != 0]
 
 
@@ -62,5 +57,5 @@ def df_to_las(df, out_path, header, zcol='z'):
     outfile.x = df['x']
     outfile.y = df['y']
     outfile.z = df[zcol]
-    # outfile.intensity = df['int']
-    # outfile.return_num = df['ret']
+    outfile.intensity = df['int']
+    outfile.return_num = df['ret']
