@@ -7,52 +7,36 @@ class CloudInfo:
     """Holds and manipulates the data from a .las point cloud."""
     def __init__(self, filename):
 
+        # Read las file from filename.
         self.filename = filename
-
-        # Reads file from .las.
-        # TODO: Limit this to avoid memory errors.
         self.las = laspy.file.File(filename, mode='r')
 
-        # Creates NumPy array of XYZ (Might delete this)
-        # TODO: include all .las data like intensity values
-        #self.scaled_xyz = np.column_stack((self.las.x, self.las.y, self.las.z))
-        #self.scaled_xy = np.column_stack((self.las.x, self.las.y))
-
-
-
-
-        # Gets extent and creates a grid variable for later.
-        # TODO: implement just using header
+        # Gets some information useful for later processes.
         self.header = self.las.header
         self.mins = self.las.header.min
         self.maxes = self.las.header.max
+
+        # Constructs dataframe of las information.
+        self.new_stack = np.column_stack((self.las.x, self.las.y, self.las.z, self.las.intensity, self.las.return_num))
+        self.dataframe = pd.DataFrame(self.new_stack, columns=['x','y','z','int','ret'])
+        self.dataframe['classification'] = 1
+
+        # Place holder variables.
         self.grid = None
         self.grid_x = None
         self.grid_y = None
         self.wkt = None
         self.dem_path = None
 
-        ## NEW SECTION TRYING FULL STACK 2/18/2017 ##
-        self.new_stack = np.column_stack((self.las.x, self.las.y, self.las.z, self.las.intensity, self.las.return_num))
-        self.dataframe = pd.DataFrame(self.new_stack, columns=['x','y','z','int','ret'])
-        self.dataframe['classification'] = 1
-
-        # OLD SECTION
-        #self.dataframe = pd.DataFrame(self.scaled_xyz, columns=['x', 'y', 'z'])
-        #self.dataframe['classification'] = 1  # Per las documentation, unclassified points are labeled as 1.
-
-
-        # self.las.close() # Not sure if this is needed yet.
-
     def grid_constructor(self, step, output=False):
         """Sets self.grid to a list of tuples corresponding to the points of a 2D grid covering the extent
         of the input .las
 
         Keyword arguments:
-            step -- Length of grid cell side in same units as .las
+        step -- Length of grid cell side in same units as .las
+        output -- If true, generates an ESRI shapefile of the grid, not used for any processes in Pyfor.
         """
 
-        ## Should this just occur upon init?
         print("Constructing grid.")
 
         min_xyz = self.mins
@@ -72,13 +56,11 @@ class CloudInfo:
         self.grid_step = step
 
         # TODO: Implement exporting this to a shapefile or similar.
-
-
-        if output == True:
+        if output:
             pass
 
     def cell_sort(self):
-        """Sorts cells into grid constructed by grid_constructor."""
+        """Sorts cells into grid constructed by grid_constructor by appending cell_x & cell_y to self.dataframe."""
 
         print("Sorting cells into grid.")
 
@@ -86,7 +68,7 @@ class CloudInfo:
         y_list = self.new_stack[:,1]
 
 
-        bins_x = np.digitize(x_list, self.grid_x) # a list of cell id numbers
+        bins_x = np.digitize(x_list, self.grid_x)
         x = np.array(self.grid_x)
         x = x[bins_x-1]
 
@@ -99,21 +81,28 @@ class CloudInfo:
 
 
     def ground_classify(self):
+        #TODO: Implement other ground filter options.
+
         """Classifies points in self.dataframe as 2 using a simple ground filter."""
         print("Classifying points as ground.")
 
         #Retrieve necessary dataframe fields.
         df = self.dataframe[['z', 'cell_x', 'cell_y']]
+
         # Construct list of ID's to adjust
         grouped = df.groupby(['cell_x', 'cell_y'])
         ground_id = [df.idxmin()['z'] for key, df in grouped]
 
-        # Adjust to proper classification
+        # Adjust to proper classification (2 used per las documentation).
         for coord_id in ground_id:
-            self.dataframe.set_value(coord_id, 'classification', 2) # Per las documentation, ground points are labeled 2.
+            self.dataframe.set_value(coord_id, 'classification', 2)
 
-    def point_cloud_to_dem(self, path=None):
-        """Holds a variety of functions that create a point cloud from a classified DEM."""
+    def point_cloud_to_dem(self, path):
+        """Holds a variety of functions that create a GeoTIFF from a classified point cloud.
+
+        Keyword arguments:
+        path -- output path for GeoTIFF output.
+        """
         from scipy.interpolate import griddata
         import gdal
         cloud = self.dataframe
@@ -124,7 +113,6 @@ class CloudInfo:
 
         def interpolate(cloud, resolution=1, int_method='cubic'):
             """Creates an interpolated 2d array from XYZ."""
-            """Interpolates point cloud for DEM production."""
             ground_df = cloud.loc[cloud['classification'] == 2]  # Retrieves ground points from data frame.
             ground_points = ground_df.as_matrix(['x', 'y','z'])  # Converts ground points to numpy array.
             # FIXME: Ground_points and nodes are verry similar.
