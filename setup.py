@@ -5,7 +5,7 @@ setup(
     version='0.1',
     author='Bryce Frank',
     author_email='bryce.frank@oregonstate.edu',
-    packages=['pyfor', 'pyfor.test'],
+    packages=['pyfor'],
     url='https://github.com/brycefrank/pyfor',
     license='LICENSE.txt',
     description='Tools for forest resource LiDAR.',
