@@ -80,22 +80,24 @@ class CloudInfo:
         self.dataframe['cell_y'] = y
 
 
-    def ground_classify(self):
-        #TODO: Implement other ground filter options.
-
+    def ground_classify(self, method):
         """Classifies points in self.dataframe as 2 using a simple ground filter."""
         print("Classifying points as ground.")
 
         #Retrieve necessary dataframe fields.
         df = self.dataframe[['z', 'cell_x', 'cell_y']]
+        if method == "simple":
+            # Construct list of ID's to adjust
+            grouped = df.groupby(['cell_x', 'cell_y'])
+            ground_id = [df.idxmin()['z'] for key, df in grouped]
 
-        # Construct list of ID's to adjust
-        grouped = df.groupby(['cell_x', 'cell_y'])
-        ground_id = [df.idxmin()['z'] for key, df in grouped]
+            # Adjust to proper classification (2 used per las documentation).
+            for coord_id in ground_id:
+                self.dataframe.set_value(coord_id, 'classification', 2)
 
-        # Adjust to proper classification (2 used per las documentation).
-        for coord_id in ground_id:
-            self.dataframe.set_value(coord_id, 'classification', 2)
+        # TODO: Implement other ground filter options.
+        else:
+            pass
 
     def point_cloud_to_dem(self, path):
         """Holds a variety of functions that create a GeoTIFF from a classified point cloud.
@@ -199,10 +201,10 @@ class CloudInfo:
             print("Converting ground points to GeoTIFF")
             cloud_to_tiff(cloud, wkt, path, resolution=1)
 
-    def process(self, step, tiff_path):
+    def generate_BEM(self, step, tiff_path, method="simple"):
         self.grid_constructor(step)
         self.cell_sort()
-        self.ground_classify()
+        self.ground_classify(method="simple")
         self.point_cloud_to_dem(tiff_path)
 
     def normalize(self, export=False, path=None):
