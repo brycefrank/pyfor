@@ -203,33 +203,7 @@ class Sampler:
         print(plot, "took", time.time() - start, "seconds OLD")
         return new_df
 
-    def old_extract_plot(self, square_df, plot_index):
-
-        #TODO: This is a little faster (3 seconds) but needs more wrangling to be functional.
-        start = time.time()
-
-        plot = self.get_geom(self.plot_shp)[plot_index]
-        plot = ogr.CreateGeometryFromWkt(plot)
-
-        plot_df = square_df
-
-        point_array = np.column_stack([plot_df.index.values, plot_df.x.values, plot_df.y.values])
-
-        multipoint = ogr.Geometry(ogr.wkbMultiPoint)
-
-        plot_points = []
-        for point in point_array:
-            thing = ogr.Geometry(ogr.wkbPoint)
-            thing.AddPoint(point[1], point[2])
-            multipoint.AddGeometry(thing)
-
-        intersection = multipoint.Intersection(plot)
-        print(plot, "took", time.time() - start, "seconds NEw")
-        return intersection
-        # new_df = plot_df.loc[plot_points, :]
-        # return new_df
-
-    def clip_plots(self, path):
+    def clip_plots(self):
         #TODO: Add leading zero's to file names for ordering purposes.
         #TODO: Generally just very slow, consider PDAL?
         from PyFor.pyfor import normalize
