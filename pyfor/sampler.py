@@ -2,6 +2,7 @@ import ogr
 import os
 import numpy as np
 import time
+
 class Sampler:
     """Handles and creates information from a CloudInfo object for sampling.
     Requres a CloudInfo object."""
@@ -231,7 +232,7 @@ class Sampler:
     def clip_plots(self, path):
         #TODO: Add leading zero's to file names for ordering purposes.
         #TODO: Generally just very slow, consider PDAL?
-        from pyfor import normalize
+        from PyFor.pyfor import normalize
         header = self.cloud.header
         unique_plot_points = self.extract_points()
         print(len(unique_plot_points))

@@ -2,11 +2,6 @@
 
 import numpy as np
 from scipy import stats
-import laspy
-
-#TODO: Implement pandas dataframes.
-
-## FUSION Metrics ##
 
 
 # x y z i r
@@ -165,39 +160,3 @@ class CloudData:
 
     def total_returns(self):
         pass
-
-
-
-
-
-data1 = CloudData(r"C:\pyformaster\pyfordata\Ancillary_Data\mydata\plots_clip\plot01.las")
-
-import os
-folder = r"C:\pyformaster\pyfordata\Ancillary_Data\mydata\plots_clip"
-a = os.listdir(folder)
-print(a)
-
-for i in a:
-    dta = CloudData(folder+'\\'+i)
-    print(dta.returns_abv_mode())
-
-
-
-
-
-
-
-
-
-
-
-## Dimensional ##
-# Dimensional can include intensity
-
-
-
-
-
-
-
-

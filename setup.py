@@ -9,5 +9,4 @@ setup(
     url='https://github.com/brycefrank/pyfor',
     license='LICENSE.txt',
     description='Tools for forest resource LiDAR.',
-    install_requires=[]
 )
