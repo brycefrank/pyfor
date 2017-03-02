@@ -1,0 +1,8 @@
+numpy
+gdal
+ogr
+affine
+numpy-mkl
+scipy
+
+-e git://github.com/brycefrank/laspy.git
