@@ -3,7 +3,7 @@ import os
 import numpy as np
 import time
 
-class Sampler:
+class PlotSampler:
     """Handles and creates information from a CloudInfo object for sampling.
     Requres a CloudInfo object."""
 
@@ -206,7 +206,7 @@ class Sampler:
     def clip_plots(self):
         #TODO: Add leading zero's to file names for ordering purposes.
         #TODO: Generally just very slow, consider PDAL?
-        from PyFor.pyfor import normalize
+        from pyfor import normalize
         header = self.cloud.header
         unique_plot_points = self.extract_points()
         print(len(unique_plot_points))
@@ -217,5 +217,29 @@ class Sampler:
             #FIXME: This gives weird file names.
             filename = "plot" + str(i) + ".las"
             file_path = filename
-            normalize.df_to_las(self.extract_plot(self.df_sort(point_set), i-1), file_path, header, 'norm')
+            normalize.df_to_las(self.extract_plot(self.df_sort(point_set), i-1),
+                                file_path, header, 'norm')
             i+=1
+
+class GridSampler:
+    def __init__(self, cloud, sample_width):
+        self.cloud = cloud
+        self.sample_width = sample_width
+
+        # Sort into cells of sample_width
+        self.cloud.grid_constructor(self.sample_width)
+        self.cloud.cell_sort()
+
+        df = self.cloud.dataframe
+
+        grouped = df.groupby(['cell_x', 'cell_y'])
+        import time
+        start = time.time()
+        grouped.z.max().values
+        # for name, group in grouped:
+        #     group.z.values.max()
+        end = time.time()
+        print(end-start)
+
+    def canopy_height_model(self):
+        pass

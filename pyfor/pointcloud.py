@@ -208,7 +208,7 @@ class CloudInfo:
         self.point_cloud_to_dem(tiff_path)
 
     def normalize(self, export=False, path=None):
-        from PyFor.pyfor import normalize
+        from pyfor import normalize
         normalize.elev_points(self.dem_path, self)
         if export:
             normalize.df_to_las(self.dataframe, path, self.header)
