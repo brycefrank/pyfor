@@ -222,6 +222,8 @@ class PlotSampler:
             i+=1
 
 class GridSampler:
+    # TODO: Just make this a function in sampler?
+    # Make this a child??
     def __init__(self, cloud, sample_width):
         self.cloud = cloud
         self.sample_width = sample_width
@@ -230,16 +232,24 @@ class GridSampler:
         self.cloud.grid_constructor(self.sample_width)
         self.cloud.cell_sort()
 
+        self.grid_x = self.cloud.grid_x
+        self.grid_y = self.cloud.grid_y
         df = self.cloud.dataframe
 
         grouped = df.groupby(['cell_x', 'cell_y'])
-        import time
-        start = time.time()
-        grouped.z.max().values
-        # for name, group in grouped:
-        #     group.z.values.max()
-        end = time.time()
-        print(end-start)
 
-    def canopy_height_model(self):
-        pass
+        self.cell_z = grouped.z.max().values
+
+
+    def canopy_height_model(self, path):
+        # Reshape the zs
+        #TODO: Figure out why -1 is needed.
+        x_width = len(self.grid_x)-1
+        y_width = len(self.grid_y)-1
+
+        height_array = np.reshape(self.cell_z, (x_width, y_width))
+
+        from pyfor import gisexport
+
+        gisexport.array_to_raster(height_array, self.sample_width, self.cloud.mins[0],
+                                  self.cloud.maxes[1], path, self.cloud.wkt)
