@@ -236,10 +236,18 @@ class GridSampler:
         self.grid_y = self.cloud.grid_y
         df = self.cloud.dataframe
 
-        grouped = df.groupby(['cell_x', 'cell_y'])
+        self.grouped = df.groupby(['cell_x', 'cell_y'])
 
-        self.cell_z = grouped.z.max().values
+        self.cell_z = self.grouped.z.max().values
 
+    def array_export(self, array, path):
+        from pyfor import gisexport
+        gisexport.array_to_raster(array, self.sample_width, self.cloud.mins[0],
+                                  self.cloud.maxes[1], self.cloud.wkt, path)
+        print(self.cloud.wkt)
+        print(self.sample_width)
+        print(self.cloud.mins[0])
+        print(self.cloud.maxes[1])
 
     def canopy_height_model(self, path):
         # Reshape the zs
@@ -251,5 +259,24 @@ class GridSampler:
 
         from pyfor import gisexport
 
-        gisexport.array_to_raster(height_array, self.sample_width, self.cloud.mins[0],
-                                  self.cloud.maxes[1], path, self.cloud.wkt)
+    def fast_rasterize(self, func, path):
+        import scipy.stats
+
+        #TODO: Figure out quantiles
+
+        """Takes advantage of built in numpy tools to rasterize.
+
+        ex: np.mean, np.var, etc should all be used as func arguments
+        """
+
+        x_width = len(self.grid_x)-1
+        y_width = len(self.grid_y)-1
+
+
+
+        cell_values = self.grouped.aggregate(lambda x: np.percentile(x,90))['z'].values
+
+        cell_values = np.reshape(cell_values, (x_width, y_width))
+
+        self.array_export(cell_values, path)
+

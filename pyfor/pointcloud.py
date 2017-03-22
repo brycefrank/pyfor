@@ -88,6 +88,7 @@ class CloudInfo:
         df = self.dataframe[['z', 'cell_x', 'cell_y']]
         if method == "simple":
             # Construct list of ID's to adjust
+            #TODO: Could be sped up (see CHM function)
             grouped = df.groupby(['cell_x', 'cell_y'])
             ground_id = [df.idxmin()['z'] for key, df in grouped]
 
