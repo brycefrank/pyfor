@@ -15,8 +15,8 @@ class CloudData:
         self.cloud = laspy.file.File(self.path)
         self.array = np.column_stack((self.cloud.x, self.cloud.y, self.cloud.z, self.cloud.intensity, self.cloud.return_num))
 
-    def min(self, dim):
-        """Where dimension is x y or z"""
+    def minimum(self, dim):
+        """Where dimension is 0 1 2 3 4"""
         return self.array[:,dim].min()
 
     def max(self, dim):

@@ -88,6 +88,7 @@ class CloudInfo:
         df = self.dataframe[['z', 'cell_x', 'cell_y']]
         if method == "simple":
             # Construct list of ID's to adjust
+            #TODO: Could be sped up (see CHM function)
             grouped = df.groupby(['cell_x', 'cell_y'])
             ground_id = [df.idxmin()['z'] for key, df in grouped]
 
@@ -157,43 +158,11 @@ class CloudInfo:
             y_max = int(np.amax(ground_points, axis=0)[1])
             # TODO: This could be more elegant, do it properly.
             grid_x, grid_y = np.mgrid[x_min:x_max:resolution, y_min:y_max:resolution]
-            return np.rot90(griddata(ground_points[:,:2],ground_points[:,2], (grid_x, grid_y), method=int_method))
-
-        def array_to_raster(array, cloud, pixel_size, wkt, path):
-            # TODO: Provide wkt checking
-            dst_filename = path
-            ground_points = cloud.loc[cloud['classification'] == 2].as_matrix(['x', 'y'])
-            x_pixels = array.shape[1]  # number of pixels in x
-            y_pixels = array.shape[0]  # number of pixels in y
-            x_min = int(np.amin(ground_points, axis=0)[0])
-            y_max = int(np.amax(ground_points, axis=0)[1])  # x_min & y_max are like the "top left" corner.
-            wkt_projection = wkt
-
-            driver = gdal.GetDriverByName('GTiff')
-
-            dataset = driver.Create(
-                dst_filename,
-                x_pixels,
-                y_pixels,
-                1,
-                gdal.GDT_Float32, )
-
-            dataset.SetGeoTransform((
-                x_min,  # 0
-                pixel_size,  # 1
-                0,  # 2
-                y_max,  # 3
-                0,  # 4
-                -pixel_size))
-
-            dataset.SetProjection(wkt_projection)
-            dataset.GetRasterBand(1).WriteArray(array)
-            dataset.FlushCache()  # Write to disk.
-            return dataset, dataset.GetRasterBand(
-                1)  # If you need to return, remenber to return  also the dataset because the band don`t live without dataset.
+            return griddata(ground_points[:,:2],ground_points[:,2], (grid_x, grid_y), method=int_method)
 
         def cloud_to_tiff(cloud, wkt, path, int_method='cubic', resolution=1):
-            array_to_raster(interpolate(cloud, resolution, int_method), cloud, resolution, wkt, path)
+            import pyfor.gisexport as gisexport
+            gisexport.array_to_raster(interpolate(cloud, resolution, int_method), resolution,self.mins[0], self.maxes[1], wkt, path)
 
         if wkt == None:
             print("This point cloud object does not have a wkt. Add one with the add_wkt function.")
@@ -208,12 +177,12 @@ class CloudInfo:
         self.point_cloud_to_dem(tiff_path)
 
     def normalize(self, export=False, path=None):
-        from PyFor.pyfor import normalize
+        from pyfor import normalize
         normalize.elev_points(self.dem_path, self)
         if export:
             normalize.df_to_las(self.dataframe, path, self.header)
 
-    # TODO: These are sort of silly.
+    # TODO: These are sort of silly. Properties?
     def add_wkt(self, wkt_string):
         """This is a temporary work-around until wkt can be read from the projection."""
         self.wkt = wkt_string

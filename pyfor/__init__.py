@@ -1,7 +1,8 @@
 __version__ = '0.1'
 
-from PyFor.pyfor import gisexport
-from PyFor.pyfor import metrics
-from PyFor.pyfor import normalize
-from PyFor.pyfor import pointcloud
-from PyFor.pyfor import sampler
+from pyfor import gisexport
+from pyfor import metrics
+from pyfor import normalize
+from pyfor import pointcloud
+from pyfor import sampler
+

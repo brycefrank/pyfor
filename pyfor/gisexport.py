@@ -36,21 +36,34 @@ def export_coords_to_shp(coordlist, path):
     outLayer.CreateFeature(outFeature)
     outFeature.Destroy()
 
-# outDriver = ogr.GetDriverByName('ESRI Shapefile')
-# outDataSource = outDriver.CreateDataSource(path)
-# outLayer = outDataSource.CreateLayer(path, geom_type=ogr.wkbPolygon)
-# featureDefn = outLayer.GetLayerDefn()
-#
-# for vert_set in vert_list(xs, ys):
-#     ring = ogr.Geometry(ogr.wkbLinearRing)
-#     first_point = vert_set[0]
-#     for point in vert_set:
-#         ring.AddPoint(point[0], point[1])
-#     ring.AddPoint(first_point[0], first_point[1])
-#     poly = ogr.Geometry(ogr.wkbPolygon)
-#     poly.AddGeometry(ring)
-#     outFeature = ogr.Feature(featureDefn)
-#     outFeature.SetGeometry(poly)
-#
-#     outLayer.CreateFeature(outFeature)
-#     outFeature.Destroy()
+def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
+    import gdal
+    import numpy as np
+    array = np.rot90(array)
+    dst_filename = path
+    x_pixels = array.shape[1]  # number of pixels in x
+    y_pixels = array.shape[0]  # number of pixels in y
+    wkt_projection = wkt
+
+    driver = gdal.GetDriverByName('GTiff')
+
+    dataset = driver.Create(
+        dst_filename,
+        x_pixels,
+        y_pixels,
+        1,
+        gdal.GDT_Float32, )
+
+    dataset.SetGeoTransform((
+        x_min,  # 0
+        pixel_size,  # 1
+        0,  # 2
+        y_max,  # 3
+        0,  # 4
+        -pixel_size))
+
+    dataset.SetProjection(wkt_projection)
+    dataset.GetRasterBand(1).WriteArray(array)
+    dataset.FlushCache()  # Write to disk.
+    return dataset, dataset.GetRasterBand(
+        1)  # If you need to return, remenber to return  also the dataset because the band don`t live without dataset.
