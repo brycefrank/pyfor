@@ -183,7 +183,6 @@ class Sampler:
 
     def extract_plot(self, square_df, plot_index):
         """converts dataframe points to something"""
-        start = time.time()
 
         plot = self.get_geom(self.plot_shp)[plot_index]
         plot = ogr.CreateGeometryFromWkt(plot)
@@ -200,7 +199,6 @@ class Sampler:
                 plot_points.append(point[0])
 
         new_df = plot_df.loc[plot_points, :]
-        print(plot, "took", time.time() - start, "seconds OLD")
         return new_df
 
     def clip_plots(self):
