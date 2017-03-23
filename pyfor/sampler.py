@@ -244,10 +244,6 @@ class GridSampler:
         from pyfor import gisexport
         gisexport.array_to_raster(array, self.sample_width, self.cloud.mins[0],
                                   self.cloud.maxes[1], self.cloud.wkt, path)
-        print(self.cloud.wkt)
-        print(self.sample_width)
-        print(self.cloud.mins[0])
-        print(self.cloud.maxes[1])
 
     def canopy_height_model(self, path):
         # Reshape the zs
@@ -259,24 +255,21 @@ class GridSampler:
 
         from pyfor import gisexport
 
-    def fast_rasterize(self, func, path):
-        import scipy.stats
-
-        #TODO: Figure out quantiles
-
-        """Takes advantage of built in numpy tools to rasterize.
-
-        ex: np.mean, np.var, etc should all be used as func arguments
-        """
-
+    def rasterize(self, func, path):
         x_width = len(self.grid_x)-1
         y_width = len(self.grid_y)-1
 
-
-
-        cell_values = self.grouped.aggregate(lambda x: np.percentile(x,90))['z'].values
+        cell_values = self.grouped['z'].aggregate(np.percentile, q=90).values
 
         cell_values = np.reshape(cell_values, (x_width, y_width))
 
         self.array_export(cell_values, path)
 
+    def standard_metrics(self):
+        """Generates rasters with a standard list of metrics."""
+
+        funcs = [np.mean, np.std, np.var, np.min, np.max]
+        func_names = ['mean.tiff', 'std.tiff', 'var.tiff', 'min.tiff', 'max.tiff']
+
+        for func, func_name in zip(funcs, func_names):
+            self.rasterize(func, func_name)
