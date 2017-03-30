@@ -1,4 +1,5 @@
 import ogr
+import osr
 import os
 
 def export_wkt_multipoints_to_shp(geom, path):
@@ -67,3 +68,19 @@ def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
     dataset.FlushCache()  # Write to disk.
     return dataset, dataset.GetRasterBand(
         1)  # If you need to return, remenber to return  also the dataset because the band don`t live without dataset.
+
+def utm_lookup(zone):
+    #TODO: add ESPG and Proj4 support
+    # see: http://gis.stackexchange.com/questions/233712/python-wkt-or-proj4-lookup-package
+    in_ds = ogr.GetDriverByName('CSV').Open('C:\pyformaster\pyformaster\PyFor\pyfor\pcs.csv')
+    print(in_ds)
+    layer = in_ds.GetLayer()
+    layer.SetAttributeFilter("COORD_REF_SYS_NAME LIKE '%UTM zone {}%'".format(zone))
+    wkt_string = []
+    for feature in layer:
+        code = feature.GetField("COORD_REF_SYS_CODE")
+        name = feature.GetField("COORD_REF_SYS_NAME")
+        srs = osr.SpatialReference()
+        srs.ImportFromEPSG(int(code))
+        wkt_string.append(srs.ExportToWkt())
+    return ''.join(wkt_string)

@@ -53,6 +53,7 @@ class CloudInfo:
 
         self.grid_x = [x for x in range(x_min, x_max+step, step)]
         self.grid_y = [y for y in range(y_min, y_max+step, step)]
+        # TODO: This makes things to immutable.
         self.grid_step = step
 
         # TODO: Implement exporting this to a shapefile or similar.
@@ -92,7 +93,7 @@ class CloudInfo:
             grouped = df.groupby(['cell_x', 'cell_y'])
             ground_id = [df.idxmin()['z'] for key, df in grouped]
 
-            # Adjust to proper classification (2 used per las documentation).
+            #  Adjust to proper classification (2 used per las documentation).
             for coord_id in ground_id:
                 self.dataframe.set_value(coord_id, 'classification', 2)
 
@@ -161,7 +162,7 @@ class CloudInfo:
             return griddata(ground_points[:,:2],ground_points[:,2], (grid_x, grid_y), method=int_method)
 
         def cloud_to_tiff(cloud, wkt, path, int_method='cubic', resolution=1):
-            import pyfor.gisexport as gisexport
+            from PyFor.pyfor import gisexport
             gisexport.array_to_raster(interpolate(cloud, resolution, int_method), resolution,self.mins[0], self.maxes[1], wkt, path)
 
         if wkt == None:
@@ -175,20 +176,34 @@ class CloudInfo:
         self.cell_sort()
         self.ground_classify(method="simple")
         self.point_cloud_to_dem(tiff_path)
+        self.dem_path = tiff_path
 
-    def normalize(self, export=False, path=None):
-        from pyfor import normalize
-        normalize.elev_points(self.dem_path, self)
+
+    def rasterize(self, step, func, path):
+        """Rasterizes a summary function over the grouped dataframe."""
+        from PyFor.pyfor import gisexport
+        self.grid_constructor(step, output=False)
+        self.cell_sort()
+        x_width = len(self.grid_x)-1
+        y_width = len(self.grid_y)-1
+
+        grouped  = self.dataframe.groupby(['cell_x', 'cell_y'])
+        cell_values = grouped['z'].aggregate(func).values
+        cell_values = np.reshape(cell_values, (x_width, y_width))
+
+        gisexport.array_to_raster(cell_values, step, self.mins[0],
+                                  self.maxes[1], self.wkt, path)
+
+    def normalize(self, dem_path,  export=False, path=None):
+        from PyFor.pyfor import normalize
+        normalize.elev_points(dem_path, self)
         if export:
             normalize.df_to_las(self.dataframe, path, self.header)
 
-    # TODO: These are sort of silly. Properties?
-    def add_wkt(self, wkt_string):
-        """This is a temporary work-around until wkt can be read from the projection."""
-        self.wkt = wkt_string
-
-    def check_wkt(self):
-        if self.wkt == None:
-            print("Consider adding a wkt string to properly project the file with add_wkt.")
-
+class GriddedCloud(CloudInfo):
+    """Creates a grid object useful for extracting information from CloudInfo"""
+    def __init__(self, filename, step):
+        super().__init__(filename)
+        self.step = step
+        self.grid_constructor(step)
 

@@ -3,7 +3,6 @@
 import numpy as np
 from scipy import stats
 
-
 # x y z i r
 # 0 1 2 3 4
 

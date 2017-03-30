@@ -29,7 +29,7 @@ def elev_points(tiff, cloud):
         pixel_x, pixel_y = reverse_transform * (x_coords, y_coords)
         pixel_x, pixel_y = pixel_x + 0.5, pixel_y + 0.5
         pixel_x, pixel_y = pixel_x.astype(int), pixel_y.astype(int)
-        return raster_array[pixel_x, pixel_y]
+        return raster_array[pixel_y, pixel_x]
 
 
     cloud.dataframe['elev'] = retrieve_pixel_value(xy_array)
@@ -40,7 +40,7 @@ def elev_points(tiff, cloud):
     cloud.dataframe = cloud.dataframe[cloud.dataframe.elev != 0]
 
 
-def df_to_las(df, out_path, header, zcol='z'):
+def df_to_las(df, out_path, header, z_col = 'norm'):
     """Exports normalized points to new las.
 
     Keyword arguments:
@@ -54,7 +54,7 @@ def df_to_las(df, out_path, header, zcol='z'):
     outfile = laspy.file.File(out_path, mode="w", header = header)
     outfile.x = df['x']
     outfile.y = df['y']
-    outfile.z = df[zcol]
+    outfile.z = df[z_col]
     outfile.intensity = df['int']
     #TODO: Fix, currently not working
     #outfile.return_num = df['ret']

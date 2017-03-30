@@ -120,7 +120,6 @@ class PlotSampler:
 
     def intersect_plots(self):
         """Exports a list of JSON coordinates of cell vertices near the plot location."""
-        # FIXME: Only works for first plot in list.
 
         plot_shp = self.plot_shp
         plot_geoms = self.get_geom(plot_shp)
@@ -243,16 +242,6 @@ class GridSampler:
         gisexport.array_to_raster(array, self.sample_width, self.cloud.mins[0],
                                   self.cloud.maxes[1], self.cloud.wkt, path)
 
-    def canopy_height_model(self, path):
-        # Reshape the zs
-        #TODO: Figure out why -1 is needed.
-        x_width = len(self.grid_x)-1
-        y_width = len(self.grid_y)-1
-
-        height_array = np.reshape(self.cell_z, (x_width, y_width))
-
-        from pyfor import gisexport
-
     def rasterize(self, func, path):
         x_width = len(self.grid_x)-1
         y_width = len(self.grid_y)-1
@@ -262,6 +251,10 @@ class GridSampler:
         cell_values = np.reshape(cell_values, (x_width, y_width))
 
         self.array_export(cell_values, path)
+
+    def canopy_height_model(self, path):
+        self.rasterize(np.max, path)
+
 
     def standard_metrics(self):
         """Generates rasters with a standard list of metrics."""
