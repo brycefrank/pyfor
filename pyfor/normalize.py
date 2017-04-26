@@ -49,6 +49,8 @@ def df_to_las(df, out_path, header, z_col = 'norm'):
     header -- The header object to write to the output file.
     zcol -- The elevation (z) information to be written to the file.
     """
+    print("Writing dataframe to .las")
+
     import laspy
 
     outfile = laspy.file.File(out_path, mode="w", header = header)
@@ -58,3 +60,19 @@ def df_to_las(df, out_path, header, z_col = 'norm'):
     outfile.intensity = df['int']
     #TODO: Fix, currently not working
     #outfile.return_num = df['ret']
+
+def ground_to_las(df, out_path, header):
+    # #TODO: Merger with df_to_las
+    #Get all ground classifcations in a new dataframe.
+
+    df = df.loc[df['classification'] == 2]
+
+
+    import laspy
+
+    outfile = laspy.file.File(out_path, mode = "w", header = header)
+
+    outfile.x = df['x']
+    outfile.y = df['y']
+    outfile.z = df['z']
+

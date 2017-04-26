@@ -81,7 +81,7 @@ class CloudInfo:
         self.dataframe['cell_y'] = y
 
 
-    def ground_classify(self, method):
+    def ground_classify(self, method, export = False):
         """Classifies points in self.dataframe as 2 using a simple ground filter."""
         print("Classifying points as ground.")
 
@@ -94,8 +94,16 @@ class CloudInfo:
             ground_id = [df.idxmin()['z'] for key, df in grouped]
 
             #  Adjust to proper classification (2 used per las documentation).
+            #FIXME: There is a much faster way to do this?
             for coord_id in ground_id:
                 self.dataframe.set_value(coord_id, 'classification', 2)
+
+
+            if export == True:
+                from PyFor.pyfor import normalize
+                normalize.ground_to_las(self.dataframe, "groundfilter.las", self.header)
+
+
 
         # TODO: Implement other ground filter options.
         else:
@@ -174,6 +182,7 @@ class CloudInfo:
     def generate_BEM(self, step, tiff_path, method="simple"):
         self.grid_constructor(step)
         self.cell_sort()
+        #TODO: Save ground filtered las file and then interpolate.
         self.ground_classify(method="simple")
         self.point_cloud_to_dem(tiff_path)
         self.dem_path = tiff_path
