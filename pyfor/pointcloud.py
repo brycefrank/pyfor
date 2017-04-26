@@ -1,3 +1,8 @@
+"""pointcloud.py holds the CloudInfo class, the integral object type of PyFor."""
+
+__license__ = "MIT"
+__docformat__ = "reStructuredText"
+
 import laspy
 import numpy as np
 import pandas as pd
@@ -32,9 +37,8 @@ class CloudInfo:
         """Sets self.grid to a list of tuples corresponding to the points of a 2D grid covering the extent
         of the input .las
 
-        Keyword arguments:
-        step -- Length of grid cell side in same units as .las
-        output -- If true, generates an ESRI shapefile of the grid, not used for any processes in Pyfor.
+        :param step: Length of grid cell side in same units as .las
+        :param output: If true, generates an ESRI shapefile of the grid, not used for any processes in Pyfor.
         """
 
         print("Constructing grid.")
@@ -84,9 +88,8 @@ class CloudInfo:
     def ground_classify(self, method = "simple", output = False):
         """Classifies points in self.dataframe as 2 using a simple ground filter.
 
-        Keyword arguments:
-        method -- Ground filtering method (to be implemented)
-        output -- If true, generates a .las of the classified ground points.
+        :param method: Ground filtering method (to be implemented, default is currently simple)
+        :param output: If true, generates a .las of the classified ground points.
         """
 
         print("Classifying points as ground.")
@@ -114,8 +117,7 @@ class CloudInfo:
     def point_cloud_to_dem(self, path):
         """Holds a variety of functions that create a GeoTIFF from a classified point cloud.
 
-        Keyword arguments:
-        path -- output path for GeoTIFF output.
+        :param path: output path for GeoTIFF output.
         """
 
         from scipy.interpolate import griddata
@@ -128,11 +130,10 @@ class CloudInfo:
         def interpolate(cloud, resolution=1, int_method='cubic'):
             """Creates an interpolated 2d array from XYZ.
 
-            Keyword arguments:
-            cloud -- The PyFor CloudInfo object
-            resolution -- The resolution at which the ground points are interpolated (in the same units
+            :param cloud: The PyFor CloudInfo object
+            :param resolution: The resolution at which the ground points are interpolated (in the same units
                 as the input las file)
-            int_method -- The interpolation method that is used, this uses the scipy.interpolate.griddata method,
+            :param int_method: The interpolation method that is used, this uses the scipy.interpolate.griddata method,
                 default is set to 'cubic', see scipy documentation for more options.
             """
 
@@ -208,10 +209,9 @@ class CloudInfo:
     def rasterize(self, resolution, func, out_path):
         """Rasterizes a summary function over the grouped dataframe.
 
-        Keyword arguments:
-        resolution -- Resolution of output raster (same units as .las)
-        func -- The numpy function to apply to the gridded las
-        path -- The output path of the new GeoTIFF
+        :param resolution: Resolution of output raster (same units as .las)
+        :param func: The numpy function to apply to the gridded las
+        :param path: The output path of the new GeoTIFF
         """
 
         from PyFor.pyfor import gisexport
@@ -231,9 +231,9 @@ class CloudInfo:
         """Subtracts the underlying elevation from the CloudInfo object given some input GeoTIFF DEM.
 
         Keyword arguments:
-        dem_path -- Resolution of output raster (same units as .las)
-        export -- Exports the normalized cloud as a new las file with name path.
-        path -- The name of the export file.
+        :param dem_path: Resolution of output raster (same units as .las)
+        :param export: Exports the normalized cloud as a new las file with name path.
+        :param path: The name of the export file.
         """
 
         from PyFor.pyfor import normalize

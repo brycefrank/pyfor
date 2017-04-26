@@ -1,0 +1,5 @@
+normalize
+=================================
+.. automodule:: normalize
+    :members:
+

@@ -4,9 +4,8 @@ import numpy as np
 def elev_points(tiff, cloud):
     """Normalizes a point cloud.
 
-    Keyword arguments:
-    tiff -- A GeoTIFF with extent that covers all considered LiDAR points, must match projections.
-    cloud -- A CloudInfo object.
+    :param tiff: A GeoTIFF with extent that covers all considered LiDAR points, must match projections.
+    :param cloud: A CloudInfo object.
     """
     #TODO: Match tiff and cloud projections.
     import gdal
@@ -26,8 +25,7 @@ def elev_points(tiff, cloud):
     def retrieve_pixel_value(coord_array):
         """Returns an array of pixel values underneath each LiDAR point.
 
-        Keyword arguments:
-        coord_array -- A 2D numpy array of XY coordinates.
+        :param coord_array: A 2D numpy array of XY coordinates.
         """
         x_coords, y_coords = xy_array[:, 0], xy_array[:, 1]
         pixel_x, pixel_y = reverse_transform * (x_coords, y_coords)
@@ -47,11 +45,10 @@ def elev_points(tiff, cloud):
 def df_to_las(df, out_path, header, z_col = 'norm'):
     """Exports normalized points to new las.
 
-    Keyword arguments:
-    df -- A dataframe of las information to write from.
-    out_path -- The location and name of the output file.
-    header -- The header object to write to the output file.
-    zcol -- The elevation (z) information to be written to the file.
+    :param df: A dataframe of las information to write from.
+    :param out_path: The location and name of the output file.
+    :param header: The header object to write to the output file.
+    :param zcol: The elevation (z) information to be written to the file.
     """
     print("Writing dataframe to .las")
 

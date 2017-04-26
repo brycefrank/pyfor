@@ -1,0 +1,210 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pointcloud &#8212; PyFor 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="sampler" href="sampler.html" />
+    <link rel="prev" title="PyFor Documentation" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pointcloud">
+<span id="pointcloud"></span><h1>pointcloud<a class="headerlink" href="#module-pointcloud" title="Permalink to this headline">¶</a></h1>
+<p>pointcloud.py holds the CloudInfo class, the integral object type of PyFor.</p>
+<dl class="class">
+<dt id="pointcloud.CloudInfo">
+<em class="property">class </em><code class="descclassname">pointcloud.</code><code class="descname">CloudInfo</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#pointcloud.CloudInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Holds and manipulates the data from a .las point cloud.</p>
+<dl class="method">
+<dt id="pointcloud.CloudInfo.cell_sort">
+<code class="descname">cell_sort</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pointcloud.CloudInfo.cell_sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sorts cells into grid constructed by grid_constructor by appending cell_x &amp; cell_y to self.dataframe.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pointcloud.CloudInfo.generate_BEM">
+<code class="descname">generate_BEM</code><span class="sig-paren">(</span><em>step</em>, <em>out_path</em><span class="sig-paren">)</span><a class="headerlink" href="#pointcloud.CloudInfo.generate_BEM" title="Permalink to this definition">¶</a></dt>
+<dd><p>User-end function that creates a bare earth model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pointcloud.CloudInfo.grid_constructor">
+<code class="descname">grid_constructor</code><span class="sig-paren">(</span><em>step</em>, <em>output=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pointcloud.CloudInfo.grid_constructor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets self.grid to a list of tuples corresponding to the points of a 2D grid covering the extent
+of the input .las</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>step</strong> &#8211; Length of grid cell side in same units as .las</li>
+<li><strong>output</strong> &#8211; If true, generates an ESRI shapefile of the grid, not used for any processes in Pyfor.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pointcloud.CloudInfo.ground_classify">
+<code class="descname">ground_classify</code><span class="sig-paren">(</span><em>method='simple'</em>, <em>output=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pointcloud.CloudInfo.ground_classify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Classifies points in self.dataframe as 2 using a simple ground filter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>method</strong> &#8211; Ground filtering method (to be implemented, default is currently simple)</li>
+<li><strong>output</strong> &#8211; If true, generates a .las of the classified ground points.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pointcloud.CloudInfo.normalize">
+<code class="descname">normalize</code><span class="sig-paren">(</span><em>dem_path</em>, <em>export=False</em>, <em>path=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pointcloud.CloudInfo.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtracts the underlying elevation from the CloudInfo object given some input GeoTIFF DEM.</p>
+<p>Keyword arguments:
+:param dem_path: Resolution of output raster (same units as .las)
+:param export: Exports the normalized cloud as a new las file with name path.
+:param path: The name of the export file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pointcloud.CloudInfo.point_cloud_to_dem">
+<code class="descname">point_cloud_to_dem</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#pointcloud.CloudInfo.point_cloud_to_dem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Holds a variety of functions that create a GeoTIFF from a classified point cloud.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; output path for GeoTIFF output.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pointcloud.CloudInfo.rasterize">
+<code class="descname">rasterize</code><span class="sig-paren">(</span><em>resolution</em>, <em>func</em>, <em>out_path</em><span class="sig-paren">)</span><a class="headerlink" href="#pointcloud.CloudInfo.rasterize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rasterizes a summary function over the grouped dataframe.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>resolution</strong> &#8211; Resolution of output raster (same units as .las)</li>
+<li><strong>func</strong> &#8211; The numpy function to apply to the gridded las</li>
+<li><strong>path</strong> &#8211; The output path of the new GeoTIFF</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pointcloud</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sampler.html">sampler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gisexport.html">gisexport</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metrics.html">metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="normalize.html">normalize</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">PyFor Documentation</a></li>
+      <li>Next: <a href="sampler.html" title="next chapter">sampler</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/pointcloud.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Bryce Frank.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/pointcloud.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -20,9 +20,8 @@ def export_wkt_multipoints_to_shp(geom, path):
 def export_coords_to_shp(coordlist, path):
     """Creates a multipoint shapefile of the coordinates in a 2d array, used for debugging purposes.
 
-    Keyword arguments:
-    coordlist -- 2d list of coordinates.
-    path -- Output path of the shapefile.
+    :param coordlist: 2d list of coordinates.
+    :param path: Output path of the shapefile.
     """
     if os.path.exists(path):
         os.remove(path)
@@ -46,13 +45,12 @@ def export_coords_to_shp(coordlist, path):
 def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
     """Creates a GeoTIFF raster from a numpy array.
 
-    Keyword arguments:
-    array -- 2D numpy array of cell values
-    pixel_size -- Desired resolution of the output raster, in same units as wkt projection.
-    x_min -- Minimum x coordinate (top left corner of raster)
-    y_max -- Maximum y coordinate
-    wkt -- The wkt string with desired projection
-    path -- The output bath of the GeoTIFF
+    :param array: 2D numpy array of cell values
+    :param pixel_size: -- Desired resolution of the output raster, in same units as wkt projection.
+    :param x_min: Minimum x coordinate (top left corner of raster)
+    :param y_max: Maximum y coordinate
+    :param wkt: The wkt string with desired projection
+    :param path: The output bath of the GeoTIFF
     """
 
     import gdal
@@ -90,8 +88,8 @@ def utm_lookup(zone):
     """Returns a wkt string of a given UTM zone. Used as a bypass for older las file specifications that do not
     contain wkt strings.
 
-    Keyword arguments:
-    zone -- The UTM zone (as a string)
+
+    :param zone: The UTM zone (as a string)
         ex: "10N"
     """
     # see: http://gis.stackexchange.com/questions/233712/python-wkt-or-proj4-lookup-package

@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sampler &#8212; PyFor 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="gisexport" href="gisexport.html" />
+    <link rel="prev" title="pointcloud" href="pointcloud.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-sampler">
+<span id="sampler"></span><h1>sampler<a class="headerlink" href="#module-sampler" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="sampler.PlotSampler">
+<em class="property">class </em><code class="descclassname">sampler.</code><code class="descname">PlotSampler</code><span class="sig-paren">(</span><em>cloud</em><span class="sig-paren">)</span><a class="headerlink" href="#sampler.PlotSampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles and creates information from a CloudInfo object for sampling.
+Requres a CloudInfo object.</p>
+<dl class="method">
+<dt id="sampler.PlotSampler.clip_plots">
+<code class="descname">clip_plots</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sampler.PlotSampler.clip_plots" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a set of clipped las files based on the input plot shapefile.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sampler.PlotSampler.df_sort">
+<code class="descname">df_sort</code><span class="sig-paren">(</span><em>plot_set</em><span class="sig-paren">)</span><a class="headerlink" href="#sampler.PlotSampler.df_sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes all of the unique vertices and makes a new dataframe</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sampler.PlotSampler.export_grid">
+<code class="descname">export_grid</code><span class="sig-paren">(</span><em>path</em>, <em>verts=False</em><span class="sig-paren">)</span><a class="headerlink" href="#sampler.PlotSampler.export_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a grid shapefile from the cloud grid_constructor function.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sampler.PlotSampler.extract_plot">
+<code class="descname">extract_plot</code><span class="sig-paren">(</span><em>square_df</em>, <em>plot_index</em><span class="sig-paren">)</span><a class="headerlink" href="#sampler.PlotSampler.extract_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>converts dataframe points to something</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sampler.PlotSampler.extract_points">
+<code class="descname">extract_points</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sampler.PlotSampler.extract_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of plot coordinate tuples (len = plots)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sampler.PlotSampler.get_geom">
+<code class="descname">get_geom</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#sampler.PlotSampler.get_geom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a shapefile and returns a list of Wkt geometries.</p>
+<p>Keyword arguments:
+path &#8211; Input path of a shapefile.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sampler.PlotSampler.intersect_plots">
+<code class="descname">intersect_plots</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sampler.PlotSampler.intersect_plots" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exports a list of JSON coordinates of cell vertices near the plot location. Used to clip a square around
+the plots within a las file.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="pointcloud.html">pointcloud</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">sampler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gisexport.html">gisexport</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metrics.html">metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="normalize.html">normalize</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="pointcloud.html" title="previous chapter">pointcloud</a></li>
+      <li>Next: <a href="gisexport.html" title="next chapter">gisexport</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/sampler.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Bryce Frank.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/sampler.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

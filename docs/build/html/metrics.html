@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>metrics &#8212; PyFor 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="normalize" href="normalize.html" />
+    <link rel="prev" title="gisexport" href="gisexport.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-metrics">
+<span id="metrics"></span><h1>metrics<a class="headerlink" href="#module-metrics" title="Permalink to this headline">¶</a></h1>
+<p>Holds metrics</p>
+<dl class="class">
+<dt id="metrics.CloudData">
+<em class="property">class </em><code class="descclassname">metrics.</code><code class="descname">CloudData</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#metrics.CloudData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maybe just use cloud info?</p>
+<dl class="method">
+<dt id="metrics.CloudData.AAD">
+<code class="descname">AAD</code><span class="sig-paren">(</span><em>dim</em><span class="sig-paren">)</span><a class="headerlink" href="#metrics.CloudData.AAD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Average (mean) absolute deviation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metrics.CloudData.MAD_median">
+<code class="descname">MAD_median</code><span class="sig-paren">(</span><em>dim</em><span class="sig-paren">)</span><a class="headerlink" href="#metrics.CloudData.MAD_median" title="Permalink to this definition">¶</a></dt>
+<dd><p>Median absolute deviation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metrics.CloudData.above">
+<code class="descname">above</code><span class="sig-paren">(</span><em>threshold</em>, <em>n_return=0</em><span class="sig-paren">)</span><a class="headerlink" href="#metrics.CloudData.above" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns number of returns above a given z-threshold (in same units as vertical datum).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metrics.CloudData.cvar">
+<code class="descname">cvar</code><span class="sig-paren">(</span><em>dim</em><span class="sig-paren">)</span><a class="headerlink" href="#metrics.CloudData.cvar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coefficient of variation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metrics.CloudData.mean">
+<code class="descname">mean</code><span class="sig-paren">(</span><em>dim</em><span class="sig-paren">)</span><a class="headerlink" href="#metrics.CloudData.mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arithmetic mean.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metrics.CloudData.minimum">
+<code class="descname">minimum</code><span class="sig-paren">(</span><em>dim</em><span class="sig-paren">)</span><a class="headerlink" href="#metrics.CloudData.minimum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Where dimension is 0 1 2 3 4</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metrics.CloudData.return_count">
+<code class="descname">return_count</code><span class="sig-paren">(</span><em>n=0</em><span class="sig-paren">)</span><a class="headerlink" href="#metrics.CloudData.return_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns total number of nth returns.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metrics.CloudData.std">
+<code class="descname">std</code><span class="sig-paren">(</span><em>dim</em><span class="sig-paren">)</span><a class="headerlink" href="#metrics.CloudData.std" title="Permalink to this definition">¶</a></dt>
+<dd><p>Population standard deviation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metrics.CloudData.total_count">
+<code class="descname">total_count</code><span class="sig-paren">(</span><em>dim=0</em><span class="sig-paren">)</span><a class="headerlink" href="#metrics.CloudData.total_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total number of records, default to first column.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metrics.CloudData.var">
+<code class="descname">var</code><span class="sig-paren">(</span><em>dim</em><span class="sig-paren">)</span><a class="headerlink" href="#metrics.CloudData.var" title="Permalink to this definition">¶</a></dt>
+<dd><p>Population variance.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="pointcloud.html">pointcloud</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sampler.html">sampler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gisexport.html">gisexport</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="normalize.html">normalize</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="gisexport.html" title="previous chapter">gisexport</a></li>
+      <li>Next: <a href="normalize.html" title="next chapter">normalize</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/metrics.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Bryce Frank.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/metrics.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
