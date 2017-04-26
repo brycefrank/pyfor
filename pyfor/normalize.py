@@ -6,7 +6,7 @@ def elev_points(tiff, cloud):
 
     Keyword arguments:
     tiff -- A GeoTIFF with extent that covers all considered LiDAR points, must match projections.
-    cloud -- A CloudInfo object (from pointcloud.py).
+    cloud -- A CloudInfo object.
     """
     #TODO: Match tiff and cloud projections.
     import gdal
@@ -24,7 +24,11 @@ def elev_points(tiff, cloud):
     reverse_transform = ~forward_transform
 
     def retrieve_pixel_value(coord_array):
-        """Returns an array of pixel values underneath each LiDAR point."""
+        """Returns an array of pixel values underneath each LiDAR point.
+
+        Keyword arguments:
+        coord_array -- A 2D numpy array of XY coordinates.
+        """
         x_coords, y_coords = xy_array[:, 0], xy_array[:, 1]
         pixel_x, pixel_y = reverse_transform * (x_coords, y_coords)
         pixel_x, pixel_y = pixel_x + 0.5, pixel_y + 0.5

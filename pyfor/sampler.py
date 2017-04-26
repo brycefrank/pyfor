@@ -104,7 +104,11 @@ class PlotSampler:
 
 
     def get_geom(self, path):
-        """Reads a shapefile and returns a list of Wkt geometries."""
+        """Reads a shapefile and returns a list of Wkt geometries.
+
+        Keyword arguments:
+        path -- Input path of a shapefile.
+        """
         # TODO: Put in gisexport?
         geoms = []
         shapefile = path
@@ -119,7 +123,8 @@ class PlotSampler:
 
 
     def intersect_plots(self):
-        """Exports a list of JSON coordinates of cell vertices near the plot location."""
+        """Exports a list of JSON coordinates of cell vertices near the plot location. Used to clip a square around
+        the plots within a las file."""
 
         plot_shp = self.plot_shp
         plot_geoms = self.get_geom(plot_shp)
@@ -201,13 +206,11 @@ class PlotSampler:
         return new_df
 
     def clip_plots(self):
-        #TODO: Add leading zero's to file names for ordering purposes.
-        #TODO: Generally just very slow, consider PDAL?
-        from pyfor import normalize
+        """Creates a set of clipped las files based on the input plot shapefile."""
+        #TODO: Potential for quadtree here!
+        from PyFor.pyfor import normalize
         header = self.cloud.header
         unique_plot_points = self.extract_points()
-        print(len(unique_plot_points))
-        print(unique_plot_points)
         i=1
         for point_set in unique_plot_points:
             print("Writing a plot to .las", i)
@@ -217,50 +220,3 @@ class PlotSampler:
             normalize.df_to_las(self.extract_plot(self.df_sort(point_set), i-1),
                                 file_path, header, 'norm')
             i+=1
-
-class GridSampler:
-    # TODO: Just make this a function in sampler?
-    # Make this a child??
-    def __init__(self, cloud, sample_width):
-        self.cloud = cloud
-        self.sample_width = sample_width
-
-        # Sort into cells of sample_width
-        self.cloud.grid_constructor(self.sample_width)
-        self.cloud.cell_sort()
-
-        self.grid_x = self.cloud.grid_x
-        self.grid_y = self.cloud.grid_y
-        df = self.cloud.dataframe
-
-        self.grouped = df.groupby(['cell_x', 'cell_y'])
-
-        self.cell_z = self.grouped.z.max().values
-
-    def array_export(self, array, path):
-        from pyfor import gisexport
-        gisexport.array_to_raster(array, self.sample_width, self.cloud.mins[0],
-                                  self.cloud.maxes[1], self.cloud.wkt, path)
-
-    def rasterize(self, func, path):
-        x_width = len(self.grid_x)-1
-        y_width = len(self.grid_y)-1
-
-        cell_values = self.grouped['z'].aggregate(np.percentile, q=90).values
-
-        cell_values = np.reshape(cell_values, (x_width, y_width))
-
-        self.array_export(cell_values, path)
-
-    def canopy_height_model(self, path):
-        self.rasterize(np.max, path)
-
-
-    def standard_metrics(self):
-        """Generates rasters with a standard list of metrics."""
-
-        funcs = [np.mean, np.std, np.var, np.min, np.max]
-        func_names = ['mean.tiff', 'std.tiff', 'var.tiff', 'min.tiff', 'max.tiff']
-
-        for func, func_name in zip(funcs, func_names):
-            self.rasterize(func, func_name)

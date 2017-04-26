@@ -18,6 +18,12 @@ def export_wkt_multipoints_to_shp(geom, path):
 
 
 def export_coords_to_shp(coordlist, path):
+    """Creates a multipoint shapefile of the coordinates in a 2d array, used for debugging purposes.
+
+    Keyword arguments:
+    coordlist -- 2d list of coordinates.
+    path -- Output path of the shapefile.
+    """
     if os.path.exists(path):
         os.remove(path)
 
@@ -38,6 +44,17 @@ def export_coords_to_shp(coordlist, path):
     outFeature.Destroy()
 
 def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
+    """Creates a GeoTIFF raster from a numpy array.
+
+    Keyword arguments:
+    array -- 2D numpy array of cell values
+    pixel_size -- Desired resolution of the output raster, in same units as wkt projection.
+    x_min -- Minimum x coordinate (top left corner of raster)
+    y_max -- Maximum y coordinate
+    wkt -- The wkt string with desired projection
+    path -- The output bath of the GeoTIFF
+    """
+
     import gdal
     import numpy as np
     array = np.rot90(array)
@@ -70,7 +87,13 @@ def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
         1)  # If you need to return, remenber to return  also the dataset because the band don`t live without dataset.
 
 def utm_lookup(zone):
-    #TODO: add ESPG and Proj4 support
+    """Returns a wkt string of a given UTM zone. Used as a bypass for older las file specifications that do not
+    contain wkt strings.
+
+    Keyword arguments:
+    zone -- The UTM zone (as a string)
+        ex: "10N"
+    """
     # see: http://gis.stackexchange.com/questions/233712/python-wkt-or-proj4-lookup-package
     in_ds = ogr.GetDriverByName('CSV').Open('C:\pyformaster\pyformaster\PyFor\pyfor\pcs.csv')
     print(in_ds)
