@@ -33,3 +33,4 @@ In no particular order:
 * Canopy Height Model
 * Grid Metrics
 * PEP8 - Method Variable Refactoring
+* Speed up plot clipping
