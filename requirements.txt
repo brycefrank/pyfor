@@ -12,7 +12,7 @@
 
 #sphinx
 sphinxcontrib-fulltoc
-unittest
+mock
 
 
 ### A Very Specific Version of Laspy ###
