@@ -1,17 +1,18 @@
 ### Requirements without Version Specifiers ###
-affine
-gdal
-ogr
-scipy
-numpy
+#affine
+#gdal
+#ogr
+#scipy
+#numpy
 #numpy-mkl
-pandas
-json
-itertools
-laspy
+#pandas
+#json
+#itertools
+#laspy
 
-sphinx
+#sphinx
 sphinxcontrib-fulltoc
+mock
 
 
 ### A Very Specific Version of Laspy ###
