@@ -1,0 +1,16 @@
+### Requirements without Version Specifiers ###
+#affine
+#gdal
+#ogr
+#scipy
+#numpy
+#numpy-mkl
+#pandas
+#json
+#itertools
+
+sphinxcontrib-fulltox
+
+### A Very Specific Version of Laspy ###
+
+#-e git:https://github.com/brycefrank/laspy.git
