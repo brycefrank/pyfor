@@ -1,6 +1,5 @@
 pointcloud
 =================================
-.. automodule:: pointcloud
 
-.. autoclass:: CloudInfo
+.. automodule:: pointcloud
    :members:

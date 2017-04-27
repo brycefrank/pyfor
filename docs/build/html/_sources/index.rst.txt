@@ -7,13 +7,13 @@ PyFor Documentation
 =================================
 
 .. toctree::
-   :hidden:
 
    pointcloud
    sampler
    gisexport
    metrics
    normalize
+
 
 
 

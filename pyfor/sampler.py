@@ -1,7 +1,5 @@
 import ogr
-import os
 import numpy as np
-import time
 
 class PlotSampler:
     """Handles and creates information from a CloudInfo object for sampling.
