@@ -1,5 +1,0 @@
-pointcloud
-=================================
-
-.. automodule:: pointcloud
-   :members:
