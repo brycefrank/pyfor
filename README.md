@@ -6,6 +6,9 @@ it is possible to take raw LiDAR data and convert it into a normalized
 form for further analysis. The main repository is located at
 https://github.com/brycefrank/PyFor
 
+Documentation (in rough form) is located at:
+http://pyfor.readthedocs.io/en/latest/
+
 This package is developed and maintained by Bryce Frank.
 
 # Structure
