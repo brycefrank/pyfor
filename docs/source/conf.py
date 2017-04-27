@@ -19,7 +19,7 @@
 #
 import os
 import sys
-sys.path.insert(0, "C:\\pyformaster\\pyformaster\\PyFor\\pyfor")
+sys.path.insert(0, "pyfor/")
 
 
 # -- General configuration ------------------------------------------------
