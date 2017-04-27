@@ -9,7 +9,9 @@
 #json
 #itertools
 
+sphinx
 sphinxcontrib-fulltoc
+
 
 ### A Very Specific Version of Laspy ###
 
