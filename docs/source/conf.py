@@ -24,7 +24,7 @@ sys.path.insert(0,os.path.abspath(os.path.join('..','..','pyfor'))+os.path.sep)
 
 
 import sys
-from unittest.mock import MagicMock
+from mock import MagicMock
 
 class Mock(MagicMock):
     @classmethod
