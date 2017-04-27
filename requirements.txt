@@ -1,13 +1,14 @@
 ### Requirements without Version Specifiers ###
-#affine
-#gdal
-#ogr
-#scipy
-#numpy
+affine
+gdal
+ogr
+scipy
+numpy
 #numpy-mkl
-#pandas
-#json
-#itertools
+pandas
+json
+itertools
+laspy
 
 sphinx
 sphinxcontrib-fulltoc
