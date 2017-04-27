@@ -7,7 +7,6 @@ PyFor Documentation
 =================================
 
 .. toctree::
-   :hidden:
 
    pointcloud
    sampler
@@ -15,7 +14,6 @@ PyFor Documentation
    metrics
    normalize
 
-   "TEST"
 
 
 
