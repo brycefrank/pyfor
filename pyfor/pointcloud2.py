@@ -89,7 +89,3 @@ class Cloud:
     def clip():
         pass
 
-#import timeit
-#print(timeit.timeit('Cloud("/home/bryce/Desktop/pyfor_test_data/tiles/PC_076.las").grid(0.01)', 'from __main__ import Cloud', number = 1))
-
-#a = Cloud("/home/bryce/Desktop/pyfor_test_data/tiles/PC_076.las").grid(0.5)
