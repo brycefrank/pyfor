@@ -8,10 +8,11 @@ import matplotlib.cm as cm
 from pyqtgraph.Qt import QtCore, QtGui
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
-import lasplot
+import ogr
+from numba import jit
 
 
-class CloudInfo:
+class Cloud:
     def __init__(self, las_path):
         self.las = laspy.file.File(las_path)
 
@@ -21,16 +22,15 @@ class CloudInfo:
         :param cell_size: The size of the cell for sorting
         :return: Returns a dataframe with sorted x and y with associated bins in a new columns
         """
-
-        min_x, max_x = min(self.las.x), max(self.las.x)
-        min_y, max_y = min(self.las.y), max(self.las.y)
+        min_x, max_x = self.las.header.min[0], self.las.header.max[0]
+        min_y, max_y = self.las.header.min[1], self.las.header.max[1]
 
         m = int(np.floor((max_y - min_y) / cell_size) + 1)
         n = int(np.floor((max_x - min_x) / cell_size) + 1)
 
         # Create bins
-        bins_x = np.digitize(self.las.x, np.linspace(min(self.las.x), max(self.las.x), n + 1))
-        bins_y = np.digitize(self.las.y, np.linspace(min(self.las.y), max(self.las.y), m + 1))
+        bins_x = np.searchsorted(np.linspace(min_x, max_x, n + 1), self.las.x)
+        bins_y = np.searchsorted(np.linspace(min_y, max_y, m + 1), self.las.y)
 
         # Add bins and las data to a new dataframe
         df = pd.DataFrame({'x': self.las.x, 'y': self.las.y, 'z': self.las.z, 'bins_x': bins_x, 'bins_y': bins_y})
@@ -51,9 +51,15 @@ class CloudInfo:
         # Show the matrix image
         plt.show()
 
-    def plot3d(self, point_size = 1, cmap = 'Spectral_r'):
-        # Generate the coordinates
-        coordinates = np.stack([self.las.x, self.las.y, self.las.z], axis = 1)
+    def plot3d(self, point_size = 1, cmap = 'Spectral_r', max_points = 5e5):
+        # Randomly sample down if too large
+        if self.las.header.count > max_points:
+                sample_mask = np.random.randint(self.las.header.count,
+                                                size = int(max_points))
+                coordinates = np.stack([self.las.x, self.las.y, self.las.z], axis = 1)[sample_mask,:]
+                print("Too many points, down sampling for 3d plot performance.")
+        else:
+            coordinates = np.stack([self.las.x, self.las.y, self.las.z], axis = 1)
 
         # Start Qt app and widget
         pg.mkQApp()
@@ -80,3 +86,10 @@ class CloudInfo:
         view.opts['center'] = pg.Vector(center[0], center[1], center[2])
         view.show()
 
+    def clip():
+        pass
+
+#import timeit
+#print(timeit.timeit('Cloud("/home/bryce/Desktop/pyfor_test_data/tiles/PC_076.las").grid(0.01)', 'from __main__ import Cloud', number = 1))
+
+#a = Cloud("/home/bryce/Desktop/pyfor_test_data/tiles/PC_076.las").grid(0.5)
