@@ -1,39 +1,5 @@
 # Introduction
 
-**PyFor** is a Python 3 module intended as a tool to assist in the
-processing of LiDAR data in the context of forest resources. With PyFor
-it is possible to take raw LiDAR data and convert it into a normalized
-form for further analysis. The main repository is located at
-https://github.com/brycefrank/PyFor
+**pyfor** is a Python module intended as a tool to assist in the processing of point cloud data in the context of forest inventory. It offers functions that convert raw point cloud data to usable information about forested landscapes using an object oriented (OOP) framework. pyfor aims to provide a cross platform means to interactively process point cloud data, as well as efficient ways to batch process large acquisitions.
 
-Documentation (in rough form) is located at:
-http://pyfor.readthedocs.io/en/latest/
-
-This package is developed and maintained by Bryce Frank.
-
-# Structure
-
-PyFor was built on top of five major packages:
-*  laspy for Python 3.5: reads and writes .las files.
-* OGR: handles and creates geospatial information like
- polygons and points.
-* GDAL: handles and creates raster data.
-* Numpy: fast computational package.
-* Pandas: dataframes and manipulation of dataframes.
-
-# Change Log
-
-v 0.1, 2-28-2017 -- Initial release.
-
-# TODO
-
-In no particular order:
-
-* Documentation
-* Register package on pip
-* Develop additional ground filter functions and bindings
-* Implement tests
-* Canopy Height Model
-* Grid Metrics
-* PEP8 - Method Variable Refactoring
-* Speed up plot clipping
+pyfor is currently undergoing major revisions from its infant stage to incorporate several packages that speed up processing time and allow for visualizations of point cloud data. The expected release for a stable working version is **August 2018**, but this branch will provide rolling release updates for anyone interested in trying the package early.
