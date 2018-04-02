@@ -4,6 +4,9 @@
 
 pyfor is currently undergoing major revisions from its infant stage to incorporate several packages that speed up processing time and allow for visualizations of point cloud data. The expected release for a stable working version is **August 2018**, but this branch will provide rolling release updates for anyone interested in trying the package early.
 
+## Installation
+[under construction]
+
 ## Getting Started
 
 [under construction]
