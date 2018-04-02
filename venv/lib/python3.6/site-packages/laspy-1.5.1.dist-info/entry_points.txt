@@ -1,0 +1,8 @@
+[console_scripts]
+lascopy = laspy.tools.lascopy:main
+lasexplorer = laspy.tools.lasexplorer:main
+lasnoise = laspy.tools.lasnoise:main
+lasvalidate = laspy.tools.lasvalidate:main
+lasverify = laspy.tools.lasverify:main
+lasviewer = laspy.tools.lasviewer:main
+
