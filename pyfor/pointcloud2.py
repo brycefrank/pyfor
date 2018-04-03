@@ -12,30 +12,32 @@ import json
 import ogr
 from numba import jit
 import clip_funcs
+import rasterizer
 
 
 class CloudData:
     """
-    A simple class composed of a numpy array of points and a laspy header, meant for internal use
+    A simple class composed of a numpy array of points and a laspy header, meant for internal use. This is basically
+    a way to load data from the las file into memory.
     """
     def __init__(self, points, header):
+
+        # Assign useful shortcuts
+        # TODO expand
         self.points = points
+        self.x = self.points[:, 0]
+        self.y = self.points[:, 1]
+        self.z = self.points[:, 2]
 
         if type(header) == laspy.header.HeaderManager:
             self.header = header.copy()
         else:
-            # Update the synthetic header
-            # TODO a bit messy, look into creating a laspy header object instead of this method
             self.header = header
-            self.header.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
-            self.header.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
-            self.header.count = np.alen(self.points)
 
-        # Assign useful shortcuts
-        # TODO expand
-        self.x = self.points[:, 0]
-        self.y = self.points[:, 1]
-        self.z = self.points[:, 2]
+        self.header.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
+        self.header.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
+        self.header.count = np.alen(self.points)
+
 
 class Cloud:
     def __init__(self, las):
@@ -59,29 +61,7 @@ class Cloud:
             print("Object type not supported, please input either a las file path or a CloudData object.")
 
     def grid(self, cell_size):
-        """
-        Sorts the point cloud into a gridded form such that every point in the las file is assigned a cell coordinate
-        with a resolution equal to cell_size
-
-        :param cell_size: The size of the cell for sorting
-        :param indices: The indices of self.points to plot
-        :return: Returns a dataframe with sorted x and y with associated bins in a new columns
-        """
-        # TODO Need to update headers when new cloud is constructed
-        min_x, max_x = self.las.header.min[0], self.las.header.max[0]
-        min_y, max_y = self.las.header.min[1], self.las.header.max[1]
-
-        m = int(np.floor((max_y - min_y) / cell_size) + 1)
-        n = int(np.floor((max_x - min_x) / cell_size) + 1)
-
-        # Create bins
-        bins_x = np.searchsorted(np.linspace(min_x, max_x, n + 1), self.las.x)
-        bins_y = np.searchsorted(np.linspace(min_y, max_y, m + 1), self.las.y)
-
-        # Add bins and las data to a new dataframe
-        df = pd.DataFrame({'x': self.las.x, 'y': self.las.y, 'z': self.las.z,
-                           'bins_x': bins_x, 'bins_y': bins_y})
-        return(df)
+        return(rasterizer.Grid(self, cell_size))
 
     def plot(self, cell_size = 1):
         """
@@ -91,7 +71,7 @@ class Cloud:
         :param cell_size: The resolution of the plot in the same units as the input file.
         """
         # Group by the x and y grid cells
-        gridded_df = self.grid(cell_size)
+        gridded_df = self.grid(cell_size).data
         group_df = gridded_df[['bins_x', 'bins_y', 'z']].groupby(['bins_x', 'bins_y'])
 
         # Summarize (i.e. aggregate) on the max z value and reshape the dataframe into a 2d matrix
@@ -100,6 +80,8 @@ class Cloud:
         # Plot the matrix, and invert the y axis to orient the 'image' appropriately
         plt.matshow(plot_mat)
         plt.gca().invert_yaxis()
+
+        #TODO Fix plot axes
 
         # Show the matrix image
         plt.show()
