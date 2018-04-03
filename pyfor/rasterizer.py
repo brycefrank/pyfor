@@ -1,7 +1,8 @@
 # Functions for rasterizing
 import numpy as np
 import pandas as pd
-from scipy.interpolate import NearestNDInterpolator
+import gdal
+from scipy.interpolate import griddata
 
 class Grid:
     """The grid object constructs a grid from a given Cloud object
@@ -36,7 +37,19 @@ class Grid:
                            'bins_x': bins_x, 'bins_y': bins_y})
         self.data = df
 
+    def array(self, func, dim):
+        """
+        Generates an m x n matrix with values as calculated for each cell in func.
+        """
+        grouped = self.data[['bins_x', 'bins_y', dim]].groupby(['bins_x', 'bins_y'])
+        array = grouped.agg({dim: func}).reset_index().pivot('bins_x', 'bins_y', dim)
+        array = np.array(array)
+        return(array)
+
+
+
     def boolean_summary(self, func, dim):
+        # TODO Might not be worth its own function...
         """
         Calculates a column in self.data that is a boolean of whether
         or not that point is the point that corresponds to the function passed.
@@ -51,14 +64,16 @@ class Grid:
         mask = self.data.groupby(['bins_x', 'bins_y'])[dim].transform(func) == self.data[dim]
         return(mask)
 
+    @property
     def non_empty_cells(self):
         # TODO There is an easier way to retrieve non empty cells than what is below,
         # put it here
         pass
 
-    def empty_cells(self):
+    @property
+    def empty_cells():
         """
-        TODO docstring
+        Retrieves the cells with no returns in self.data
         """
 
         # Determine which cells have at least one point in them
@@ -92,32 +107,32 @@ class Grid:
                 arr = np.append(arr, stacked, axis = 0)
         return(arr)
 
-    def bin_translate(self, x_bin, y_bin):
+    def interpolate(self, agg_dim, agg_func, interp_method = "nearest"):
         """
-        Translate bins from indices to Cloud space. The returned coordinates are the centers of the
-        grid cells.
+        # TODO Decide on return type, matrix or append to self.data? This decision can be made
+        after more IO stuff is written. It should probably return a saveable / plottable
+        raster object of some sort. Should I make a raster class, or just flesh out grid?
+
+        Interpolates missing cells in the grid.
         """
-        # TODO: Make this pretty
-        n = self.n
-        m = self.n
-        c = self.cell_size
+        # Get points and values that we already have
 
-        new_x = ( (x_bin - 1) / (n - 1) ) * (self.las.header.max[0] - self.las.header.min[0]) + self.las.header.min[0] + (c / 2)
-        new_y = ( (y_bin -1 ) / (m -1) ) * (self.las.header.max[1] - self.las.header.min[1]) + self.las.header.min[1] + (c / 2)
+        cells = self.data.groupby(['bins_x', 'bins_y'])[agg_dim].agg(agg_func).reset_index()
+        missing_cells = self.empty_cells
 
-        return(np.stack((new_x, new_y), axis = 1))
+        points = cells[['bins_x', 'bins_y']].values
+        values = cells[agg_dim].values
 
-    def interpolate(self, training_dims = ['x', 'y'], response = ['z']):
-        """
-        Fills missing cells in self.data using the preferred interpolation method.
-        """
+        # https://stackoverflow.com/questions/12864445/numpy-meshgrid-points
+        # TODO does this need a transpose?
+        X, Y = np.mgrid[1:self.n+1, 1:self.m+1]
+        positions = np.stack([X.ravel(), Y.ravel()], axis = 1)
 
-        # Create interpolator from existing data
-        interp = NearestNDInterpolator(np.array(self.non_empty_cells[training_dims]), np.array(self.non_empty_cells[response]))
+        interp_grid = griddata(points, values, positions, method = interp_method)
 
-        # Get missing_cell centroid coordinates
-        missing_cell_centroids = self.bin_translate(self.empty_cells()[:,0], self.empty_cells()[:,1])
-        z_interp = interp(missing_cell_centroids)
+        #return(cells)
+        return(interp_grid.reshape(self.m, self.n))
 
-        return(interp)
-
+    def write_raster(self, path, func, dim, wkt):
+        # IN DEVELOPMENT
+        pass

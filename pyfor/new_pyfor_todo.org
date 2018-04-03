@@ -1,0 +1,27 @@
+* TODO: Implement Zhang et al. (2003)
+  - or package mcc lidar?
+* Notes on PDAL
+** Installation in Linux
+   - On ubuntu, requires access to artful packages
+   - Used [[https://packages.debian.org/sid/amd64/pdal/download][this]] page to download via aptitude
+     - Had to run this command for `sudo apt-update` to work:
+       sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6494C6D6997C215E
+*** pdal-python installation
+   - Requires: cython, packaging (available through pip), libpdal-dev (through apt)
+   - For now, the package available from the Debian repositories is compiled only with python 2.x in mind.
+     This probably is not a big deal, but I will need to use python2.x for now. I sent an email to the package
+     maintainer to see if it would be possible to compile a different version
+     - Despite his somewhat catty response, he did suggest something useful, I could just compile PDAL for
+       python 3 myself and host the package (probably on ubuntu somewhere). This sounds like it could a
+       pain in the tuckus but may be worthwhile for consistencies sake. Worth a couple hours of poking
+   - The real question is how portable is PDAL across OSs. If I can just call command line arguments
+     consistently across OSs, it just boils down to writing the PDAL json files, which does not look too 
+     hard.
+** Thoughts
+   - PDAL is big, bulky and awkward, but has the advantage of an active development team,
+     fast C++ code I could never dream of writing
+   - Perhaps PyFor should simply be a wrapper for PDAL/GDAL/OGR
+   - Blog post: "PDAL for Humans"
+     - you can tell these tutorials are written by total C++ dweebs.
+* Notes on PCL
+  - Incredibly difficult to install, bulky...probably not the way to go
