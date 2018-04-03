@@ -14,14 +14,21 @@ For installation I highly recommend looking into setting up [miniconda](https://
 
 [under construction]
 
-## Dependencies
+## Goals
 
-- Python 3
-- numpy
-- pandas
-- gdal
-- ogr
-- pyqtgraph
+- Provide efficient functions for the calculation of rasterized metrics from large aerial point cloud acquisitions.
+    - numba jit compiled functions
+        - clipping
+        - normalization
+        - tree detection algorithms
+    - Paralell processing
+    - GPU processing via CUDA
+
+- Provide means for interactive data analysis and processing of point cloud data
+    - 2d and 3d point cloud visualizations
+    - integration with `pandas` library
+
+- Maintain compatibility between operating systems via conda
 
 ## Contact
 

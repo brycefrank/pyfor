@@ -1,11 +1,13 @@
 # Functions for rasterizing
 import numpy as np
 import pandas as pd
+from scipy.interpolate import NearestNDInterpolator
 
 class Grid:
     """The grid object constructs a grid from a given Cloud object
     and cell_size and contains functions useful for manipulating
     rasterized data."""
+    # TODO Decide between self.cloud or self.las
     def __init__(self, cloud, cell_size):
         """
         Sorts the point cloud into a gridded form such that every point in the las file is assigned a cell coordinate
@@ -16,6 +18,7 @@ class Grid:
         :return: Returns a dataframe with sorted x and y with associated bins in a new columns
         """
         self.las = cloud.las
+        self.cell_size = cell_size
 
         # TODO Need to update headers when new cloud is constructed
         min_x, max_x = self.las.header.min[0], self.las.header.max[0]
@@ -48,22 +51,27 @@ class Grid:
         mask = self.data.groupby(['bins_x', 'bins_y'])[dim].transform(func) == self.data[dim]
         return(mask)
 
-    def get_missing_cells(self):
+    def non_empty_cells(self):
+        # TODO There is an easier way to retrieve non empty cells than what is below,
+        # put it here
+        pass
+
+    def empty_cells(self):
         """
         TODO docstring
         """
 
         # Determine which cells have at least one point in them
         mask = self.boolean_summary(np.min, 'z')
-        self.data['mask'] = mask
-        non_empty_cells = self.data.loc[self.data['mask']]
+        self.non_empty_cells = self.data[mask]
 
         # Sort by cell IDs
-        grouped_sort = non_empty_cells.sort_values(['bins_x', 'bins_y'])
+        grouped_sort = self.non_empty_cells.sort_values(['bins_x', 'bins_y'])
 
         # Initialize an array container
         arr = np.empty((0, 2))
 
+        # TODO Opportunity for jit compilation
         for x_bin in range(1, self.m):
             # Subset the dataframe for each value of x_bin
             x_col = grouped_sort.loc[grouped_sort['bins_x'] == x_bin]
@@ -83,3 +91,33 @@ class Grid:
                 # Append to the container array
                 arr = np.append(arr, stacked, axis = 0)
         return(arr)
+
+    def bin_translate(self, x_bin, y_bin):
+        """
+        Translate bins from indices to Cloud space. The returned coordinates are the centers of the
+        grid cells.
+        """
+        # TODO: Make this pretty
+        n = self.n
+        m = self.n
+        c = self.cell_size
+
+        new_x = ( (x_bin - 1) / (n - 1) ) * (self.las.header.max[0] - self.las.header.min[0]) + self.las.header.min[0] + (c / 2)
+        new_y = ( (y_bin -1 ) / (m -1) ) * (self.las.header.max[1] - self.las.header.min[1]) + self.las.header.min[1] + (c / 2)
+
+        return(np.stack((new_x, new_y), axis = 1))
+
+    def interpolate(self, training_dims = ['x', 'y'], response = ['z']):
+        """
+        Fills missing cells in self.data using the preferred interpolation method.
+        """
+
+        # Create interpolator from existing data
+        interp = NearestNDInterpolator(np.array(self.non_empty_cells[training_dims]), np.array(self.non_empty_cells[response]))
+
+        # Get missing_cell centroid coordinates
+        missing_cell_centroids = self.bin_translate(self.empty_cells()[:,0], self.empty_cells()[:,1])
+        z_interp = interp(missing_cell_centroids)
+
+        return(interp)
+
