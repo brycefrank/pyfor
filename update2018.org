@@ -1,6 +1,0 @@
-* To-Do List
-** DONE Revise gridding function (pure numpy / pandas implementation)
-** TODO create unit test for Cloud.grid
-** TODO create unit test for Cloud.clip
-** TODO Implement Zhang et al. 2003
-*** TODO Incorporate interpolation

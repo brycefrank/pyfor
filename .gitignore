@@ -1,3 +1,4 @@
 # Sphinx Build files
-/docs/build
-
+docs/build
+venv/
+pyfor/*.pyc

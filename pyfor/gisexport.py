@@ -68,7 +68,7 @@ def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
         x_pixels,
         y_pixels,
         1,
-        gdal.GDT_Float32, )
+        gdal.GDT_Float32)
 
     dataset.SetGeoTransform((
         x_min,  # 0
@@ -93,6 +93,7 @@ def utm_lookup(zone):
         ex: "10N"
     """
     # see: http://gis.stackexchange.com/questions/233712/python-wkt-or-proj4-lookup-package
+    # FIXME: store this file locally
     in_ds = ogr.GetDriverByName('CSV').Open('C:\pyformaster\pyformaster\PyFor\pyfor\pcs.csv')
     print(in_ds)
     layer = in_ds.GetLayer()

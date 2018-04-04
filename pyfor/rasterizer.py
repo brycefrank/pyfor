@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import gdal
 from scipy.interpolate import griddata
+import gisexport
 
 class Grid:
     """The grid object constructs a grid from a given Cloud object
@@ -39,14 +40,13 @@ class Grid:
 
     def array(self, func, dim):
         """
-        Generates an m x n matrix with values as calculated for each cell in func.
+        Generates an m x n matrix with values as calculated for each cell in func. This is a raw
+        array without missing cells interpolated. See self.interpolate for interpolation methods.
         """
         grouped = self.data[['bins_x', 'bins_y', dim]].groupby(['bins_x', 'bins_y'])
         array = grouped.agg({dim: func}).reset_index().pivot('bins_x', 'bins_y', dim)
         array = np.array(array)
         return(array)
-
-
 
     def boolean_summary(self, func, dim):
         # TODO Might not be worth its own function...
@@ -107,7 +107,7 @@ class Grid:
                 arr = np.append(arr, stacked, axis = 0)
         return(arr)
 
-    def interpolate(self, agg_dim, agg_func, interp_method = "nearest"):
+    def interpolate(self, dim, func, interp_method = "nearest"):
         """
         # TODO Decide on return type, matrix or append to self.data? This decision can be made
         after more IO stuff is written. It should probably return a saveable / plottable
@@ -117,11 +117,11 @@ class Grid:
         """
         # Get points and values that we already have
 
-        cells = self.data.groupby(['bins_x', 'bins_y'])[agg_dim].agg(agg_func).reset_index()
+        cells = self.data.groupby(['bins_x', 'bins_y'])[dim].agg(func).reset_index()
         missing_cells = self.empty_cells
 
         points = cells[['bins_x', 'bins_y']].values
-        values = cells[agg_dim].values
+        values = cells[dim].values
 
         # https://stackoverflow.com/questions/12864445/numpy-meshgrid-points
         # TODO does this need a transpose?
@@ -130,9 +130,14 @@ class Grid:
 
         interp_grid = griddata(points, values, positions, method = interp_method)
 
-        #return(cells)
         return(interp_grid.reshape(self.m, self.n))
 
-    def write_raster(self, path, func, dim, wkt):
-        # IN DEVELOPMENT
-        pass
+    def write_raster(self, path, func, dim, wkt = None):
+        if self.wkt == None:
+            # This should only be the case for older .las files without CRS information
+            print("There is no wkt string set for this Grid object, you must manually pass one to the \
+            write_raster function.")
+        else:
+            write_array = self.array(func, dim)
+            print("Raster file written to {}".format(path))
+            gisexport.array_to_raster(self.array, self.cell_size, self.las.header.min[0], self.header.max[1], path)
