@@ -8,12 +8,13 @@ class Grid:
     and cell_size and contains functions useful for manipulating
     rasterized data."""
     # TODO Decide between self.cloud or self.las
+    # TODO bw4sz, cell size units?
+    
     def __init__(self, cloud, cell_size):
         """
         Sorts the point cloud into a gridded form such that every point in the las file is assigned a cell coordinate
         with a resolution equal to cell_size
-
-        :param cell_size: The size of the cell for sorting
+            :param cell_size: The size of the cell for sorting
         :param indices: The indices of self.points to plot
         :return: Returns a dataframe with sorted x and y with associated bins in a new columns
         """
