@@ -10,9 +10,8 @@ import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 import json
 import ogr
-from numba import jit
-import clip_funcs
-import rasterizer
+from pyfor import rasterizer
+from pyfor import clip_funcs
 
 
 class CloudData:
@@ -38,7 +37,6 @@ class CloudData:
         self.header.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
         self.header.count = np.alen(self.points)
 
-
 class Cloud:
     def __init__(self, las):
         """
@@ -63,12 +61,14 @@ class Cloud:
     def grid(self, cell_size):
         return(rasterizer.Grid(self, cell_size))
 
-    def plot(self, cell_size = 1):
+    def plot(self, cell_size = 1, return_plot = False):
         """
         Plots a 2 dimensional canopy height model using the maximum z value in each cell. This is intended for visual
-        checking and not for analysis purposes.
+        checking and not for analysis purposes. See the rasterizer.Grid class for analysis.
 
         :param cell_size: The resolution of the plot in the same units as the input file.
+        :param return_plot: If true, returns a matplotlib plt object.
+        :return: If return_plot == True, returns matplotlib plt object.
         """
         # Group by the x and y grid cells
         gridded_df = self.grid(cell_size).data
@@ -82,9 +82,11 @@ class Cloud:
         plt.gca().invert_yaxis()
 
         #TODO Fix plot axes
-
-        # Show the matrix image
-        plt.show()
+        if return_plot:
+            return(plt)
+        else:
+            # Show the matrix image
+            plt.show()
 
     def plot3d(self, point_size = 1, cmap = 'Spectral_r', max_points = 5e5):
         """
@@ -149,7 +151,3 @@ class Cloud:
             keep_points = clip_funcs.poly_clip(self, geometry)
 
         return(Cloud(CloudData(keep_points, self.las.header)))
-
-
-
-

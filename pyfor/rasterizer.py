@@ -1,9 +1,8 @@
 # Functions for rasterizing
 import numpy as np
 import pandas as pd
-import gdal
 from scipy.interpolate import griddata
-import gisexport
+from pyfor import gisexport
 
 class Grid:
     """The grid object constructs a grid from a given Cloud object
@@ -64,14 +63,14 @@ class Grid:
         mask = self.data.groupby(['bins_x', 'bins_y'])[dim].transform(func) == self.data[dim]
         return(mask)
 
-    @property
-    def non_empty_cells(self):
-        # TODO There is an easier way to retrieve non empty cells than what is below,
-        # put it here
-        pass
+    #@property
+    #def non_empty_cells(self):
+    #    # TODO There is an easier way to retrieve non empty cells than what is below,
+    #    # put it here
+    #    pass
 
     @property
-    def empty_cells():
+    def empty_cells(self):
         """
         Retrieves the cells with no returns in self.data
         """

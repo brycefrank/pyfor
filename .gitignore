@@ -2,3 +2,4 @@
 docs/build
 venv/
 pyfor/*.pyc
+pyfor/test.py
