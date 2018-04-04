@@ -1,2 +1,0 @@
-* To-Do List
-** TODO Revise gridding function (pure numpy / pandas implementation)

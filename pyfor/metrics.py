@@ -6,7 +6,7 @@ from scipy import stats
 # x y z i r
 # 0 1 2 3 4
 
-class CloudData:
+class CloudMetrics:
     """Maybe just use cloud info?"""
     def __init__(self, path):
         import laspy
