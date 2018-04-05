@@ -15,7 +15,7 @@ class Grid:
         """
         Sorts the point cloud into a gridded form such that every point in the las file is assigned a cell coordinate
         with a resolution equal to cell_size
-            :param cell_size: The size of the cell for sorting
+        :param cell_size: The size of the cell for sorting in the units of the input cloud object
         :param indices: The indices of self.points to plot
         :return: Returns a dataframe with sorted x and y with associated bins in a new columns
         """
@@ -107,7 +107,7 @@ class Grid:
                 arr = np.append(arr, stacked, axis = 0)
         return(arr)
 
-    def interpolate(self, dim, func, interp_method = "nearest"):
+    def interpolate(self, dim, func, interp_method="nearest"):
         """
         # TODO Decide on return type, matrix or append to self.data? This decision can be made
         after more IO stuff is written. It should probably return a saveable / plottable
@@ -116,28 +116,24 @@ class Grid:
         Interpolates missing cells in the grid.
         """
         # Get points and values that we already have
-
         cells = self.data.groupby(['bins_x', 'bins_y'])[dim].agg(func).reset_index()
-        missing_cells = self.empty_cells
 
         points = cells[['bins_x', 'bins_y']].values
         values = cells[dim].values
 
         # https://stackoverflow.com/questions/12864445/numpy-meshgrid-points
-        # TODO does this need a transpose?
         X, Y = np.mgrid[1:self.n+1, 1:self.m+1]
-        positions = np.stack([X.ravel(), Y.ravel()], axis = 1)
 
-        interp_grid = griddata(points, values, (X, Y), method = interp_method)
+        interp_grid = griddata(points, values, (X, Y), method = interp_method).T
 
         return(interp_grid)
 
     def write_raster(self, path, func, dim, wkt = None):
-        if self.wkt == None:
+        if self.las.wkt == None:
             # This should only be the case for older .las files without CRS information
             print("There is no wkt string set for this Grid object, you must manually pass one to the \
-            write_raster function.")
+            write_raster function. This likely means you are using an older las specification.")
         else:
             write_array = self.array(func, dim)
             print("Raster file written to {}".format(path))
-            gisexport.array_to_raster(self.array, self.cell_size, self.las.header.min[0], self.header.max[1], path)
+            gisexport.array_to_raster(write_array, self.cell_size, self.las.header.min[0], self.las.header.max[1], path)
