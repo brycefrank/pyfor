@@ -1,5 +1,7 @@
 # Sphinx Build files
-docs/build
+<<<<<<< HEAD
+/docs/build
+venv/*
 venv/
 pyfor/*.pyc
 pyfor/test.py
