@@ -151,3 +151,25 @@ class Cloud:
             keep_points = clip_funcs.poly_clip(self, geometry)
 
         return(Cloud(CloudData(keep_points, self.las.header)))
+    
+    def filter_z(self,min,max):
+        
+        """
+        Filters a cloud object based on Z heights
+        :param min: Minimum z height in map units
+        :param max: Maximum z height in map units
+        """
+        
+        #Filter condition
+        condition = (self.las.points[:,2] > min) &  (self.las.points[:,2] < max)
+        self.las.points=self.las.points[condition]
+        
+        #reform header
+        self.las.x = self.las.points[:, 0]
+        self.las.y = self.las.points[:, 1]
+        self.las.z = self.las.points[:, 2]
+        
+        # TODO consider returning a new cloud object
+        self.las.header.min = [np.min(self.las.x), np.min(self.las.y), np.min(self.las.z)]
+        self.las.header.max = [np.max(self.las.x), np.max(self.las.y), np.max(self.las.z)]
+        self.las.header.count = np.alen(self.las.points)     
