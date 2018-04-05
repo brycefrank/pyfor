@@ -128,9 +128,9 @@ class Grid:
         X, Y = np.mgrid[1:self.n+1, 1:self.m+1]
         positions = np.stack([X.ravel(), Y.ravel()], axis = 1)
 
-        interp_grid = griddata(points, values, positions, method = interp_method)
+        interp_grid = griddata(points, values, (X, Y), method = interp_method)
 
-        return(interp_grid.reshape(self.m, self.n))
+        return(interp_grid)
 
     def write_raster(self, path, func, dim, wkt = None):
         if self.wkt == None:

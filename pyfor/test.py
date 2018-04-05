@@ -1,14 +1,17 @@
-import laspy
-import copy
-from sys import getsizeof
+import importlib.machinery
 import numpy as np
 import matplotlib.pyplot as plt
-import itertools
+pyfor = importlib.machinery.SourceFileLoader('pyfor','/home/bryce/Programming/PyFor/pyfor/__init__.py').load_module()
 
-pc = cloud.Cloud("/home/bryce/Desktop/pyfor_test_data/plot_tiles/PC110201LeafOn2010.LAS")
 
-point_array = pc.las.points
+pc = pyfor.cloud.Cloud("/home/bryce/Desktop/pyfor_test_data/PC_001.las")
+pc_grid = pc.grid(0.5)
 
-mask = point_array[:,2] > 300
+interp = pc_grid.interpolate("z", "max")
 
-print(point_array[mask].shape)
+plt.imshow(interp)
+plt.colorbar()
+plt.show()
+
+
+
