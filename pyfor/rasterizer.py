@@ -2,7 +2,11 @@
 import numpy as np
 import pandas as pd
 from scipy.interpolate import griddata
+import matplotlib.pyplot as plt
 from pyfor import gisexport
+from pyfor import metrics2
+
+# TODO: refactor any grouped dataframe to "cells"
 
 class Grid:
     """The grid object constructs a grid from a given Cloud object
@@ -10,7 +14,6 @@ class Grid:
     rasterized data."""
     # TODO Decide between self.cloud or self.las
     # TODO bw4sz, cell size units?
-    
     def __init__(self, cloud, cell_size):
         """
         Sorts the point cloud into a gridded form such that every point in the las file is assigned a cell coordinate
@@ -34,9 +37,8 @@ class Grid:
         bins_y = np.searchsorted(np.linspace(min_y, max_y, self.m), self.las.y)
 
         # Add bins and las data to a new dataframe
-        df = pd.DataFrame({'x': self.las.x, 'y': self.las.y, 'z': self.las.z,
+        self.data = pd.DataFrame({'x': self.las.x, 'y': self.las.y, 'z': self.las.z,
                            'bins_x': bins_x, 'bins_y': bins_y})
-        self.data = df
 
     def array(self, func, dim):
         """
@@ -128,6 +130,45 @@ class Grid:
 
         return(interp_grid)
 
+    def metrics(self, func_string, dim):
+        """
+        Calculates summary statistics for each grid cell in the Grid.
+
+        :return:
+        """
+
+        # We have a grouped dataframe (we will group all of the data for now:
+        cells = self.data.groupby(['bins_x', 'bins_y'])[dim]
+
+        return(cells.agg(func_string))
+
+    def plot(self, z_func, return_plot = False):
+        """
+        Plots a 2 dimensional canopy height model using the maximum z value in each cell. This is intended for visual
+        checking and not for analysis purposes. See the rasterizer.Grid class for analysis.
+
+        :param z_func: The function to aggregate z as a string.
+        :param return_plot: If true, returns a matplotlib plt object.
+        :return: If return_plot == True, returns matplotlib plt object.
+        """
+
+        # Group by the x and y grid cells
+        group_df = self.data[['bins_x', 'bins_y', 'z']].groupby(['bins_x', 'bins_y'])
+
+        # Summarize (i.e. aggregate) on the max z value and reshape the dataframe into a 2d matrix
+        plot_mat = group_df.agg({'z': z_func}).reset_index().pivot('bins_y', 'bins_x', 'z')
+
+        # Plot the matrix, and invert the y axis to orient the 'image' appropriately
+        plt.matshow(plot_mat)
+        plt.gca().invert_yaxis()
+
+        # TODO Fix plot axes
+        if return_plot:
+            return(plt)
+        else:
+            # Show the matrix image
+            plt.show()
+
     def write_raster(self, path, func, dim, wkt = None):
         if self.las.wkt == None:
             # This should only be the case for older .las files without CRS information
@@ -137,3 +178,5 @@ class Grid:
             write_array = self.array(func, dim)
             print("Raster file written to {}".format(path))
             gisexport.array_to_raster(write_array, self.cell_size, self.las.header.min[0], self.las.header.max[1], path)
+
+

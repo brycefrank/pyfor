@@ -20,13 +20,12 @@ class CloudData:
     a way to load data from the las file into memory.
     """
     def __init__(self, points, header):
-
-        # Assign useful shortcuts
+        # TODO naming is a bit convoluted, but functioning
         # TODO expand
         self.points = points
-        self.x = self.points[:, 0]
-        self.y = self.points[:, 1]
-        self.z = self.points[:, 2]
+        self.x = self.points["x"]
+        self.y = self.points["y"]
+        self.z = self.points["z"]
 
         if type(header) == laspy.header.HeaderManager:
             self.header = header.copy()
@@ -37,6 +36,7 @@ class CloudData:
         self.header.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
         self.header.count = np.alen(self.points)
 
+
 class Cloud:
     def __init__(self, las):
         """
@@ -46,9 +46,10 @@ class Cloud:
         """
         if type(las) == str:
             las = laspy.file.File(las)
-            points = np.stack((las.x, las.y, las.z, las.intensity, las.flag_byte,
-                                    las.classification, las.scan_angle_rank, las.user_data,
-                                    las.pt_src_id), axis=1)
+            # Rip points from laspy
+            points = pd.DataFrame({"x": las.x, "y": las.y, "z": las.z, "intensity": las.intensity, "classification": las.classification,
+                                   "flag_byte":las.flag_byte, "scan_angle_rank":las.scan_angle_rank, "user_data": las.user_data,
+                                   "pt_src_id": las.pt_src_id})
             header = las.header
 
             # Toss out the laspy object in favor of CloudData
@@ -59,34 +60,28 @@ class Cloud:
             print("Object type not supported, please input either a las file path or a CloudData object.")
 
     def grid(self, cell_size):
+        """
+        Generates a Grid object for this Cloud given a cell size.
+
+        :param cell_size: The resolution of the plot in the same units as the input file.
+        :return: A Grid object.
+        """
         return(rasterizer.Grid(self, cell_size))
 
     def plot(self, cell_size = 1, return_plot = False):
         """
-        Plots a 2 dimensional canopy height model using the maximum z value in each cell. This is intended for visual
-        checking and not for analysis purposes. See the rasterizer.Grid class for analysis.
+        Plots a basic canopy height model of the Cloud object. This is mainly a convenience function for
+        rasterizer.Grid.plot, check that method docstring for more information and more robust usage cases.
 
         :param cell_size: The resolution of the plot in the same units as the input file.
         :param return_plot: If true, returns a matplotlib plt object.
         :return: If return_plot == True, returns matplotlib plt object.
         """
-        # Group by the x and y grid cells
-        gridded_df = self.grid(cell_size).data
-        group_df = gridded_df[['bins_x', 'bins_y', 'z']].groupby(['bins_x', 'bins_y'])
 
-        # Summarize (i.e. aggregate) on the max z value and reshape the dataframe into a 2d matrix
-        plot_mat = group_df.agg({'z': 'max'}).reset_index().pivot('bins_y', 'bins_x', 'z')
+        rasterizer.Grid(self, cell_size).plot("max")
 
-        # Plot the matrix, and invert the y axis to orient the 'image' appropriately
-        plt.matshow(plot_mat)
-        plt.gca().invert_yaxis()
-
-        #TODO Fix plot axes
-        if return_plot:
-            return(plt)
-        else:
-            # Show the matrix image
-            plt.show()
+        if return_plot == True:
+            return(rasterizer.Grid(self, "max", cell_size, return_plot = True))
 
     def plot3d(self, point_size = 1, cmap = 'Spectral_r', max_points = 5e5):
         """
@@ -151,25 +146,24 @@ class Cloud:
             keep_points = clip_funcs.poly_clip(self, geometry)
 
         return(Cloud(CloudData(keep_points, self.las.header)))
-    
+
     def filter_z(self,min,max):
-        
         """
         Filters a cloud object based on Z heights
         :param min: Minimum z height in map units
         :param max: Maximum z height in map units
         """
-        
+
         #Filter condition
         condition = (self.las.points[:,2] > min) &  (self.las.points[:,2] < max)
         self.las.points=self.las.points[condition]
-        
+
         #reform header
         self.las.x = self.las.points[:, 0]
         self.las.y = self.las.points[:, 1]
         self.las.z = self.las.points[:, 2]
-        
+
         # TODO consider returning a new cloud object
         self.las.header.min = [np.min(self.las.x), np.min(self.las.y), np.min(self.las.z)]
         self.las.header.max = [np.max(self.las.x), np.max(self.las.y), np.max(self.las.z)]
-        self.las.header.count = np.alen(self.las.points)     
+        self.las.header.count = np.alen(self.las.points)
