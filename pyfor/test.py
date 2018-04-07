@@ -5,8 +5,13 @@ pyfor = importlib.machinery.SourceFileLoader('pyfor','/home/bryce/Programming/Py
 
 
 
-pc = pyfor.cloud.Cloud("/home/bryce/Desktop/pyfor_test_data/plot_tiles/PC107701LeafOn2010.LAS")
+pc = pyfor.cloud.Cloud("/home/bryce/Programming/PyFor/samples/data/NEON_D03_OSBS_DP1_405000_3276000_classified_point_cloud.laz")
 
 pc_grid = pc.grid(1)
 
-pc_grid.metrics(np.max, "z")
+pc_grid.metrics(my_pct, "z")
+
+pc_grid.interpolate(my_pct, "z")
+
+def my_pct(a):
+    return(np.percentile(a, q = 0.2))

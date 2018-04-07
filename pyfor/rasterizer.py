@@ -9,9 +9,8 @@ from pyfor import metrics2
 # TODO: refactor any grouped dataframe to "cells"
 
 class Grid:
-    """The grid object constructs a grid from a given Cloud object
-    and cell_size and contains functions useful for manipulating
-    rasterized data."""
+    """The grid object constructs a grid from a given Cloud object and cell_size and contains functions useful
+    for manipulating rasterized data."""
     # TODO Decide between self.cloud or self.las
     # TODO bw4sz, cell size units?
     def __init__(self, cloud, cell_size):
@@ -40,13 +39,21 @@ class Grid:
         self.data = pd.DataFrame({'x': self.las.x, 'y': self.las.y, 'z': self.las.z,
                            'bins_x': bins_x, 'bins_y': bins_y})
 
+        self.cells = self.data.groupby(['bins_x', 'bins_y'])
+
     def array(self, func, dim):
         """
         Generates an m x n matrix with values as calculated for each cell in func. This is a raw
         array without missing cells interpolated. See self.interpolate for interpolation methods.
+
+        :param func: A function string, i.e. "max", a function itself, i.e. max, or a Metrics object. This function
+        must be able to take an array as an input and produce a single value as an output. This single value will
+        become the value of each cell in the array.
+        :param dim: The dimension to calculate on as a string, see the column names of self.data for a full list of
+        options
+        :return: A 2D numpy array where the value of each cell is the result of the passed function.
         """
-        grouped = self.data[['bins_x', 'bins_y', dim]].groupby(['bins_x', 'bins_y'])
-        array = grouped.agg({dim: func}).reset_index().pivot('bins_x', 'bins_y', dim)
+        array = self.cells.agg({dim: func}).reset_index().pivot('bins_x', 'bins_y', dim)
         array = np.array(array)
         return(array)
 
@@ -74,6 +81,7 @@ class Grid:
 
     @property
     def empty_cells(self):
+        # TODO Interpolate doesn't use this anymore, should probably get rid of it.
         """
         Retrieves the cells with no returns in self.data
         """
@@ -88,7 +96,7 @@ class Grid:
         # Initialize an array container
         arr = np.empty((0, 2))
 
-        # TODO Opportunity for jit compilation
+        # TODO Opportunity for jit compilation, runs a bit slow (2.62 s)
         for x_bin in range(1, self.m):
             # Subset the dataframe for each value of x_bin
             x_col = grouped_sort.loc[grouped_sort['bins_x'] == x_bin]
@@ -109,7 +117,7 @@ class Grid:
                 arr = np.append(arr, stacked, axis = 0)
         return(arr)
 
-    def interpolate(self, dim, func, interp_method="nearest"):
+    def interpolate(self, func, dim, interp_method="nearest"):
         """
         # TODO Decide on return type, matrix or append to self.data? This decision can be made
         after more IO stuff is written. It should probably return a saveable / plottable
@@ -118,10 +126,10 @@ class Grid:
         Interpolates missing cells in the grid.
         """
         # Get points and values that we already have
-        cells = self.data.groupby(['bins_x', 'bins_y'])[dim].agg(func).reset_index()
+        cell_values = self.cells[dim].agg(func).reset_index()
 
-        points = cells[['bins_x', 'bins_y']].values
-        values = cells[dim].values
+        points = cell_values[['bins_x', 'bins_y']].values
+        values = cell_values[dim].values
 
         # https://stackoverflow.com/questions/12864445/numpy-meshgrid-points
         X, Y = np.mgrid[1:self.n+1, 1:self.m+1]
@@ -142,21 +150,17 @@ class Grid:
 
         return(cells.agg(func_string))
 
-    def plot(self, z_func, return_plot = False):
+    def plot(self, func, dim = "z", return_plot = False):
         """
         Plots a 2 dimensional canopy height model using the maximum z value in each cell. This is intended for visual
         checking and not for analysis purposes. See the rasterizer.Grid class for analysis.
 
-        :param z_func: The function to aggregate z as a string.
+        :param func: The function to aggregate the points in the cell.
         :param return_plot: If true, returns a matplotlib plt object.
         :return: If return_plot == True, returns matplotlib plt object.
         """
-
-        # Group by the x and y grid cells
-        group_df = self.data[['bins_x', 'bins_y', 'z']].groupby(['bins_x', 'bins_y'])
-
         # Summarize (i.e. aggregate) on the max z value and reshape the dataframe into a 2d matrix
-        plot_mat = group_df.agg({'z': z_func}).reset_index().pivot('bins_y', 'bins_x', 'z')
+        plot_mat = self.cells.agg({dim: func}).reset_index().pivot('bins_y', 'bins_x', 'z')
 
         # Plot the matrix, and invert the y axis to orient the 'image' appropriately
         plt.matshow(plot_mat)
