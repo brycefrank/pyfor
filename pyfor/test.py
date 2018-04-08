@@ -1,17 +1,14 @@
 import importlib.machinery
 import numpy as np
+from importlib import reload
 import matplotlib.pyplot as plt
 pyfor = importlib.machinery.SourceFileLoader('pyfor','/home/bryce/Programming/PyFor/pyfor/__init__.py').load_module()
+reload(pyfor)
 
 
 
-pc = pyfor.cloud.Cloud("/home/bryce/Programming/PyFor/samples/data/NEON_D03_OSBS_DP1_405000_3276000_classified_point_cloud.laz")
-
+pc = pyfor.cloud.Cloud("/home/bryce/Desktop/pyfor_test_data/PC_001.las")
 pc_grid = pc.grid(1)
-
-pc_grid.metrics(my_pct, "z")
-
-pc_grid.interpolate(my_pct, "z")
-
-def my_pct(a):
-    return(np.percentile(a, q = 0.2))
+A = pc_grid.interpolate("min", "z")[100:200, 100:200]
+pyfor.filter.zhang(A, 20)
+np.sum(flag)
