@@ -3,12 +3,10 @@
 import laspy
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from pyqtgraph.Qt import QtCore, QtGui
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
-import json
 import ogr
 from pyfor import rasterizer
 from pyfor import clip_funcs

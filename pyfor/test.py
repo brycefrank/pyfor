@@ -8,7 +8,12 @@ reload(pyfor)
 
 
 pc = pyfor.cloud.Cloud("/home/bryce/Desktop/pyfor_test_data/PC_001.las")
-pc_grid = pc.grid(1)
+pc_grid = pc.grid(0.5)
+A = pc_grid.interpolate("max", "z")
+
+import matplotlib.pyplot as plt
+
+
 A = pc_grid.interpolate("min", "z")[100:200, 100:200]
 pyfor.filter.zhang(A, 20)
 np.sum(flag)
