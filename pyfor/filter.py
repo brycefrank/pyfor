@@ -1,8 +1,9 @@
 import numpy as np
 from numba import jit
+from scipy.ndimage.morphology import grey_opening
+from scipy.interpolate import griddata
 
-# PARAMETERS
-# TODO put this in function calls later
+# Leaving this as functions for now, may become a class later.
 
 def window_size(k):
     b = 2
@@ -28,6 +29,7 @@ def dht(elev_array, w_k, w_k_1, dh_0, dh_max, c):
     """
 
     s = slope(elev_array, w_k, w_k_1)
+    s = 1
 
     if w_k <= 3:
         return(dh_0)
@@ -36,6 +38,7 @@ def dht(elev_array, w_k, w_k_1, dh_0, dh_max, c):
     else:
         return(dh_max)
 
+# This function was replaced with the scipy.opening, leaving for a bit
 def erosion(Z, w_k, n):
     Z_f = []
     for j in range(1, n+1):
@@ -45,6 +48,7 @@ def erosion(Z, w_k, n):
         Z_f.append(np.min(a))
     return(np.asarray(Z_f))
 
+# This function was replaced with the scipy.opening, leaving for a bit
 def dilation(Z, w_k, n):
     Z_f = []
     for j in range(1, n+1):
@@ -55,9 +59,8 @@ def dilation(Z, w_k, n):
     return(np.asarray(Z_f))
 
 
-def zhang(array, number_of_windows, dh_max, dh_0, c):
+def zhang(array, number_of_windows, dh_max, dh_0, c, grid):
     """Implements Zhang et. al (2003)
-    IN PROGRESS
     """
     w_k_list = list(map(window_size, range(number_of_windows)))
     w_k_min = w_k_list[0]
@@ -66,6 +69,7 @@ def zhang(array, number_of_windows, dh_max, dh_0, c):
     n = A.shape[1]
     flag = np.zeros((m, n))
     for w_k in enumerate(w_k_list):
+        opened = grey_opening(array, (w_k[1], w_k[1]))
         if w_k[1] == w_k_min:
             w_k_1 = 0
         else:
@@ -73,23 +77,48 @@ def zhang(array, number_of_windows, dh_max, dh_0, c):
         for i in range(0, m):
             P_i = A[i,:]
             Z = P_i
-            Z_e = erosion(Z, w_k[1], n)
-            Z_f = dilation(Z_e, w_k[1], n)
+            Z_f = opened[i,:]
             dh_t = dht(Z, w_k[1], w_k_1, dh_0, dh_max, c)
             for j in range(0, n):
                 if Z[j] - Z_f[j] > dh_t:
                     flag[i, j] = w_k[1]
             P_i = Z_f
             A[i,:] = P_i
-    return(flag)
+
+    # Remove interpolated cells
+    empty = grid.empty_cells
+    empty_y, empty_x = empty[:,0].astype(int), empty[:,1].astype(int)
+    A[empty_x - 1, empty_y - 1] = np.nan
+    B = np.where(flag != 0, A, np.nan)
+
+    # Interpolate on our newly found ground cells
+    X, Y = np.mgrid[1:grid.n+1, 1:grid.m+1]
+    positions = np.vstack([X.ravel(), Y.ravel()])
+
+    # This is where the data is
+    C = np.where(np.isfinite(B) == True)
+    vals = B[C[0], C[1]]
+
+    dem_array = griddata(np.stack((C[0], C[1]), axis = 1), vals, (X, Y))
+
+    return(dem_array)
 
 def holder_func(array, grid):
     """
     This is just holding some things in development -bf 04/08/18
     :return:
     """
+
+    # Get the flag matrix ( > 0 values indicate non-ground)
     flag = zhang(array, 3, 3, 1, 0.5)
+
+    # Extract indices
     empty_y, empty_x = grid.empty_cells[:,0].astype(int), grid.empty_cells[:,1].astype(int)
+
+    # Set empty cells (i.e. cells that were interpolated) to np.nan
     array[empty_x - 1, empty_y -1] = np.nan
-    B = np.where(flag == 0, A, np.nan)
-    plt.matshow(B)
+
+    # Set cells where the flag is not 0 to nan, this is the final filtered raster
+    B = np.where(flag != 0, array, np.nan)
+
+    return(B)

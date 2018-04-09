@@ -81,7 +81,7 @@ class Grid:
 
     @property
     def empty_cells(self):
-        # TODO Interpolate doesn't use this anymore, should probably get rid of it.
+        # TODO Very slow.
         """
         Retrieves the cells with no returns in self.data
         """
@@ -96,7 +96,6 @@ class Grid:
         # Initialize an array container
         arr = np.empty((0, 2))
 
-        # TODO Opportunity for jit compilation, runs a bit slow (2.62 s)
         for x_bin in range(1, self.m):
             # Subset the dataframe for each value of x_bin
             x_col = grouped_sort.loc[grouped_sort['bins_x'] == x_bin]
