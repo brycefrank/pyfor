@@ -66,7 +66,7 @@ class Cloud:
         """
         return(rasterizer.Grid(self, cell_size))
 
-    def plot(self, cell_size = 1, return_plot = False):
+    def plot(self, cell_size = 1, cmap = "viridis", return_plot = False):
         """
         Plots a basic canopy height model of the Cloud object. This is mainly a convenience function for
         rasterizer.Grid.plot, check that method docstring for more information and more robust usage cases.
@@ -76,7 +76,7 @@ class Cloud:
         :return: If return_plot == True, returns matplotlib plt object.
         """
 
-        rasterizer.Grid(self, cell_size).plot("max")
+        rasterizer.Grid(self, cell_size).plot("max", cmap = "viridis")
 
         if return_plot == True:
             return(rasterizer.Grid(self, "max", cell_size, return_plot = True))

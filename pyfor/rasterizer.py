@@ -150,12 +150,13 @@ class Grid:
 
         return(cells.agg(func_string))
 
-    def plot(self, func, dim = "z", return_plot = False):
+    def plot(self, func, cmap ="viridis", dim = "z", return_plot = False):
         """
         Plots a 2 dimensional canopy height model using the maximum z value in each cell. This is intended for visual
         checking and not for analysis purposes. See the rasterizer.Grid class for analysis.
 
         :param func: The function to aggregate the points in the cell.
+        :param cmap: A matplotlib color map string.
         :param return_plot: If true, returns a matplotlib plt object.
         :return: If return_plot == True, returns matplotlib plt object.
         """
@@ -163,7 +164,7 @@ class Grid:
         plot_mat = self.cells.agg({dim: func}).reset_index().pivot('bins_y', 'bins_x', 'z')
 
         # Plot the matrix, and invert the y axis to orient the 'image' appropriately
-        plt.matshow(plot_mat)
+        plt.matshow(plot_mat, cmap)
         plt.gca().invert_yaxis()
 
         # TODO Fix plot axes
