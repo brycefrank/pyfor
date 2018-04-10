@@ -5,6 +5,7 @@ from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
 from pyfor import gisexport
 from pyfor import metrics2
+from pyfor import filter
 
 # TODO: refactor any grouped dataframe to "cells"
 
@@ -73,12 +74,6 @@ class Grid:
         mask = self.data.groupby(['bins_x', 'bins_y'])[dim].transform(func) == self.data[dim]
         return(mask)
 
-    #@property
-    #def non_empty_cells(self):
-    #    # TODO There is an easier way to retrieve non empty cells than what is below,
-    #    # put it here
-    #    pass
-
     @property
     def empty_cells(self):
         # TODO Very slow.
@@ -86,12 +81,14 @@ class Grid:
         Retrieves the cells with no returns in self.data
         """
 
-        all_cells = np.array(np.meshgrid(range(1, self.m+1), range(1, self.n+1))).T.reshape(-1, 2)
-        all_cells = pd.DataFrame(all_cells, columns=['bins_x', 'bins_y'])
-        all_cells = pd.merge(self.data, all_cells, how = 'outer')
-        non_cells = all_cells[['bins_x', 'bins_y']][np.isnan(all_cells['x'])].values
+        non_empty = self.cells.agg({"z": "count"}).reset_index()
+        all_cells = pd.DataFrame(np.array(np.meshgrid(range(0, self.m+1), range(0, self.n+1))).T.reshape(-1, 2), columns=['bins_x', 'bins_y'])
+        all_cells = pd.merge(non_empty, all_cells, how = 'outer')
 
-        return(non_cells)
+        empty_array = all_cells[np.isnan(all_cells['z'])][['bins_x', 'bins_y']].values
+
+        return(empty_array)
+
 
 
     def interpolate(self, func, dim, interp_method="nearest"):
@@ -151,6 +148,16 @@ class Grid:
             # Show the matrix image
             plt.show()
 
+    def filter(self):
+        """
+        Wrapper call for filter.zhang with convenient defaults.
+        :param type:
+        :return:
+        """
+
+        dem_array = filter.zhang(self.interpolate("min", "z"), 3, 0.5, 0.5, self.cell_size, self)
+        return(dem_array)
+
     def write_raster(self, path, func, dim, wkt = None):
         if self.las.wkt == None:
             # This should only be the case for older .las files without CRS information
@@ -160,5 +167,4 @@ class Grid:
             write_array = self.array(func, dim)
             print("Raster file written to {}".format(path))
             gisexport.array_to_raster(write_array, self.cell_size, self.las.header.min[0], self.las.header.max[1], path)
-
 

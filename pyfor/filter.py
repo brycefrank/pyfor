@@ -11,11 +11,19 @@ def window_size(k):
 
 
 def dhmax(elev_array):
+    """
+    Calculates the maximum height difference for an elevation array.
+
+    :param elev_array:
+    :return:
+    """
     return(np.max(elev_array) - np.min(elev_array))
 
 
 def slope(elev_array, w_k, w_k_1):
     """
+    Calculates the slope coefficient.
+
     Returns the slope coefficient s for a given elev_aray and w_k
     """
     return(dhmax(elev_array) / ((w_k - w_k_1) / 2))
@@ -23,11 +31,14 @@ def slope(elev_array, w_k, w_k_1):
 
 def dht(elev_array, w_k, w_k_1, dh_0, dh_max, c):
     """"
+    Calculates dh_t.
+
     :param elev_array: A 1D array of elevation values
     :param w_k: An integer representing the window size
     :param w_k_1: An integer representing the previous window size
     """
 
+    # TODO decide if this slope works or not
     s = slope(elev_array, w_k, w_k_1)
     s = 1
 
@@ -38,7 +49,7 @@ def dht(elev_array, w_k, w_k_1, dh_0, dh_max, c):
     else:
         return(dh_max)
 
-# This function was replaced with the scipy.opening, leaving for a bit
+# This function was replaced with the scipy.opening, leaving just in case it gets used again later.
 def erosion(Z, w_k, n):
     Z_f = []
     for j in range(1, n+1):
@@ -48,7 +59,7 @@ def erosion(Z, w_k, n):
         Z_f.append(np.min(a))
     return(np.asarray(Z_f))
 
-# This function was replaced with the scipy.opening, leaving for a bit
+# This function was replaced with the scipy.opening, leaving just in case it gets used again later.
 def dilation(Z, w_k, n):
     Z_f = []
     for j in range(1, n+1):
@@ -60,7 +71,17 @@ def dilation(Z, w_k, n):
 
 
 def zhang(array, number_of_windows, dh_max, dh_0, c, grid):
-    """Implements Zhang et. al (2003)
+    """
+    Implements Zhang et. al (2003), a progressive morphological ground filter.
+
+    :param array: The array to interpolate on, usually an aggregate of the minimum Z value
+    #TODO fix this to be max window size
+    :param number_of_windows:
+    :param dh_max: The maximum height threshold
+    :param dh_0: The starting null height threshold
+    :param c: The cell size used to construct the array
+    :param grid: The grid object used to construct the array
+    :return: An array corresponding to the filtered points, can be used to construct a DEM via the Raster class
     """
     w_k_list = list(map(window_size, range(number_of_windows)))
     w_k_min = w_k_list[0]
@@ -88,12 +109,11 @@ def zhang(array, number_of_windows, dh_max, dh_0, c, grid):
     # Remove interpolated cells
     empty = grid.empty_cells
     empty_y, empty_x = empty[:,0].astype(int), empty[:,1].astype(int)
-    A[empty_x - 1, empty_y - 1] = np.nan
+    A[empty_y - 1, empty_x - 1] = np.nan
     B = np.where(flag != 0, A, np.nan)
 
     # Interpolate on our newly found ground cells
     X, Y = np.mgrid[1:grid.n+1, 1:grid.m+1]
-    positions = np.vstack([X.ravel(), Y.ravel()])
 
     # This is where the data is
     C = np.where(np.isfinite(B) == True)
@@ -103,22 +123,3 @@ def zhang(array, number_of_windows, dh_max, dh_0, c, grid):
 
     return(dem_array)
 
-def holder_func(array, grid):
-    """
-    This is just holding some things in development -bf 04/08/18
-    :return:
-    """
-
-    # Get the flag matrix ( > 0 values indicate non-ground)
-    flag = zhang(array, 3, 3, 1, 0.5)
-
-    # Extract indices
-    empty_y, empty_x = grid.empty_cells[:,0].astype(int), grid.empty_cells[:,1].astype(int)
-
-    # Set empty cells (i.e. cells that were interpolated) to np.nan
-    array[empty_x - 1, empty_y -1] = np.nan
-
-    # Set cells where the flag is not 0 to nan, this is the final filtered raster
-    B = np.where(flag != 0, array, np.nan)
-
-    return(B)
