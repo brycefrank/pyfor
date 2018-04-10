@@ -86,35 +86,13 @@ class Grid:
         Retrieves the cells with no returns in self.data
         """
 
-        # Determine which cells have at least one point in them
-        mask = self.boolean_summary(np.min, 'z')
-        self.non_empty_cells = self.data[mask]
+        all_cells = np.array(np.meshgrid(range(1, self.m+1), range(1, self.n+1))).T.reshape(-1, 2)
+        all_cells = pd.DataFrame(all_cells, columns=['bins_x', 'bins_y'])
+        all_cells = pd.merge(self.data, all_cells, how = 'outer')
+        non_cells = all_cells[['bins_x', 'bins_y']][np.isnan(all_cells['x'])].values
 
-        # Sort by cell IDs
-        grouped_sort = self.non_empty_cells.sort_values(['bins_x', 'bins_y'])
+        return(non_cells)
 
-        # Initialize an array container
-        arr = np.empty((0, 2))
-
-        for x_bin in range(1, self.m):
-            # Subset the dataframe for each value of x_bin
-            x_col = grouped_sort.loc[grouped_sort['bins_x'] == x_bin]
-
-            # Construct a list to feed to missing_elements and get the missing elements
-            L = list(x_col['bins_y'])
-
-            if len(L) > 0:
-                start, end = L[0], self.m
-                missing = sorted(set(range(start, end + 1)).difference(L))
-
-                # Create numpy array of the missing x_bin and y_bins
-                ones = np.full(len(missing), x_bin)
-                vals = np.array(missing)
-                stacked = np.stack((ones, vals), axis = 1)
-
-                # Append to the container array
-                arr = np.append(arr, stacked, axis = 0)
-        return(arr)
 
     def interpolate(self, func, dim, interp_method="nearest"):
         """
