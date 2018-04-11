@@ -134,7 +134,8 @@ class Cloud:
         # FIXME need to ensure Z dimension lines up after processing, probably a simple fix with the dataframe ID
         new_z = dem_grid.data['z']
 
-        self.las.z = new_z
+        self.las.points['z'] = dem_grid.data['z']
+
 
     def clip(self, geometry):
         """

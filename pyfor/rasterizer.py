@@ -171,7 +171,9 @@ class Grid:
 
         # Organize the array into a dataframe and merge
         df = pd.DataFrame(dem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
-        df = pd.merge(self.data, df)
+        #df = pd.merge(self.data, df)
+
+        df = self.data.reset_index().merge(df, how = "left").set_index('index')
         df['z'] = df['z'] - df['val']
 
         # Initialize new grid object
