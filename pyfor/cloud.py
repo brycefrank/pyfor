@@ -95,9 +95,11 @@ class Cloud:
         if self.las.header.count > max_points:
                 sample_mask = np.random.randint(self.las.header.count,
                                                 size = int(max_points))
+                #TODO update this to new pandas framework
                 coordinates = np.stack([self.las.x, self.las.y, self.las.z], axis = 1)[sample_mask,:]
                 print("Too many points, down sampling for 3d plot performance.")
         else:
+            # TODO update this to new pandas framework
             coordinates = np.stack([self.las.x, self.las.y, self.las.z], axis = 1)
 
         # Start Qt app and widget
@@ -125,6 +127,14 @@ class Cloud:
         center = np.mean(coordinates, axis = 0)
         view.opts['center'] = pg.Vector(center[0], center[1], center[2])
         view.show()
+
+    def normalize(self, cell_size):
+        grid = self.grid(cell_size)
+        dem_grid = grid.normalize()
+        # FIXME need to ensure Z dimension lines up after processing, probably a simple fix with the dataframe ID
+        new_z = dem_grid.data['z']
+
+        self.las.z = new_z
 
     def clip(self, geometry):
         """

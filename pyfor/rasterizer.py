@@ -22,7 +22,8 @@ class Grid:
         :param indices: The indices of self.points to plot
         :return: Returns a dataframe with sorted x and y with associated bins in a new columns
         """
-        self.las = cloud.las
+        self.cloud = cloud
+        self.las = self.cloud.las
         self.cell_size = cell_size
 
         # TODO Need to update headers when new cloud is constructed
@@ -142,9 +143,14 @@ class Grid:
             # Show the matrix image
             plt.show()
 
+    def plot3d(self):
+        pass
+
     def ground_filter(self):
         """
         Wrapper call for filter.zhang with convenient defaults.
+
+        Returns a Raster object corresponding to the filtered ground DEM of this particular grid.
         :param type:
         :return:
         """
@@ -153,6 +159,27 @@ class Grid:
         dem_array = Raster(dem_array)
 
         return(dem_array)
+
+    def normalize(self):
+        """
+        Returns a new, normalized Grid object.
+        :return:
+        """
+
+        # Retrieve the DEM
+        dem = self.ground_filter()
+
+        # Organize the array into a dataframe and merge
+        df = pd.DataFrame(dem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
+        df = pd.merge(self.data, df)
+        df['z'] = df['z'] - df['val']
+
+        # Initialize new grid object
+        ground_grid = Grid(self.cloud, self.cell_size)
+        ground_grid.data = df
+        ground_grid.cells = ground_grid.data.groupby(['bins_x', 'bins_y'])
+
+        return(ground_grid)
 
     def write_raster(self, path, func, dim, wkt = None):
         if self.las.wkt == None:
@@ -174,11 +201,11 @@ class Raster:
         plt.matshow(self.array)
         plt.show()
 
-    def write_raster(self):
+    def write_raster(self, path):
         if self.crs == None:
             # This should only be the case for older .las files without CRS information
             print("There is no wkt string set for this Grid object, you must manually pass one to the \
             write_raster function. This likely means you are using an older las specification.")
         else:
             print("Raster file written to {}".format(path))
-            gisexport.array_to_raster(write_array, self.cell_size, self.las.header.min[0], self.las.header.max[1], path)
+            gisexport.array_to_raster(self.array, self.cell_size, self.las.header.min[0], self.las.header.max[1], path)

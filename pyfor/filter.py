@@ -121,7 +121,7 @@ def zhang(array, number_of_windows, dh_max, dh_0, c, grid):
     X, Y = np.mgrid[0:grid.m, 0:grid.n]
     C = np.where(np.isfinite(B) == True)
     vals = B[C[0], C[1]]
-    dem_array = griddata(np.stack((C[0], C[1]), axis = 1), vals, (X, Y))
+    dem_array = griddata(np.stack((C[0], C[1]), axis = 1), vals, (X, Y), method="nearest")
 
     return(dem_array)
 

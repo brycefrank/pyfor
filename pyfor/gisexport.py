@@ -17,7 +17,7 @@ def export_wkt_multipoints_to_shp(geom, path):
     outFeature.Destroy()
 
 
-def export_coords_to_shp(coordlist, path):
+def _export_coords_to_shp(coordlist, path):
     """Creates a multipoint shapefile of the coordinates in a 2d array, used for debugging purposes.
 
     :param coordlist: 2d list of coordinates.
