@@ -14,14 +14,11 @@ def square_clip(cloud, bounds):
     """
 
     # Extact x y coordinates from cloud
-    las_xy = cloud.las.points[:,0:2]
+    las_xy = cloud.las.points[["x", "y"]]
 
     # Create masks for each axis
-    x_in = np.logical_and(las_xy[:,0] >= bounds[0] -300,
-                          las_xy[:,0] <= bounds[1] + 300)
-    y_in = np.logical_and(las_xy[:,1] >= bounds[2] - 300,
-                          las_xy[:,1] <= bounds[3] + 300)
-
+    x_in = (las_xy["x"] >= bounds[0]) & (las_xy["x"] <= bounds[1])
+    y_in = (las_xy["y"] >= bounds[2]) & (las_xy["y"] <= bounds[3])
     stack = np.stack((x_in, y_in), axis=1)
     in_clip = np.where(np.all(stack, axis=1))
 

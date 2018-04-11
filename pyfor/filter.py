@@ -72,7 +72,8 @@ def dilation(Z, w_k, n):
 
 def zhang(array, number_of_windows, dh_max, dh_0, c, grid):
     """
-    Implements Zhang et. al (2003), a progressive morphological ground filter.
+    Implements Zhang et. al (2003), a progressive morphological ground filter. This returns a matrix of Z values for
+    each grid cell that have been determined to be actual ground cells.
 
     :param array: The array to interpolate on, usually an aggregate of the minimum Z value
     #TODO fix this to be max window size
@@ -106,19 +107,20 @@ def zhang(array, number_of_windows, dh_max, dh_0, c, grid):
             P_i = Z_f
             A[i,:] = P_i
 
+    if np.sum(flag) == 0:
+        print("No ground points classified.")
+        return(None)
+
     # Remove interpolated cells
     empty = grid.empty_cells
-    empty_y, empty_x = empty[:,0].astype(int), empty[:,1].astype(int)
-    A[empty_y - 1, empty_x - 1] = np.nan
+    empty_x, empty_y = empty[:,0], empty[:,1]
+    A[empty_y, empty_x] = np.nan
     B = np.where(flag != 0, A, np.nan)
 
     # Interpolate on our newly found ground cells
-    X, Y = np.mgrid[1:grid.n+1, 1:grid.m+1]
-
-    # This is where the data is
+    X, Y = np.mgrid[0:grid.m, 0:grid.n]
     C = np.where(np.isfinite(B) == True)
     vals = B[C[0], C[1]]
-
     dem_array = griddata(np.stack((C[0], C[1]), axis = 1), vals, (X, Y))
 
     return(dem_array)

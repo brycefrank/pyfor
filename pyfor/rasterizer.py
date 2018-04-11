@@ -80,18 +80,12 @@ class Grid:
         """
         Retrieves the cells with no returns in self.data
         """
+        array = self.array("count", "z")
+        emptys = np.argwhere(np.isnan((array)))
 
-        non_empty = self.cells.agg({"z": "count"}).reset_index()
-        all_cells = pd.DataFrame(np.array(np.meshgrid(range(0, self.m+1), range(0, self.n+1))).T.reshape(-1, 2), columns=['bins_x', 'bins_y'])
-        all_cells = pd.merge(non_empty, all_cells, how = 'outer')
+        return(emptys)
 
-        empty_array = all_cells[np.isnan(all_cells['z'])][['bins_x', 'bins_y']].values
-
-        return(empty_array)
-
-
-
-    def interpolate(self, func, dim, interp_method="nearest"):
+    def _interpolate(self, func, dim, interp_method="nearest"):
         """
         # TODO Decide on return type, matrix or append to self.data? This decision can be made
         after more IO stuff is written. It should probably return a saveable / plottable
@@ -148,14 +142,16 @@ class Grid:
             # Show the matrix image
             plt.show()
 
-    def filter(self):
+    def ground_filter(self):
         """
         Wrapper call for filter.zhang with convenient defaults.
         :param type:
         :return:
         """
+        # Get the interpolated DEM array.
+        dem_array = filter.zhang(self._interpolate("min", "z"), 3, 1.5, 0.5, self.cell_size, self)
+        dem_array = Raster(dem_array)
 
-        dem_array = filter.zhang(self.interpolate("min", "z"), 3, 0.5, 0.5, self.cell_size, self)
         return(dem_array)
 
     def write_raster(self, path, func, dim, wkt = None):
@@ -168,3 +164,21 @@ class Grid:
             print("Raster file written to {}".format(path))
             gisexport.array_to_raster(write_array, self.cell_size, self.las.header.min[0], self.las.header.max[1], path)
 
+
+class Raster:
+    def __init__(self, array, crs = None, cell_size = 1):
+        self.array = array
+        pass
+
+    def plot(self):
+        plt.matshow(self.array)
+        plt.show()
+
+    def write_raster(self):
+        if self.crs == None:
+            # This should only be the case for older .las files without CRS information
+            print("There is no wkt string set for this Grid object, you must manually pass one to the \
+            write_raster function. This likely means you are using an older las specification.")
+        else:
+            print("Raster file written to {}".format(path))
+            gisexport.array_to_raster(write_array, self.cell_size, self.las.header.min[0], self.las.header.max[1], path)
