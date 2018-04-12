@@ -1,4 +1,4 @@
-![header](https://github.com/brycefrank/pyfor/blob/pdal-u/docs/tile.png)
+<img src="https://github.com/brycefrank/pyfor/blob/pdal-u/docs/tile.png" width="400">
 
 # Introduction
 
