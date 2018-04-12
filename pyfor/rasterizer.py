@@ -146,7 +146,7 @@ class Grid:
     def plot3d(self):
         pass
 
-    def ground_filter(self):
+    def ground_filter(self, num_windows, dh_max, dh_0):
         """
         Wrapper call for filter.zhang with convenient defaults.
 
@@ -154,20 +154,22 @@ class Grid:
         :param type:
         :return:
         """
+        # TODO Add functionality for classifying points as ground
         # Get the interpolated DEM array.
-        dem_array = filter.zhang(self._interpolate("min", "z"), 3, 1.5, 0.5, self.cell_size, self)
+        dem_array = filter.zhang(self._interpolate("min", "z"), num_windows,
+                                 dh_max, dh_0, self.cell_size, self)
         dem_array = Raster(dem_array)
 
         return(dem_array)
 
-    def normalize(self):
+    def normalize(self, num_windows, dh_max, dh_0):
         """
         Returns a new, normalized Grid object.
         :return:
         """
 
         # Retrieve the DEM
-        dem = self.ground_filter()
+        dem = self.ground_filter(num_windows, dh_max, dh_0)
 
         # Organize the array into a dataframe and merge
         df = pd.DataFrame(dem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
