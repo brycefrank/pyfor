@@ -28,11 +28,21 @@ class CloudData:
         if type(header) == laspy.header.HeaderManager:
             self.header = header.copy()
         else:
+            # TODO Actually construct a laspy header from available data.
             self.header = header
 
         self.header.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
         self.header.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
         self.header.count = np.alen(self.points)
+
+    def write(self, path):
+        if type(self.header) == laspy.header.HeaderManager:
+            out = laspy.file.File(path, mode="w", header=self.header)
+            out.points = self.points.values
+            out.close()
+        else:
+            print("Writing custom cloud objects not yet supported. Please set header to a laspy.header.HeaderManager \
+                  instance")
 
 
 class Cloud:
@@ -66,7 +76,7 @@ class Cloud:
         """
         return(rasterizer.Grid(self, cell_size))
 
-    def plot(self, cell_size = 1, cmap = "viridis", return_plot = False):
+    def plot(self, cell_size = 1, cmap = "viridis"):
         """
         Plots a basic canopy height model of the Cloud object. This is mainly a convenience function for
         rasterizer.Grid.plot, check that method docstring for more information and more robust usage cases.
@@ -78,8 +88,9 @@ class Cloud:
 
         rasterizer.Grid(self, cell_size).plot("max", cmap = "viridis")
 
-        if return_plot == True:
-            return(rasterizer.Grid(self, "max", cell_size, return_plot = True))
+        # TODO will be restructured when Raster is fully implemented
+        #if return_plot == True:
+        #    return(rasterizer.Grid.plot(self, "max", cell_size, return_plot = True))
 
     def plot3d(self, point_size = 1, cmap = 'Spectral_r', max_points = 5e5):
         """
@@ -129,20 +140,27 @@ class Cloud:
         view.show()
 
     def normalize(self, cell_size):
+        """
+        Normalizes this cloud object in place by generating a DEM using the default filtering algorithm  and subtracting
+        the underlying ground elevation.
+
+        :param cell_size: The cell_size at which to classify the point cloud into bins in the same units as the input
+        point cloud.
+        """
         grid = self.grid(cell_size)
         dem_grid = grid.normalize()
-        # FIXME need to ensure Z dimension lines up after processing, probably a simple fix with the dataframe ID
-        new_z = dem_grid.data['z']
 
         self.las.points['z'] = dem_grid.data['z']
 
 
     def clip(self, geometry):
         """
-        Returns a new Cloud object clipped to the provided geometry
+        Clips the point cloud to the provided geometry (see below for compatible types) using a ray casting algorithm.
+
+
         :param geometry: Either a tuple of bounding box coordinates (square clip), an OGR geometry (polygon clip),
         or a tuple of a point and radius (circle clip)
-        :return:
+        :return: A new Cloud object clipped to the provided geometry.
         """
         # TODO Could be nice to add a warning if the shapefile extends beyond the pointcloud bounds
 

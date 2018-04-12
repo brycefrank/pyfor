@@ -1,7 +1,10 @@
 # Functions for rasterizing
 import numpy as np
 import pandas as pd
+from scipy.ndimage import label
 from scipy.interpolate import griddata
+from skimage.morphology import watershed
+from skimage.feature import peak_local_max
 import matplotlib.pyplot as plt
 from pyfor import gisexport
 from pyfor import metrics2
@@ -107,17 +110,16 @@ class Grid:
 
         return(interp_grid)
 
-    def metrics(self, func_string, dim):
+    def metrics(self, func_dict):
         """
         Calculates summary statistics for each grid cell in the Grid.
 
-        :return:
+        :param func_dict: A dictionary containing keys corresponding to the columns of self.data and values
+        that correspond to the functions to be  called on those columns.
+        :return: A pandas dataframe with the aggregated metrics.
         """
 
-        # We have a grouped dataframe (we will group all of the data for now:
-        cells = self.data.groupby(['bins_x', 'bins_y'])[dim]
-
-        return(cells.agg(func_string))
+        return(self.cells.agg(func_dict))
 
     def plot(self, func, cmap ="viridis", dim = "z", return_plot = False):
         """
@@ -204,6 +206,20 @@ class Raster:
     def plot(self):
         plt.matshow(self.array)
         plt.show()
+
+    def watershed_seg(self):
+        """
+        Returns the watershed segmentation of the Raster.
+
+        :return:
+        """
+
+        # TODO Add arguments to parent function with useful defaults.
+        tops = peak_local_max(self.array, indices = False, min_distance= 2, threshold_abs=2)
+        tops = label(tops)[0]
+        labels = watershed(-self.array, tops, mask = self.array, watershed_line=True)
+
+        return(labels)
 
     def write_raster(self, path):
         if self.crs == None:
