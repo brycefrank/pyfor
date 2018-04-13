@@ -1,0 +1,31 @@
+PyFor package
+=============
+
+Subpackages
+-----------
+
+.. toctree::
+
+    PyFor.pyfor
+    PyFor.pyfortest
+    PyFor.samples
+
+Submodules
+----------
+
+PyFor.setup module
+------------------
+
+.. automodule:: PyFor.setup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: PyFor
+    :members:
+    :undoc-members:
+    :show-inheritance:

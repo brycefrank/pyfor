@@ -12,6 +12,7 @@ import pyqtgraph.opengl as gl
 import ogr
 from pyfor import rasterizer
 from pyfor import clip_funcs
+from pyfor import plot
 
 
 class CloudData:
@@ -100,42 +101,7 @@ class Cloud:
         :return:
         # TODO refactor to a name that isn't silly
         """
-        if self.las.header.count > max_points:
-            print("Point cloud too large, down sampling for plot performance.")
-            rand = np.random.randint(0, self.las.header.count, 30000)
-
-        x = self.las.x[rand]
-        y = self.las.y[rand]
-        z = self.las.z[rand]
-
-        trace1 = go.Scatter3d(
-            x=x,
-            y=y,
-            z=z,
-            mode='markers',
-            marker=dict(
-                size=0.5,
-                color=z,
-                colorscale='Viridis',
-                opacity=1
-            )
-        )
-
-        data = [trace1]
-        layout = go.Layout(
-            margin=dict(
-                l=0,
-                r=0,
-                b=0,
-                t=0
-            ),
-            scene=dict(
-                aspectmode="data"
-            )
-        )
-        offline.init_notebook_mode(connected=True)
-        fig = go.Figure(data=data, layout=layout)
-        offline.iplot(fig, filename='simple-3d-scatter')
+        plot.iplot3d(self.las, max_points)
 
     def plot3d(self, point_size = 1, cmap = 'Spectral_r', max_points = 5e5):
         """

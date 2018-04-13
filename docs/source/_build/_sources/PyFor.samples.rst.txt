@@ -1,0 +1,10 @@
+PyFor.samples package
+=====================
+
+Module contents
+---------------
+
+.. automodule:: PyFor.samples
+    :members:
+    :undoc-members:
+    :show-inheritance:

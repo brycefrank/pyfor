@@ -1,0 +1,102 @@
+PyFor.pyfor package
+===================
+
+Submodules
+----------
+
+PyFor.pyfor.clip\_funcs module
+------------------------------
+
+.. automodule:: PyFor.pyfor.clip_funcs
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+PyFor.pyfor.cloud module
+------------------------
+
+.. automodule:: PyFor.pyfor.cloud
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+PyFor.pyfor.filter module
+-------------------------
+
+.. automodule:: PyFor.pyfor.filter
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+PyFor.pyfor.gisexport module
+----------------------------
+
+.. automodule:: PyFor.pyfor.gisexport
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+PyFor.pyfor.main module
+-----------------------
+
+.. automodule:: PyFor.pyfor.main
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+PyFor.pyfor.metrics module
+--------------------------
+
+.. automodule:: PyFor.pyfor.metrics
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+PyFor.pyfor.metrics2 module
+---------------------------
+
+.. automodule:: PyFor.pyfor.metrics2
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+PyFor.pyfor.normalize module
+----------------------------
+
+.. automodule:: PyFor.pyfor.normalize
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+PyFor.pyfor.plot module
+-----------------------
+
+.. automodule:: PyFor.pyfor.plot
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+PyFor.pyfor.rasterizer module
+-----------------------------
+
+.. automodule:: PyFor.pyfor.rasterizer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+PyFor.pyfor.test module
+-----------------------
+
+.. automodule:: PyFor.pyfor.test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: PyFor.pyfor
+    :members:
+    :undoc-members:
+    :show-inheritance:

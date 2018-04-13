@@ -7,3 +7,4 @@ from pyfor import rasterizer
 from pyfor import gisexport
 from pyfor import clip_funcs
 from pyfor import filter
+from pyfor import plot
