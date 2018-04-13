@@ -1,11 +1,9 @@
 import importlib.machinery
-import numpy as np
-from importlib import reload
 import matplotlib.pyplot as plt
 pyfor = importlib.machinery.SourceFileLoader('pyfor','/home/bryce/Programming/PyFor/pyfor/__init__.py').load_module()
 reload(pyfor)
 
-pc = pyfor.cloud.Cloud("/home/bryce/Desktop/pyfor_test_data/PC_001.las")
+pc = pyfor.cloud.Cloud("/home/bryce/Desktop/pyfor_test_data/tiles/PC_076.las")
 
 
 pc_grid = pc.grid(0.5)
@@ -29,11 +27,7 @@ from scipy import ndimage
 tops = feature.peak_local_max(interp, indices = False, min_distance= 2, threshold_abs=2)
 tops = ndimage.label(tops)[0]
 
-y = tops[:,0]
-x = tops[:,1]
 
-interp[y, x] = 0
-plt.matshow(tops)
 
 from skimage.morphology import watershed
 labels = watershed(-interp, tops, mask = interp, watershed_line=True)

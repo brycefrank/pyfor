@@ -3,6 +3,8 @@
 import laspy
 import numpy as np
 import pandas as pd
+import plotly.offline as offline
+import plotly.graph_objs as go
 import matplotlib.cm as cm
 from pyqtgraph.Qt import QtCore, QtGui
 import pyqtgraph as pg
@@ -91,6 +93,49 @@ class Cloud:
         # TODO will be restructured when Raster is fully implemented
         #if return_plot == True:
         #    return(rasterizer.Grid.plot(self, "max", cell_size, return_plot = True))
+
+    def iplot3d(self, max_points = 30000):
+        """
+        Plots the 3d point cloud in a compatible version for Jupyter notebooks.
+        :return:
+        # TODO refactor to a name that isn't silly
+        """
+        if self.las.header.count > max_points:
+            print("Point cloud too large, down sampling for plot performance.")
+            rand = np.random.randint(0, self.las.header.count, 30000)
+
+        x = self.las.x[rand]
+        y = self.las.y[rand]
+        z = self.las.z[rand]
+
+        trace1 = go.Scatter3d(
+            x=x,
+            y=y,
+            z=z,
+            mode='markers',
+            marker=dict(
+                size=0.5,
+                color=z,
+                colorscale='Viridis',
+                opacity=1
+            )
+        )
+
+        data = [trace1]
+        layout = go.Layout(
+            margin=dict(
+                l=0,
+                r=0,
+                b=0,
+                t=0
+            ),
+            scene=dict(
+                aspectmode="data"
+            )
+        )
+        offline.init_notebook_mode(connected=True)
+        fig = go.Figure(data=data, layout=layout)
+        offline.iplot(fig, filename='simple-3d-scatter')
 
     def plot3d(self, point_size = 1, cmap = 'Spectral_r', max_points = 5e5):
         """
