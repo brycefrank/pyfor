@@ -7,7 +7,6 @@ from skimage.morphology import watershed
 from skimage.feature import peak_local_max
 import matplotlib.pyplot as plt
 from pyfor import gisexport
-from pyfor import metrics2
 from pyfor import filter
 
 # TODO: refactor any grouped dataframe to "cells"
@@ -30,19 +29,23 @@ class Grid:
         self.cell_size = cell_size
 
         # TODO Need to update headers when new cloud is constructed
-        min_x, max_x = self.las.header.min[0], self.las.header.max[0]
-        min_y, max_y = self.las.header.min[1], self.las.header.max[1]
+        min_x, max_x = self.las.min[0], self.las.max[0]
+        min_y, max_y = self.las.min[1], self.las.max[1]
 
         self.m = int(np.floor((max_y - min_y) / cell_size))
         self.n = int(np.floor((max_x - min_x) / cell_size))
 
         # Create bins
-        bins_x = np.searchsorted(np.linspace(min_x, max_x, self.n), self.las.x)
-        bins_y = np.searchsorted(np.linspace(min_y, max_y, self.m), self.las.y)
+        bins_x = np.searchsorted(np.linspace(min_x, max_x, self.n), self.las.points["x"])
+        bins_y = np.searchsorted(np.linspace(min_y, max_y, self.m), self.las.points["y"])
 
         # Add bins and las data to a new dataframe
-        self.data = pd.DataFrame({'x': self.las.x, 'y': self.las.y, 'z': self.las.z,
-                           'bins_x': bins_x, 'bins_y': bins_y})
+        #self.data = pd.DataFrame({'x': self.las.x, 'y': self.las.y, 'z': self.las.z,
+         #                  'bins_x': bins_x, 'bins_y': bins_y})
+
+        self.data = self.las.points
+        self.data["bins_x"] = bins_x
+        self.data["bins_y"] = bins_y
 
         self.cells = self.data.groupby(['bins_x', 'bins_y'])
 
@@ -201,6 +204,8 @@ class Grid:
 class Raster:
     def __init__(self, array, crs = None, cell_size = 1):
         self.array = array
+        self.crs = crs
+        self.cell_size = cell_size
         pass
 
     def plot(self):
@@ -228,4 +233,4 @@ class Raster:
             write_raster function. This likely means you are using an older las specification.")
         else:
             print("Raster file written to {}".format(path))
-            gisexport.array_to_raster(self.array, self.cell_size, self.las.header.min[0], self.las.header.max[1], path)
+            gisexport.array_to_raster(self.array, self.cell_size, self.las.min[0], self.las.max[1], path)

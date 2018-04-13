@@ -21,31 +21,30 @@ class CloudData:
     a way to load data from the las file into memory.
     """
     def __init__(self, points, header):
-        # TODO naming is a bit convoluted, but functioning
-        # TODO expand
         self.points = points
         self.x = self.points["x"]
         self.y = self.points["y"]
         self.z = self.points["z"]
 
-        if type(header) == laspy.header.HeaderManager:
-            self.header = header.copy()
-        else:
-            # TODO Actually construct a laspy header from available data.
-            self.header = header
+        self.header = header
 
-        self.header.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
-        self.header.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
-        self.header.count = np.alen(self.points)
+        self.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
+        self.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
+        self.count = np.alen(self.points)
 
     def write(self, path):
-        if type(self.header) == laspy.header.HeaderManager:
-            out = laspy.file.File(path, mode="w", header=self.header)
-            out.points = self.points.values
-            out.close()
-        else:
-            print("Writing custom cloud objects not yet supported. Please set header to a laspy.header.HeaderManager \
-                  instance")
+        # Make header manager
+        writer = laspy.file.File(path, header = self.header, mode = "w")
+        writer.x = self.points["x"]
+        writer.y = self.points["y"]
+        writer.z = self.points["z"]
+        writer.intesity = self.points["intensity"]
+        writer.classification = self.points["classification"]
+        writer.flag_byte = self.points["flag_byte"]
+        writer.scan_angle_rank = self.points["scan_angle_rank"]
+        writer.user_data = self.points["user_data"]
+        writer.pt_src_id = self.points["pt_src_id"]
+        writer.close()
 
 
 class Cloud:
@@ -95,13 +94,13 @@ class Cloud:
         #if return_plot == True:
         #    return(rasterizer.Grid.plot(self, "max", cell_size, return_plot = True))
 
-    def iplot3d(self, max_points = 30000):
+    def iplot3d(self, max_points = 30000, point_size = 0.5):
         """
         Plots the 3d point cloud in a compatible version for Jupyter notebooks.
         :return:
         # TODO refactor to a name that isn't silly
         """
-        plot.iplot3d(self.las, max_points)
+        plot.iplot3d(self.las, max_points, point_size)
 
     def plot3d(self, point_size = 1, cmap = 'Spectral_r', max_points = 5e5):
         """
@@ -114,7 +113,7 @@ class Cloud:
         """
 
         # Randomly sample down if too large
-        if self.las.header.count > max_points:
+        if self.las.count > max_points:
                 sample_mask = np.random.randint(self.las.header.count,
                                                 size = int(max_points))
                 #TODO update this to new pandas framework
@@ -150,7 +149,7 @@ class Cloud:
         view.opts['center'] = pg.Vector(center[0], center[1], center[2])
         view.show()
 
-    def normalize(self, cell_size):
+    def normalize(self, cell_size, num_windows, dh_max, dh_0):
         """
         Normalizes this cloud object in place by generating a DEM using the default filtering algorithm  and subtracting
         the underlying ground elevation.
@@ -159,7 +158,7 @@ class Cloud:
         point cloud.
         """
         grid = self.grid(cell_size)
-        dem_grid = grid.normalize()
+        dem_grid = grid.normalize(num_windows, dh_max, dh_0)
 
         self.las.points['z'] = dem_grid.data['z']
 
@@ -185,23 +184,12 @@ class Cloud:
 
         return(Cloud(CloudData(keep_points, self.las.header)))
 
-    def filter_z(self,min,max):
+    def filter(self, min, max, dim):
         """
-        Filters a cloud object based on Z heights
-        :param min: Minimum z height in map units
-        :param max: Maximum z height in map units
+        Filters a cloud object for a given dimension in place.
+
+        :param min: Minimum dimension to retain.
+        :param max: Maximum dimension to retain.
         """
-
-        #Filter condition
-        condition = (self.las.points[:,2] > min) &  (self.las.points[:,2] < max)
-        self.las.points=self.las.points[condition]
-
-        #reform header
-        self.las.x = self.las.points[:, 0]
-        self.las.y = self.las.points[:, 1]
-        self.las.z = self.las.points[:, 2]
-
-        # TODO consider returning a new cloud object
-        self.las.header.min = [np.min(self.las.x), np.min(self.las.y), np.min(self.las.z)]
-        self.las.header.max = [np.max(self.las.x), np.max(self.las.y), np.max(self.las.z)]
-        self.las.header.count = np.alen(self.las.points)
+        condition = (self.las.points[dim] > min) & (self.las.points[dim] < max)
+        self.las = CloudData(self.las.points[condition], self.las.header)

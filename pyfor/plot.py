@@ -1,4 +1,9 @@
-def iplot3d(las, max_points):
+from plotly import offline
+from plotly.graph_objs import graph_objs as go
+import numpy as np
+
+
+def iplot3d(las, max_points, point_size):
     """
     Plots the 3d point cloud in a compatible version for Jupyter notebooks.
     :return:
@@ -7,7 +12,7 @@ def iplot3d(las, max_points):
     # Check if in iPython notebook
     try:
         cfg = get_ipython().config
-        if cfg['IPKernelApp']['parent_appname'] == 'ipython-notebook':
+        if 'jupyter' in cfg['IPKernelApp']['connection_file']:
             if las.header.count > max_points:
                 print("Point cloud too large, down sampling for plot performance.")
                 rand = np.random.randint(0, las.header.count, 30000)
@@ -21,7 +26,7 @@ def iplot3d(las, max_points):
                     z=z,
                     mode='markers',
                     marker=dict(
-                        size=0.5,
+                        size=point_size,
                         color=z,
                         colorscale='Viridis',
                         opacity=1
@@ -42,7 +47,7 @@ def iplot3d(las, max_points):
                 )
                 offline.init_notebook_mode(connected=True)
                 fig = go.Figure(data=data, layout=layout)
-                offline.iplot(fig, filename='simple-3d-scatter')
+                offline.iplot(fig)
         else:
             print("This function can only be used within a Jupyter notebook.")
             return(False)
