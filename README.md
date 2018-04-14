@@ -13,7 +13,36 @@ pyfor is currently undergoing major revisions from its infant stage to incorpora
 
 For installation I highly recommend looking into setting up [miniconda](https://conda.io/miniconda.html) for your system before beginning. pyfor depends on many packages that are otherwise tricky and difficult to install (especially gdal and its bindings), and conda provides a quick and easy way to manage many different Python environments on your system simultaneously.
 
-[Upload to conda-forge and instructions forthcoming]
+Note that the following installation procedures will install the rolling release version of pyfor (i.e. this branches' source files). I develop actively on this branch and push commits daily, so beware of intermittent bugs when updating. More stable releases are forthcoming. 
+
+### Linux
+
+The following bash commands will install this branch of pyfor. It requires installation of miniconda (see above). This will install all of the prerequisites in that environment, named `pyfor_env`. pyfor depends on a lot of heavy libraries, so expect construction of the environment to take a little time.
+
+```bash
+git clone https://github.com/brycefrank/pyfor.git
+git checkout pdal-u
+cd pyfor
+conda env create -f environment.yml
+source activate pyfor_env
+pip install .
+```
+
+Following these commands, pyfor should load in the activated Python shell.
+
+```python
+import pyfor
+```
+
+You are now ready to process!
+
+### macOS
+
+[forthcoming]
+
+### Windows
+
+[forthcoming]
 
 ## Getting Started
 
@@ -22,6 +51,28 @@ For installation I highly recommend looking into setting up [miniconda](https://
 An early version of the documentation is located [here](http://pyfor-pdal-u.readthedocs.io/en/pdal-u/). Beware of many formatting issues yet to be fixed.
 
 An early collection of samples is located [here](https://github.com/brycefrank/pyfor/tree/pdal-u/samples)
+
+## Features
+
+Below is a list of features planned for the 0.2 stable release. 0.2 is intended to be adequate for processing and visualizing individual point cloud tiles.
+
+- [X] Ground filter
+- [X] Normalization
+- [X] Rasterization
+	- [X] Raster input and output
+- [X] Interactive 2d & 3d plotting via Jupyter
+- [X] Grid metrics extraction
+- [X] Watershed segmentation
+- [X] Canopy height model
+- [X] Clipping point clouds
+- [ ] Area-based approach workflows
+
+And forthcoming in the 0.3 stable release.
+- [ ] Batch processing
+	- [ ] Multiprocessor support
+	- [ ] Cluster support
+- [ ] Voxelization methods
+- [ ] More tree detection methods
 
 ## Goals
 

@@ -38,8 +38,14 @@ class CloudDataTestCase(unittest.TestCase):
 
     def test_write(self):
         self.test_cloud_data.write("data/temp_test_write.las")
-        self.assertEqual(type(laspy.file.File('data/temp_test_write.las')), laspy.file.File)
+        read = laspy.file.File('data/temp_test_write.las')
+        self.assertEqual(type(read), laspy.file.File)
+        read.close()
+
         os.remove('data/temp_test_write.las')
+
+    def tearDown(self):
+        self
 
 
 class CloudTestCase(unittest.TestCase):
@@ -54,7 +60,7 @@ class CloudTestCase(unittest.TestCase):
     def test_grid_creation(self):
         """Tests if the grid is successfully created."""
         # Does the call to grid return the proper type
-        self.assertEqual(type(self.test_cloud.grid), rasterizer.Grid)
+        self.assertEqual(type(self.test_cloud.grid(1)), rasterizer.Grid)
 
     def test_filter_works(self):
         pass
@@ -62,7 +68,10 @@ class CloudTestCase(unittest.TestCase):
     # TODO Come up with adequate tests for plotting methods
 
     def test_clip_square(self):
-        clip_cloud = self.test_cloud.clip((472237, 472237+50, 5015782, 5015782+50))
+        mins, maxes = self.test_cloud.las.header.min, self.test_cloud.las.header.max
+        clip_cloud = self.test_cloud.clip((mins[0], mins[0]+5, mins[1], mins[1]+5))
+        self.assertEqual(type(clip_cloud), cloud.Cloud)
+        self.assertLess(clip_cloud.las.count, self.test_cloud.las.count)
         pass
 
     def test_clip_polygon(self):
@@ -75,16 +84,12 @@ class GridTestCase(unittest.TestCase):
     def setUp(self):
         self.test_grid = cloud.Cloud("data/test.las").grid(1)
 
-        # Create a small dummy Grid.data for testing
-        dummy_dict = {
-            'bins_x' : [1, 1, 2],
-            'bins_y' : [1, 2, 1],
-            'z'      : [1.2, 2.3, 4.8]
-        }
-
-        self.dummy_grid_data = pd.DataFrame(dummy_dict)
-
     def test_empty_cells(self):
-        pass
+        empty = self.test_grid.empty_cells
+        self.assertEqual(empty.shape, (167, 2))
+
+    def tearDown(self):
+        del self.test_grid.las.header
+
 
 

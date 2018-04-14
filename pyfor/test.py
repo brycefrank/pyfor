@@ -7,8 +7,9 @@ import laspy
 
 pc = pyfor.cloud.Cloud("/home/bryce/Programming/PyFor/pyfortest/data/test.las")
 
+a = pc.clip((pc.las.header.min[0], pc.las.header.min[0]+5, pc.las.header.min[1], pc.las.header.min[1] + 5))
 
-pc_grid = pc.grid(0.5)
+pc_grid = pc.grid(1)
 
 
 metrics_df = {

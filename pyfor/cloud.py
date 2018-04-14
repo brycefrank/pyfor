@@ -66,6 +66,11 @@ class Cloud:
             header = las.header
 
             # Toss out the laspy object in favor of CloudData
+
+            # FIXME the following line produces errors when creating new CloudData objects.
+            # TODO one way to do this might be to move the above code into the __init__ for CloudData and handle close
+            # there
+            # las.close()
             self.las = CloudData(points, header)
         elif type(las) == CloudData:
             self.las = las
@@ -189,7 +194,7 @@ class Cloud:
         if type(geometry) == tuple and len(geometry) == 4:
             # Square clip
             mask = clip_funcs.square_clip(self, geometry)
-            keep_points = self.las.points[mask]
+            keep_points = self.las.points.iloc[mask]
 
         elif type(geometry) == ogr.Geometry:
             keep_points = clip_funcs.poly_clip(self, geometry)

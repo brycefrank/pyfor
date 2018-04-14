@@ -164,7 +164,7 @@ class Grid:
         """
         # TODO Add functionality for classifying points as ground
         # Get the interpolated DEM array.
-        dem_array = filter.zhang(self._interpolate("min", "z"), num_windows,
+        dem_array = filter.zhang(self.interpolate("min", "z"), num_windows,
                                  dh_max, dh_0, self.cell_size, self)
         dem_array = Raster(dem_array)
 
