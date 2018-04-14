@@ -1,0 +1,16 @@
+name: pyfor_env
+
+dependencies:
+  - python=3.6
+  - numpy
+  - gdal
+  - pandas
+  - scipy
+  - scikit-image
+  - pyqtraph
+  - matplotlib
+  - pyopengl
+  - plotly
+  - plotly
+  - pip:
+      - laspy
