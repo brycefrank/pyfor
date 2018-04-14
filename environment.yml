@@ -7,7 +7,7 @@ dependencies:
   - pandas
   - scipy
   - scikit-image
-  - pyqtraph
+  - pyqtgraph
   - matplotlib
   - pyopengl
   - plotly
