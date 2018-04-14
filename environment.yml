@@ -11,6 +11,6 @@ dependencies:
   - matplotlib
   - pyopengl
   - plotly
-  - plotly
+  - numba
   - pip:
       - laspy
