@@ -19,6 +19,10 @@ For installation I highly recommend looking into setting up [miniconda](https://
 
 [under construction]
 
+An early version of the documentation is located [here](http://pyfor-pdal-u.readthedocs.io/en/pdal-u/). Beware of many formatting issues yet to be fixed.
+
+An early collection of samples is located [here](https://github.com/brycefrank/pyfor/tree/pdal-u/samples)
+
 ## Goals
 
 - Maintain a purely Python code base.
