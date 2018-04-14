@@ -176,6 +176,10 @@ class Grid:
         :return:
         """
 
+        if self.cloud.normalized == True:
+            print("It appears this has already been normalized once. Proceeding with normalization but expect \
+            strange results.")
+
         # Retrieve the DEM
         dem = self.ground_filter(num_windows, dh_max, dh_0)
 

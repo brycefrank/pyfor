@@ -77,6 +77,9 @@ class Cloud:
         else:
             print("Object type not supported, please input either a las file path or a CloudData object.")
 
+        # We're not sure if this is true or false yet
+        self.normalized = None
+
     def grid(self, cell_size):
         """
         Generates a Grid object for this Cloud given a cell size. See the documentation for Grid for more information.
@@ -178,6 +181,7 @@ class Cloud:
         dem_grid = grid.normalize(num_windows, dh_max, dh_0)
 
         self.las.points['z'] = dem_grid.data['z']
+        self.normalized = True
 
 
     def clip(self, geometry):
