@@ -3,8 +3,6 @@
 import laspy
 import numpy as np
 import pandas as pd
-import plotly.offline as offline
-import plotly.graph_objs as go
 import matplotlib.cm as cm
 from pyqtgraph.Qt import QtCore, QtGui
 import pyqtgraph as pg
@@ -33,6 +31,11 @@ class CloudData:
         self.count = np.alen(self.points)
 
     def write(self, path):
+        """
+        Writes the points and header to a .las file.
+
+        :param path: The path of the .las file to write to.
+        """
         # Make header manager
         writer = laspy.file.File(path, header = self.header, mode = "w")
         writer.x = self.points["x"]
@@ -50,7 +53,7 @@ class CloudData:
 class Cloud:
     def __init__(self, las):
         """
-        A dataframe representation of a point cloud.
+        A dataframe representation of a point cloud, with some useful functions for manipulating and displaying.
 
         :param las: A path to a las file, a laspy.file.File object, or a CloudFrame object
         """
@@ -71,7 +74,7 @@ class Cloud:
 
     def grid(self, cell_size):
         """
-        Generates a Grid object for this Cloud given a cell size.
+        Generates a Grid object for this Cloud given a cell size. See the documentation for Grid for more information.
 
         :param cell_size: The resolution of the plot in the same units as the input file.
         :return: A Grid object.
@@ -80,7 +83,7 @@ class Cloud:
 
     def plot(self, cell_size = 1, cmap = "viridis"):
         """
-        Plots a basic canopy height model of the Cloud object. This is mainly a convenience function for
+        Plots a basic canopy height model of the Cloud object. This is mainly a convenience function for \
         rasterizer.Grid.plot, check that method docstring for more information and more robust usage cases.
 
         :param cell_size: The resolution of the plot in the same units as the input file.
@@ -88,7 +91,7 @@ class Cloud:
         :return: If return_plot == True, returns matplotlib plt object.
         """
 
-        rasterizer.Grid(self, cell_size).plot("max", cmap = "viridis")
+        rasterizer.Grid(self, cell_size).plot("max", cmap="viridis")
 
         # TODO will be restructured when Raster is fully implemented
         #if return_plot == True:
@@ -96,16 +99,21 @@ class Cloud:
 
     def iplot3d(self, max_points = 30000, point_size = 0.5):
         """
-        Plots the 3d point cloud in a compatible version for Jupyter notebooks.
-        :return:
-        # TODO refactor to a name that isn't silly
+        Plots the 3d point cloud in a compatible version for Jupyter notebooks using Plotly as a backend. If \
+        max_points exceedds 30,000, the point cloud is downsampled using a uniform random distribution by default. \
+        This can be changed using the max_points argument.
+
+        :param max_points: The maximum number of points to render.
+        :param point_size: The point size of the rendered point cloud.
         """
+
         plot.iplot3d(self.las, max_points, point_size)
 
     def plot3d(self, point_size = 1, cmap = 'Spectral_r', max_points = 5e5):
         """
-        Plots the three dimensional point cloud. By default, if the point cloud exceeds 5e5 points, then it is
-        downsampled using a uniform random distribution of 5e5 points.
+        Plots the three dimensional point cloud using a method suitable for non-Jupyter use (i.e. via the Python \
+        console). By default, if the point cloud exceeds 5e5 points, then it is downsampled using a uniform random \
+        distribution of 5e5 points.
 
         :param point_size: The size of the rendered points.
         :param cmap: The matplotlib color map used to color the height distribution.
@@ -149,13 +157,17 @@ class Cloud:
         view.opts['center'] = pg.Vector(center[0], center[1], center[2])
         view.show()
 
-    def normalize(self, cell_size, num_windows, dh_max, dh_0):
+    def normalize(self, cell_size, num_windows = 7, dh_max = 2.5, dh_0 = 1):
         """
-        Normalizes this cloud object in place by generating a DEM using the default filtering algorithm  and subtracting
-        the underlying ground elevation.
+        Normalizes this cloud object **in place** by generating a DEM using the default filtering algorithm  and \
+        subtracting the underlying ground elevation. This uses a grid-based progressive morphological filter developed \
+        in Zhang et al. (2003).
 
-        :param cell_size: The cell_size at which to classify the point cloud into bins in the same units as the input
-        point cloud.
+        :param cell_size: The cell_size at which to rasterize the point cloud into bins, in the same units as the \
+        input point cloud.
+        :param num_windows: The number of windows to consider.
+        :param dh_max: The maximum height threshold.
+        :param dh_0: The null height threshold.
         """
         grid = self.grid(cell_size)
         dem_grid = grid.normalize(num_windows, dh_max, dh_0)
@@ -168,8 +180,8 @@ class Cloud:
         Clips the point cloud to the provided geometry (see below for compatible types) using a ray casting algorithm.
 
 
-        :param geometry: Either a tuple of bounding box coordinates (square clip), an OGR geometry (polygon clip),
-        or a tuple of a point and radius (circle clip)
+        :param geometry: Either a tuple of bounding box coordinates (square clip), an OGR geometry (polygon clip), \
+        or a tuple of a point and radius (circle clip).
         :return: A new Cloud object clipped to the provided geometry.
         """
         # TODO Could be nice to add a warning if the shapefile extends beyond the pointcloud bounds
@@ -186,10 +198,12 @@ class Cloud:
 
     def filter(self, min, max, dim):
         """
-        Filters a cloud object for a given dimension in place.
+        Filters a cloud object for a given dimension **in place**.
 
         :param min: Minimum dimension to retain.
         :param max: Maximum dimension to retain.
+        :param dim: The dimension of interest as a string. For example "z". This corresponds to a column label in \
+        self.las.points dataframe.
         """
         condition = (self.las.points[dim] > min) & (self.las.points[dim] < max)
         self.las = CloudData(self.las.points[condition], self.las.header)

@@ -12,23 +12,24 @@ from pyfor import filter
 # TODO: refactor any grouped dataframe to "cells"
 
 class Grid:
-    """The grid object constructs a grid from a given Cloud object and cell_size and contains functions useful
-    for manipulating rasterized data."""
+    """The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. It is \
+    not quite a raster yet. A raster has only one value per cell, whereas the Grid object merely sorts all points \
+    into their respective cells."""
     # TODO Decide between self.cloud or self.las
     # TODO bw4sz, cell size units?
     def __init__(self, cloud, cell_size):
         """
-        Sorts the point cloud into a gridded form such that every point in the las file is assigned a cell coordinate
+        Sorts the point cloud into a gridded form such that every point in the las file is assigned a cell coordinate \
         with a resolution equal to cell_size
-        :param cell_size: The size of the cell for sorting in the units of the input cloud object
-        :param indices: The indices of self.points to plot
+
+        :param cloud: The "parent" cloud object.
+        :param cell_size: The size of the cell for sorting in the units of the input cloud object.
         :return: Returns a dataframe with sorted x and y with associated bins in a new columns
         """
         self.cloud = cloud
         self.las = self.cloud.las
         self.cell_size = cell_size
 
-        # TODO Need to update headers when new cloud is constructed
         min_x, max_x = self.las.min[0], self.las.max[0]
         min_y, max_y = self.las.min[1], self.las.max[1]
 
@@ -39,10 +40,6 @@ class Grid:
         bins_x = np.searchsorted(np.linspace(min_x, max_x, self.n), self.las.points["x"])
         bins_y = np.searchsorted(np.linspace(min_y, max_y, self.m), self.las.points["y"])
 
-        # Add bins and las data to a new dataframe
-        #self.data = pd.DataFrame({'x': self.las.x, 'y': self.las.y, 'z': self.las.z,
-         #                  'bins_x': bins_x, 'bins_y': bins_y})
-
         self.data = self.las.points
         self.data["bins_x"] = bins_x
         self.data["bins_y"] = bins_y
@@ -51,28 +48,28 @@ class Grid:
 
     def array(self, func, dim):
         """
-        Generates an m x n matrix with values as calculated for each cell in func. This is a raw
-        array without missing cells interpolated. See self.interpolate for interpolation methods.
+        Generates an m x n matrix with values as calculated for each cell in func. This is a raw array without \
+        missing cells interpolated. See self.interpolate for interpolation methods.
 
-        :param func: A function string, i.e. "max", a function itself, i.e. max, or a Metrics object. This function
-        must be able to take an array as an input and produce a single value as an output. This single value will
-        become the value of each cell in the array.
-        :param dim: The dimension to calculate on as a string, see the column names of self.data for a full list of
+        :param func: A function string, i.e. "max" or a function itself, i.e. np.max. This function must be able to \
+        take a 1D array of the given dimension as an input and produce a single value as an output. This single value \
+        will become the value of each cell in the array.
+        :param dim: The dimension to calculate on as a string, see the column names of self.data for a full list of \
         options
         :return: A 2D numpy array where the value of each cell is the result of the passed function.
         """
+
         array = self.cells.agg({dim: func}).reset_index().pivot('bins_x', 'bins_y', dim)
         array = np.array(array)
+
         return(array)
 
     def boolean_summary(self, func, dim):
         # TODO Might not be worth its own function...
         """
-        Calculates a column in self.data that is a boolean of whether
-        or not that point is the point that corresponds to the function passed.
-
-        For example, this can be used to create a boolean mask of points that
-        are the minimum z point in their respective cell.
+        Calculates a column in self.data that is a boolean of whether or not that point is the point that corresponds \
+        to the function passed. For example, this can be used to create a boolean mask of points that are the minimum \
+        z point in their respective cell.
 
         :param func: The function to calculate on each group.
         :param dim: The dimension of the point cloud as a string (x, y or z)
@@ -83,22 +80,25 @@ class Grid:
 
     @property
     def empty_cells(self):
-        # TODO Very slow.
         """
         Retrieves the cells with no returns in self.data
+
+        return: An N x 2 numpy array where each row cooresponds to the [y x] coordinate of the empty cell.
         """
         array = self.array("count", "z")
         emptys = np.argwhere(np.isnan((array)))
 
         return(emptys)
 
-    def _interpolate(self, func, dim, interp_method="nearest"):
+    def interpolate(self, func, dim, interp_method="nearest"):
         """
-        # TODO Decide on return type, matrix or append to self.data? This decision can be made
-        after more IO stuff is written. It should probably return a saveable / plottable
-        raster object of some sort. Should I make a raster class, or just flesh out grid?
+        Interpolates missing cells in the grid. This function uses scipy.griddata as a backend. Please see \
+        documentation for that function for more details.
 
-        Interpolates missing cells in the grid.
+        :param func: The function (or function string) to calculate an array on the gridded data.
+        :param dim: The dimension (i.e. column name of self.cells) to cast func onto.
+
+        :return: An interpolated array.
         """
         # Get points and values that we already have
         cell_values = self.cells[dim].agg(func).reset_index()
@@ -117,8 +117,8 @@ class Grid:
         """
         Calculates summary statistics for each grid cell in the Grid.
 
-        :param func_dict: A dictionary containing keys corresponding to the columns of self.data and values
-        that correspond to the functions to be  called on those columns.
+        :param func_dict: A dictionary containing keys corresponding to the columns of self.data and values that \
+        correspond to the functions to be  called on those columns.
         :return: A pandas dataframe with the aggregated metrics.
         """
 
@@ -126,7 +126,7 @@ class Grid:
 
     def plot(self, func, cmap ="viridis", dim = "z", return_plot = False):
         """
-        Plots a 2 dimensional canopy height model using the maximum z value in each cell. This is intended for visual
+        Plots a 2 dimensional canopy height model using the maximum z value in each cell. This is intended for visual \
         checking and not for analysis purposes. See the rasterizer.Grid class for analysis.
 
         :param func: The function to aggregate the points in the cell.
@@ -149,6 +149,9 @@ class Grid:
             plt.show()
 
     def plot3d(self):
+        """
+        Not yet implemented.
+        """
         pass
 
     def ground_filter(self, num_windows, dh_max, dh_0):

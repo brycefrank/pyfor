@@ -1,34 +1,133 @@
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>pyfor package &#8212; pyfor 0.2.0 documentation</title>
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-   
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
 
   </head><body>
-  
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html">
+          pyfor</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
             
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">pyfor package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-pyfor.clip_funcs">pyfor.clip_funcs module</a></li>
+<li><a class="reference internal" href="#module-pyfor.cloud">pyfor.cloud module</a></li>
+<li><a class="reference internal" href="#module-pyfor.filter">pyfor.filter module</a></li>
+<li><a class="reference internal" href="#module-pyfor.gisexport">pyfor.gisexport module</a></li>
+<li><a class="reference internal" href="#pyfor-main-module">pyfor.main module</a></li>
+<li><a class="reference internal" href="#module-pyfor.metrics">pyfor.metrics module</a></li>
+<li><a class="reference internal" href="#module-pyfor.metrics2">pyfor.metrics2 module</a></li>
+<li><a class="reference internal" href="#module-pyfor.normalize">pyfor.normalize module</a></li>
+<li><a class="reference internal" href="#module-pyfor.plot">pyfor.plot module</a></li>
+<li><a class="reference internal" href="#module-pyfor.rasterizer">pyfor.rasterizer module</a></li>
+<li><a class="reference internal" href="#pyfor-test-module">pyfor.test module</a></li>
+<li><a class="reference internal" href="#module-pyfor">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../_sources/source/pyfor.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
   <div class="section" id="pyfor-package">
 <h1>pyfor package<a class="headerlink" href="#pyfor-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
@@ -79,18 +178,18 @@ min y and max y coordinates of the square.
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>geometry</strong> – Either a tuple of bounding box coordinates (square clip), an OGR geometry (polygon clip),</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>geometry</strong> – Either a tuple of bounding box coordinates (square clip), an OGR geometry (polygon clip),         or a tuple of a point and radius (circle clip).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A new Cloud object clipped to the provided geometry.</td>
 </tr>
 </tbody>
 </table>
-<p>or a tuple of a point and radius (circle clip)
-:return: A new Cloud object clipped to the provided geometry.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyfor.cloud.Cloud.filter">
 <code class="descname">filter</code><span class="sig-paren">(</span><em>min</em>, <em>max</em>, <em>dim</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.filter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Filters a cloud object for a given dimension in place.</p>
+<dd><p>Filters a cloud object for a given dimension <strong>in place</strong>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -98,6 +197,7 @@ min y and max y coordinates of the square.
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>min</strong> – Minimum dimension to retain.</li>
 <li><strong>max</strong> – Maximum dimension to retain.</li>
+<li><strong>dim</strong> – The dimension of interest as a string. For example “z”. This corresponds to a column label in         self.las.points dataframe.</li>
 </ul>
 </td>
 </tr>
@@ -108,7 +208,7 @@ min y and max y coordinates of the square.
 <dl class="method">
 <dt id="pyfor.cloud.Cloud.grid">
 <code class="descname">grid</code><span class="sig-paren">(</span><em>cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.grid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates a Grid object for this Cloud given a cell size.</p>
+<dd><p>Generates a Grid object for this Cloud given a cell size. See the documentation for Grid for more information.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -124,32 +224,45 @@ min y and max y coordinates of the square.
 <dl class="method">
 <dt id="pyfor.cloud.Cloud.iplot3d">
 <code class="descname">iplot3d</code><span class="sig-paren">(</span><em>max_points=30000</em>, <em>point_size=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.iplot3d" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots the 3d point cloud in a compatible version for Jupyter notebooks.
-:return:
-# TODO refactor to a name that isn’t silly</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyfor.cloud.Cloud.normalize">
-<code class="descname">normalize</code><span class="sig-paren">(</span><em>cell_size</em>, <em>num_windows</em>, <em>dh_max</em>, <em>dh_0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.normalize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Normalizes this cloud object in place by generating a DEM using the default filtering algorithm  and subtracting
-the underlying ground elevation.</p>
+<dd><p>Plots the 3d point cloud in a compatible version for Jupyter notebooks using Plotly as a backend. If         max_points exceedds 30,000, the point cloud is downsampled using a uniform random distribution by default.         This can be changed using the max_points argument.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cell_size</strong> – The cell_size at which to classify the point cloud into bins in the same units as the input</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>max_points</strong> – The maximum number of points to render.</li>
+<li><strong>point_size</strong> – The point size of the rendered point cloud.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
-<p>point cloud.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.normalize">
+<code class="descname">normalize</code><span class="sig-paren">(</span><em>cell_size</em>, <em>num_windows=7</em>, <em>dh_max=2.5</em>, <em>dh_0=1</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalizes this cloud object <strong>in place</strong> by generating a DEM using the default filtering algorithm  and         subtracting the underlying ground elevation. This uses a grid-based progressive morphological filter developed         in Zhang et al. (2003).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cell_size</strong> – The cell_size at which to rasterize the point cloud into bins, in the same units as the         input point cloud.</li>
+<li><strong>num_windows</strong> – The number of windows to consider.</li>
+<li><strong>dh_max</strong> – The maximum height threshold.</li>
+<li><strong>dh_0</strong> – The null height threshold.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyfor.cloud.Cloud.plot">
 <code class="descname">plot</code><span class="sig-paren">(</span><em>cell_size=1</em>, <em>cmap='viridis'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.plot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots a basic canopy height model of the Cloud object. This is mainly a convenience function for
-rasterizer.Grid.plot, check that method docstring for more information and more robust usage cases.</p>
+<dd><p>Plots a basic canopy height model of the Cloud object. This is mainly a convenience function for         rasterizer.Grid.plot, check that method docstring for more information and more robust usage cases.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -170,8 +283,7 @@ rasterizer.Grid.plot, check that method docstring for more information and more 
 <dl class="method">
 <dt id="pyfor.cloud.Cloud.plot3d">
 <code class="descname">plot3d</code><span class="sig-paren">(</span><em>point_size=1</em>, <em>cmap='Spectral_r'</em>, <em>max_points=500000.0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.plot3d" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots the three dimensional point cloud. By default, if the point cloud exceeds 5e5 points, then it is
-downsampled using a uniform random distribution of 5e5 points.</p>
+<dd><p>Plots the three dimensional point cloud using a method suitable for non-Jupyter use (i.e. via the Python         console). By default, if the point cloud exceeds 5e5 points, then it is downsampled using a uniform random         distribution of 5e5 points.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -198,7 +310,16 @@ a way to load data from the las file into memory.</p>
 <dl class="method">
 <dt id="pyfor.cloud.CloudData.write">
 <code class="descname">write</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.CloudData.write" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Writes the points and header to a .las file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> – The path of the .las file to write to.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
@@ -763,35 +884,32 @@ ex: “10N”</td>
 <dt id="pyfor.rasterizer.Grid">
 <em class="property">class </em><code class="descclassname">pyfor.rasterizer.</code><code class="descname">Grid</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>The grid object constructs a grid from a given Cloud object and cell_size and contains functions useful
-for manipulating rasterized data.</p>
+<p>The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. It is     not quite a raster yet. A raster has only one value per cell, whereas the Grid object merely sorts all points     into their respective cells.</p>
 <dl class="method">
 <dt id="pyfor.rasterizer.Grid.array">
 <code class="descname">array</code><span class="sig-paren">(</span><em>func</em>, <em>dim</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.array" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates an m x n matrix with values as calculated for each cell in func. This is a raw
-array without missing cells interpolated. See self.interpolate for interpolation methods.</p>
+<dd><p>Generates an m x n matrix with values as calculated for each cell in func. This is a raw array without         missing cells interpolated. See self.interpolate for interpolation methods.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func</strong> – A function string, i.e. “max”, a function itself, i.e. max, or a Metrics object. This function</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>func</strong> – A function string, i.e. “max” or a function itself, i.e. np.max. This function must be able to         take a 1D array of the given dimension as an input and produce a single value as an output. This single value         will become the value of each cell in the array.</li>
+<li><strong>dim</strong> – The dimension to calculate on as a string, see the column names of self.data for a full list of         options</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A 2D numpy array where the value of each cell is the result of the passed function.</p>
+</td>
 </tr>
 </tbody>
 </table>
-<p>must be able to take an array as an input and produce a single value as an output. This single value will
-become the value of each cell in the array.
-:param dim: The dimension to calculate on as a string, see the column names of self.data for a full list of
-options
-:return: A 2D numpy array where the value of each cell is the result of the passed function.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyfor.rasterizer.Grid.boolean_summary">
 <code class="descname">boolean_summary</code><span class="sig-paren">(</span><em>func</em>, <em>dim</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.boolean_summary" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates a column in self.data that is a boolean of whether
-or not that point is the point that corresponds to the function passed.</p>
-<p>For example, this can be used to create a boolean mask of points that
-are the minimum z point in their respective cell.</p>
+<dd><p>Calculates a column in self.data that is a boolean of whether or not that point is the point that corresponds         to the function passed. For example, this can be used to create a boolean mask of points that are the minimum         z point in their respective cell.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -810,6 +928,7 @@ are the minimum z point in their respective cell.</p>
 <dt id="pyfor.rasterizer.Grid.empty_cells">
 <code class="descname">empty_cells</code><a class="headerlink" href="#pyfor.rasterizer.Grid.empty_cells" title="Permalink to this definition">¶</a></dt>
 <dd><p>Retrieves the cells with no returns in self.data</p>
+<p>return: An N x 2 numpy array where each row cooresponds to the [y x] coordinate of the empty cell.</p>
 </dd></dl>
 
 <dl class="method">
@@ -822,6 +941,27 @@ are the minimum z point in their respective cell.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pyfor.rasterizer.Grid.interpolate">
+<code class="descname">interpolate</code><span class="sig-paren">(</span><em>func</em>, <em>dim</em>, <em>interp_method='nearest'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.interpolate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolates missing cells in the grid. This function uses scipy.griddata as a backend. Please see         documentation for that function for more details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>func</strong> – The function (or function string) to calculate an array on the gridded data.</li>
+<li><strong>dim</strong> – The dimension (i.e. column name of self.cells) to cast func onto.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">An interpolated array.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="pyfor.rasterizer.Grid.metrics">
 <code class="descname">metrics</code><span class="sig-paren">(</span><em>func_dict</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.metrics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates summary statistics for each grid cell in the Grid.</p>
@@ -829,12 +969,12 @@ are the minimum z point in their respective cell.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func_dict</strong> – A dictionary containing keys corresponding to the columns of self.data and values</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func_dict</strong> – A dictionary containing keys corresponding to the columns of self.data and values that         correspond to the functions to be  called on those columns.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A pandas dataframe with the aggregated metrics.</td>
 </tr>
 </tbody>
 </table>
-<p>that correspond to the functions to be  called on those columns.
-:return: A pandas dataframe with the aggregated metrics.</p>
 </dd></dl>
 
 <dl class="method">
@@ -847,8 +987,7 @@ are the minimum z point in their respective cell.</p>
 <dl class="method">
 <dt id="pyfor.rasterizer.Grid.plot">
 <code class="descname">plot</code><span class="sig-paren">(</span><em>func</em>, <em>cmap='viridis'</em>, <em>dim='z'</em>, <em>return_plot=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.plot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots a 2 dimensional canopy height model using the maximum z value in each cell. This is intended for visual
-checking and not for analysis purposes. See the rasterizer.Grid class for analysis.</p>
+<dd><p>Plots a 2 dimensional canopy height model using the maximum z value in each cell. This is intended for visual         checking and not for analysis purposes. See the rasterizer.Grid class for analysis.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -870,7 +1009,8 @@ checking and not for analysis purposes. See the rasterizer.Grid class for analys
 <dl class="method">
 <dt id="pyfor.rasterizer.Grid.plot3d">
 <code class="descname">plot3d</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.plot3d" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Not yet implemented.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="pyfor.rasterizer.Grid.write_raster">
@@ -919,47 +1059,21 @@ checking and not for analysis purposes. See the rasterizer.Grid class for analys
 </div>
 
 
-          </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../index.html">Documentation overview</a><ul>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
     </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2018, Bryce Frank.
       
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
       
-      |
-      <a href="../_sources/source/pyfor.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
-
-    
-
-    
+    </p>
+    <p>
+        &copy; Copyright 2018, Bryce Frank.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.<br/>
+    </p>
+  </div>
+</footer>
   </body>
 </html>
