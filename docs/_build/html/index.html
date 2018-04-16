@@ -63,6 +63,8 @@
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
 <li><a class="reference internal" href="#">pyfor</a></li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 </ul>
@@ -118,6 +120,25 @@
 <h1>pyfor<a class="headerlink" href="#pyfor" title="Permalink to this headline">¶</a></h1>
 <p>This is the documentation repository for <strong>pyfor</strong>, a Python package for point cloud data processing in the context of forest inventory.Our GitHub page is located <a class="reference external" href="https://github.com/brycefrank/pyfor/tree/pdal-u">here</a>. Please refer to that page (specifically the Wiki) if you are interested in a “higher-level” user manual, installation instructions and the like.</p>
 <p>However, if you are interested in nitty-gritty documentation of functions, this is the place to be. Consider this the last stop before reading source code.</p>
+</div>
+<div class="section" id="classes">
+<h1>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h1>
+<p>pyfor is written using an OOP framework. The classes listed below make up the most of the package high-level functionality.</p>
+<ul class="simple">
+<li><a class="reference external" href="source/pyfor.cloud.html#pyfor.cloud.Cloud">Cloud</a> - represents the point cloud itself.</li>
+<li><a class="reference external" href="source/pyfor.cloud.html#pyfor.cloud.CloudData">CloudData</a> - handles the point cloud data manipulations (mostly an internal class).</li>
+<li><a class="reference external" href="source/pyfor.rasterizer.html#pyfor.rasterizer.Grid">Grid</a> - represents the point cloud as separated into grid cells (many points per grid cell).</li>
+<li><a class="reference external" href="source/pyfor.rasterizer.html#pyfor.rasterizer.Raster">Raster</a> - represents the point cloud as a two-dimensional raster (one value per grid cell).</li>
+</ul>
+</div>
+<div class="section" id="functions">
+<h1>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h1>
+<p>The beating heart of pyfor is its collections of functions, these handle the lower level processing tasks. They are located in a few different scripts:</p>
+<ul class="simple">
+<li><a class="reference external" href="source/pyfor.clip_funcs.html">clip_funcs.py</a> - holds functions for clipping point cloud data.</li>
+<li><a class="reference external" href="source/pyfor.gisexport.html">gisexport.py</a> - holds functions for writing to GIS file types, mostly a wrapper for GDAL.</li>
+<li><a class="reference external" href="source/pyfor.filter.html">filter.py</a> - holds ground filtering and related functions.</li>
+</ul>
 </div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>

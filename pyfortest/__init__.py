@@ -1,1 +1,1 @@
-from pyfortest.test_pyfor import test_pyfor
+from pyfortest import test_pyfor

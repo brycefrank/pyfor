@@ -7,6 +7,7 @@ import pandas as pd
 import laspy
 import os
 
+test_las = os.path.abspath('data/test.las')
 
 class CloudDataTestCase(unittest.TestCase):
     def setUp(self):
@@ -22,7 +23,7 @@ class CloudDataTestCase(unittest.TestCase):
             "pt_src_id" : [0, 1]
         }
 
-        self.test_header = laspy.file.File("data/test.las").header
+        self.test_header = laspy.file.File("").header
 
         self.test_points = pd.DataFrame.from_dict(self.test_points)
         self.column = [0,1]

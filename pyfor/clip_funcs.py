@@ -4,7 +4,7 @@ from numba import vectorize, bool_, float64
 
 def square_clip(cloud, bounds):
     """
-    Clips a square from a tuple describing the position of the square
+    Clips a square from a tuple describing the position of the square.
 
     :param las_xy: A N x 2 numpy array of x and y coordinates, x in
     column 0
@@ -25,6 +25,14 @@ def square_clip(cloud, bounds):
     return(in_clip)
 
 def ray_trace(x, y, poly):
+    """
+    A numba implementation of the ray tracing algorithm.
+
+    :param x: A 1D numpy array of x coordinates.
+    :param y: A 1D numpy array of y coordinates.
+    :param poly: The coordinates of a polygon as a numpy array (i.e. from geo_json['coordinates']
+    :return:
+    """
     @vectorize([bool_(float64, float64)])
     def ray(x, y):
         # where xy is a coordinate
