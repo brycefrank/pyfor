@@ -7,7 +7,6 @@ import pandas as pd
 import laspy
 import os
 
-test_las = os.path.abspath('data/test.las')
 
 class CloudDataTestCase(unittest.TestCase):
     def setUp(self):
@@ -23,7 +22,7 @@ class CloudDataTestCase(unittest.TestCase):
             "pt_src_id" : [0, 1]
         }
 
-        self.test_header = laspy.file.File("").header
+        self.test_header = laspy.file.File("data/test.las").header
 
         self.test_points = pd.DataFrame.from_dict(self.test_points)
         self.column = [0,1]
@@ -45,9 +44,7 @@ class CloudDataTestCase(unittest.TestCase):
 
         os.remove('data/temp_test_write.las')
 
-    def tearDown(self):
-        self
-
+    # TODO tear down
 
 class CloudTestCase(unittest.TestCase):
 
@@ -92,5 +89,18 @@ class GridTestCase(unittest.TestCase):
     def tearDown(self):
         del self.test_grid.las.header
 
+class GISExportTestCase(unittest.TestCase):
 
+    def test_pcs_exists(self):
+        print(os.path.realpath(__file__))
+        self.assertTrue(os.path.exists(os.path.abspath(os.path.join('..', 'pyfor', 'pcs.csv'))))
+
+    def test_array_to_raster_writes(self):
+        test_grid = cloud.Cloud("data/test.las").grid(1)
+        wkt = gisexport.utm_lookup("10N")
+        array = test_grid.array("max", "z")
+        gisexport.array_to_raster(array, 0.5, test_grid.las.header.min[0], test_grid.las.header.max[1],
+                                  wkt, "data/temp_raster_array.tif")
+        self.assertTrue(os.path.exists("data/temp_raster_array.tif"))
+        os.remove("data/temp_raster_array.tif")
 

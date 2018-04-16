@@ -113,7 +113,7 @@ def zhang(array, number_of_windows, dh_max, dh_0, c, grid):
 
     # Remove interpolated cells
     empty = grid.empty_cells
-    empty_x, empty_y = empty[:,0], empty[:,1]
+    empty_y, empty_x = empty[:,0], empty[:,1]
     A[empty_y, empty_x] = np.nan
     B = np.where(flag != 0, A, np.nan)
 

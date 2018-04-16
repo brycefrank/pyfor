@@ -79,6 +79,7 @@ class Cloud:
 
         # We're not sure if this is true or false yet
         self.normalized = None
+        self.wkt = None
 
     def grid(self, cell_size):
         """

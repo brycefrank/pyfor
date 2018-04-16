@@ -55,7 +55,7 @@ def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
 
     import gdal
     import numpy as np
-    array = np.rot90(array)
+    array = np.flipud(array)
     dst_filename = path
     x_pixels = array.shape[1]  # number of pixels in x
     y_pixels = array.shape[0]  # number of pixels in y
@@ -92,10 +92,8 @@ def utm_lookup(zone):
     :param zone: The UTM zone (as a string)
         ex: "10N"
     """
-    # see: http://gis.stackexchange.com/questions/233712/python-wkt-or-proj4-lookup-package
-    # FIXME: store this file locally
-    in_ds = ogr.GetDriverByName('CSV').Open('C:\pyformaster\pyformaster\PyFor\pyfor\pcs.csv')
-    print(in_ds)
+    pcs_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pcs.csv')
+    in_ds = ogr.GetDriverByName('CSV').Open(pcs_path)
     layer = in_ds.GetLayer()
     layer.SetAttributeFilter("COORD_REF_SYS_NAME LIKE '%UTM zone {}%'".format(zone))
     wkt_string = []

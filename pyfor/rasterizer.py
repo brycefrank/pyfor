@@ -59,7 +59,7 @@ class Grid:
         :return: A 2D numpy array where the value of each cell is the result of the passed function.
         """
 
-        array = self.cells.agg({dim: func}).reset_index().pivot('bins_x', 'bins_y', dim)
+        array = self.cells.agg({dim: func}).reset_index().pivot('bins_y', 'bins_x', dim)
         array = np.array(array)
 
         return(array)
@@ -137,16 +137,7 @@ class Grid:
         # Summarize (i.e. aggregate) on the max z value and reshape the dataframe into a 2d matrix
         plot_mat = self.cells.agg({dim: func}).reset_index().pivot('bins_y', 'bins_x', 'z')
 
-        # Plot the matrix, and invert the y axis to orient the 'image' appropriately
-        plt.matshow(plot_mat, cmap)
-        plt.gca().invert_yaxis()
-
-        # TODO Fix plot axes
-        if return_plot:
-            return(plt)
-        else:
-            # Show the matrix image
-            plt.show()
+        Raster(plot_mat, self).plot(return_plot=False)
 
     def plot3d(self):
         """
@@ -166,7 +157,7 @@ class Grid:
         # Get the interpolated DEM array.
         dem_array = filter.zhang(self.interpolate("min", "z"), num_windows,
                                  dh_max, dh_0, self.cell_size, self)
-        dem_array = Raster(dem_array)
+        dem_array = Raster(dem_array, self)
 
         return(dem_array)
 
@@ -197,27 +188,39 @@ class Grid:
 
         return(ground_grid)
 
-    def write_raster(self, path, func, dim, wkt = None):
-        if self.las.wkt == None:
-            # This should only be the case for older .las files without CRS information
-            print("There is no wkt string set for this Grid object, you must manually pass one to the \
-            write_raster function. This likely means you are using an older las specification.")
-        else:
-            write_array = self.array(func, dim)
-            print("Raster file written to {}".format(path))
-            gisexport.array_to_raster(write_array, self.cell_size, self.las.header.min[0], self.las.header.max[1], path)
-
-
 class Raster:
-    def __init__(self, array, crs = None, cell_size = 1):
+    def __init__(self, array, grid = None):
         self.array = array
-        self.crs = crs
-        self.cell_size = cell_size
-        pass
+        self.grid = grid
+        self.cell_size = self.grid.cell_size
 
-    def plot(self):
-        plt.matshow(self.array)
-        plt.show()
+    def plot(self, return_plot = False):
+        """
+        Default plotting method for the Raster object.
+
+        :return:
+        """
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        caz = ax.matshow(self.array)
+        fig.colorbar(caz)
+        fig.gca().invert_yaxis()
+        ax.xaxis.tick_bottom()
+        ax.set_xticks(np.linspace(0, self.grid.n, 3))
+        ax.set_yticks(np.linspace(0, self.grid.m, 3))
+
+        x_ticks, y_ticks = np.rint(np.linspace(self.grid.las.header.min[0], self.grid.las.header.max[0], 3)), \
+                           np.rint(np.linspace(self.grid.las.header.min[1], self.grid.las.header.max[1], 3))
+
+        ax.set_xticklabels(x_ticks)
+        ax.set_yticklabels(y_ticks)
+
+        if return_plot == True:
+            return(fig)
+
+        else:
+            plt.show()
+
 
     def watershed_seg(self):
         """
@@ -234,10 +237,11 @@ class Raster:
         return(labels)
 
     def write_raster(self, path):
-        if self.crs == None:
+        if self.grid.cloud.wkt == None:
             # This should only be the case for older .las files without CRS information
             print("There is no wkt string set for this Grid object, you must manually pass one to the \
             write_raster function. This likely means you are using an older las specification.")
         else:
             print("Raster file written to {}".format(path))
-            gisexport.array_to_raster(self.array, self.cell_size, self.las.min[0], self.las.max[1], path)
+            gisexport.array_to_raster(self.array, self.cell_size, self.grid.las.min[0], self.grid.las.max[1],
+                                      self.grid.cloud.wkt, path)
