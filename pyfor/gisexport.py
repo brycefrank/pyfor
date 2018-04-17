@@ -1,6 +1,8 @@
 import ogr
 import osr
 import os
+import gdal
+import numpy as np
 
 def export_wkt_multipoints_to_shp(geom, path):
     if os.path.exists(path):
@@ -53,8 +55,6 @@ def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
     :param path: The output bath of the GeoTIFF
     """
 
-    import gdal
-    import numpy as np
     array = np.flipud(array)
     dst_filename = path
     x_pixels = array.shape[1]  # number of pixels in x
@@ -81,8 +81,27 @@ def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
     dataset.SetProjection(wkt_projection)
     dataset.GetRasterBand(1).WriteArray(array)
     dataset.FlushCache()  # Write to disk.
-    return dataset, dataset.GetRasterBand(
-        1)  # If you need to return, remenber to return  also the dataset because the band don`t live without dataset.
+
+def array_to_polygons(array, pixel_size, x_min, y_max, wkt, path):
+    # Write raster
+    if os.path.exists('./temp.tif'):
+        os.remove('./temp.tif')
+
+
+    array_to_raster(array, pixel_size, x_min, y_max, wkt, './temp.tif')
+
+    # Read it back in
+    band = gdal.Open("./temp.tif")
+    band1 = band.GetRasterBand(1)
+
+    # Construct shapefile
+    driver = ogr.GetDriverByName("ESRI Shapefile")
+
+    outDataSource = driver.CreateDataSource(path)
+    outLayer = outDataSource.CreateLayer("watershed", srs = None)
+
+    gdal.Polygonize(band1, None, outLayer, -1, [], callback = None)
+    outDataSource.Destroy()
 
 def utm_lookup(zone):
     """Returns a wkt string of a given UTM zone. Used as a bypass for older las file specifications that do not

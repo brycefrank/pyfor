@@ -64,10 +64,12 @@ class CloudTestCase(unittest.TestCase):
         # TODO test if self.test_cloud.min z dimension changes (or something similar)
         pass
 
-    def test_filter_works(self):
-        pass
-
-    # TODO Come up with adequate tests for plotting methods
+    def test_filter_z(self):
+        self.test_filter = cloud.Cloud("data/test.las")
+        self.test_filter.filter(350, 351, "z")
+        self.assertEqual(self.test_filter.las.count, 30)
+        self.assertLessEqual(self.test_filter.las.max[2], [351])
+        self.assertGreaterEqual(self.test_filter.las.min[2], [350])
 
     def test_clip_square(self):
         mins, maxes = self.test_cloud.las.header.min, self.test_cloud.las.header.max

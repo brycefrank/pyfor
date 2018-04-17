@@ -222,7 +222,7 @@ class Raster:
             plt.show()
 
 
-    def watershed_seg(self):
+    def watershed_seg(self, path):
         """
         Returns the watershed segmentation of the Raster.
 
@@ -232,9 +232,12 @@ class Raster:
         # TODO Add arguments to parent function with useful defaults.
         tops = peak_local_max(self.array, indices = False, min_distance= 2, threshold_abs=2)
         tops = label(tops)[0]
-        labels = watershed(-self.array, tops, mask = self.array, watershed_line=True)
+        labels = watershed(-self.array, tops, mask = self.array)
 
-        return(labels)
+        # Convert to gdal.Band
+        # TODO I really don't like the temp file but I can't find any other way to do it.
+        gisexport.array_to_raster(labels, self.grid.cell_size, self.grid.las.min[0],
+                                  self.grid.las.max[1], self.grid.cloud.wkt, path)
 
     def write_raster(self, path):
         if self.grid.cloud.wkt == None:
