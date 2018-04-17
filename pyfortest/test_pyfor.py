@@ -60,6 +60,10 @@ class CloudTestCase(unittest.TestCase):
         # Does the call to grid return the proper type
         self.assertEqual(type(self.test_cloud.grid(1)), rasterizer.Grid)
 
+    def test_normalize(self):
+        # TODO test if self.test_cloud.min z dimension changes (or something similar)
+        pass
+
     def test_filter_works(self):
         pass
 

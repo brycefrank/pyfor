@@ -182,6 +182,8 @@ class Cloud:
         dem_grid = grid.normalize(num_windows, dh_max, dh_0)
 
         self.las.points['z'] = dem_grid.data['z']
+        self.las.min = [np.min(dem_grid.data.x), np.min(dem_grid.data.y), np.min(dem_grid.data.z)]
+        self.las.max = [np.max(dem_grid.data.x), np.max(dem_grid.data.y), np.max(dem_grid.data.z)]
         self.normalized = True
 
 
