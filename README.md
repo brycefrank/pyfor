@@ -2,7 +2,7 @@
   <img src="https://github.com/brycefrank/pyfor/blob/pdal-u/docs/tile.png" width="400">
 </p>
 
-[![Documentation Status](https://readthedocs.org/projects/pyfor-pdal-u/badge/?version=pdal-u)](http://pyfor-pdal-u.readthedocs.io/en/pdal-u/?badge=pdal-u)[![Build Status](https://travis-ci.org/brycefrank/pyfor.svg?branch=pdal-u)](https://travis-ci.org/brycefrank/pyfor)
+[![Documentation Status](https://readthedocs.org/projects/pyfor-pdal-u/badge/?version=pdal-u)](http://pyfor-pdal-u.readthedocs.io/en/pdal-u/?badge=pdal-u)[![Build Status](https://travis-ci.org/brycefrank/pyfor.svg?branch=pdal-u)](https://travis-ci.org/brycefrank/pyfor)[![Coverage Status](https://coveralls.io/repos/github/brycefrank/pyfor/badge.svg?branch=pdal-u)](https://coveralls.io/github/brycefrank/pyfor?branch=pdal-u)
 
 
 **pyfor** is a Python module intended as a tool to assist in the processing of point cloud data in the context of forest inventory. It offers functions that convert raw point cloud data to usable information about forested landscapes using an object oriented (OOP) framework accessible for advanced and novice users of Python. pyfor aims to provide a cross platform means to interactively process point cloud data, as well as efficient ways to batch process large acquisitions.
