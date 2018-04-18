@@ -1,4 +1,7 @@
 language: python
+branches:
+  only:
+    - pdal-u
 python:
   - "3.6"
 install:
@@ -13,6 +16,5 @@ install:
   - conda env create -f environment.yml
   - source activate pyfor_env
   - pip install .
-
 script:
   - python pyfortest/test_pyfor.py
