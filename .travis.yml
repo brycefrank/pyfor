@@ -15,6 +15,7 @@ install:
   - conda info -a
   - conda env create -f environment.yml
   - source activate pyfor_env
+  - pip install coveralls
   - pip install .
 script:
-  - python pyfortest/test_pyfor.py
+  - coverage run --source pyfor setup.py test

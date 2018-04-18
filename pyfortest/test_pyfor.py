@@ -7,6 +7,8 @@ import pandas as pd
 import laspy
 import os
 
+data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+test_las = os.path.join(data_dir, 'test.las')
 
 class CloudDataTestCase(unittest.TestCase):
     def setUp(self):
@@ -22,7 +24,7 @@ class CloudDataTestCase(unittest.TestCase):
             "pt_src_id" : [0, 1]
         }
 
-        self.test_header = laspy.file.File("data/test.las").header
+        self.test_header = laspy.file.File(test_las).header
 
         self.test_points = pd.DataFrame.from_dict(self.test_points)
         self.column = [0,1]
@@ -37,19 +39,19 @@ class CloudDataTestCase(unittest.TestCase):
 
 
     def test_write(self):
-        self.test_cloud_data.write("data/temp_test_write.las")
-        read = laspy.file.File('data/temp_test_write.las')
+        self.test_cloud_data.write(os.path.join(data_dir, "temp_test_write.las"))
+        read = laspy.file.File(os.path.join(data_dir, "temp_test_write.las"))
         self.assertEqual(type(read), laspy.file.File)
         read.close()
 
-        os.remove('data/temp_test_write.las')
+        os.remove(os.path.join(data_dir, "temp_test_write.las"))
 
     # TODO tear down
 
 class CloudTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.test_cloud = cloud.Cloud("data/test.las")
+        self.test_cloud = cloud.Cloud(test_las)
 
     def test_las_load(self):
         """Tests if a .las file succesfully loads when cloud.Cloud is called"""
@@ -65,7 +67,7 @@ class CloudTestCase(unittest.TestCase):
         pass
 
     def test_filter_z(self):
-        self.test_filter = cloud.Cloud("data/test.las")
+        self.test_filter = cloud.Cloud(test_las)
         self.test_filter.filter(350, 351, "z")
         self.assertEqual(self.test_filter.las.count, 30)
         self.assertLessEqual(self.test_filter.las.max[2], [351])
@@ -86,7 +88,7 @@ class CloudTestCase(unittest.TestCase):
 
 class GridTestCase(unittest.TestCase):
     def setUp(self):
-        self.test_grid = cloud.Cloud("data/test.las").grid(1)
+        self.test_grid = cloud.Cloud(test_las).grid(1)
 
     def test_empty_cells(self):
         empty = self.test_grid.empty_cells
@@ -99,14 +101,15 @@ class GISExportTestCase(unittest.TestCase):
 
     def test_pcs_exists(self):
         print(os.path.realpath(__file__))
-        self.assertTrue(os.path.exists(os.path.abspath(os.path.join('..', 'pyfor', 'pcs.csv'))))
+        pcs_path = os.path.join('..', 'pyfor', 'pcs.csv', os.path.dirname(os.path.realpath(__file__)))
+        self.assertTrue(os.path.exists(pcs_path))
 
     def test_array_to_raster_writes(self):
-        test_grid = cloud.Cloud("data/test.las").grid(1)
+        test_grid = cloud.Cloud(test_las).grid(1)
         wkt = gisexport.utm_lookup("10N")
         array = test_grid.array("max", "z")
         gisexport.array_to_raster(array, 0.5, test_grid.las.header.min[0], test_grid.las.header.max[1],
-                                  wkt, "data/temp_raster_array.tif")
-        self.assertTrue(os.path.exists("data/temp_raster_array.tif"))
-        os.remove("data/temp_raster_array.tif")
+                                  wkt, os.path.join(data_dir, "temp_raster_array.tif"))
+        self.assertTrue(os.path.exists(os.path.join(data_dir, "temp_raster_array.tif")))
+        os.remove(os.path.join(data_dir, "temp_raster_array.tif"))
 
