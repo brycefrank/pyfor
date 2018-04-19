@@ -12,6 +12,7 @@ dependencies:
   - pyopengl
   - plotly
   - numba
+  - rasterio
   - pip:
       - laspy
       - sphinx_bootstrap_theme
