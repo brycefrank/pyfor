@@ -4,6 +4,7 @@ import os
 import gdal
 import numpy as np
 import rasterio
+from rasterio.features import shapes
 
 def export_wkt_multipoints_to_shp(geom, path):
     if os.path.exists(path):
@@ -46,7 +47,7 @@ def _export_coords_to_shp(coordlist, path):
     outFeature.Destroy()
 
 def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
-    """Creates a GeoTIFF raster from a numpy array.
+    """Writes a GeoTIFF raster from a numpy array.
 
     :param array: 2D numpy array of cell values
     :param pixel_size: -- Desired resolution of the output raster, in same units as wkt projection.
@@ -64,25 +65,27 @@ def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
 
 
 def array_to_polygons(array, pixel_size, x_min, y_max, wkt, path):
-    # Write raster
-    if os.path.exists('./temp.tif'):
-        os.remove('./temp.tif')
+    """
+    Writes a shapefile from a numpy array (calls rasterio.polygonize first).
 
+    :param array:
+    :param pixel_size:
+    :param x_min:
+    :param y_max:
+    :param wkt:
+    :param path:
+    :return:
+    """
+    # FIXME not done yet. What to return? I think geopandas may be useful for all this polygon stuff.
 
-    array_to_raster(array, pixel_size, x_min, y_max, wkt, './temp.tif')
-
-    # Read it back in
-    band = gdal.Open("./temp.tif")
-    band1 = band.GetRasterBand(1)
-
-    # Construct shapefile
-    driver = ogr.GetDriverByName("ESRI Shapefile")
-
-    outDataSource = driver.CreateDataSource(path)
-    outLayer = outDataSource.CreateLayer("watershed", srs = None)
-
-    gdal.Polygonize(band1, None, outLayer, -1, [], callback = None)
-    outDataSource.Destroy()
+    # Convert array to shapely polygons
+    # Read into generator
+    results = (
+        {'properties': {'raster_val': v}, 'geometry': s}
+        for i, (s, v)
+            in enumerate(shapes(array))
+    )
+    geoms = list(results)
 
 def utm_lookup(zone):
     """Returns a wkt string of a given UTM zone. Used as a bypass for older las file specifications that do not
