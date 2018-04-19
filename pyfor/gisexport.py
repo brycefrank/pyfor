@@ -3,6 +3,7 @@ import osr
 import os
 import gdal
 import numpy as np
+import rasterio
 
 def export_wkt_multipoints_to_shp(geom, path):
     if os.path.exists(path):
@@ -54,33 +55,13 @@ def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
     :param wkt: The wkt string with desired projection
     :param path: The output bath of the GeoTIFF
     """
+    transform = rasterio.transform.from_origin(x_min, y_max, pixel_size, pixel_size)
+    out_dataset = rasterio.open(path, 'w', driver='GTiff', height=array.shape[0], width = array.shape[1], count=1,
+                                dtype=str(array.dtype),crs=wkt, transform=transform)
 
-    array = np.flipud(array)
-    dst_filename = path
-    x_pixels = array.shape[1]  # number of pixels in x
-    y_pixels = array.shape[0]  # number of pixels in y
-    wkt_projection = wkt
+    out_dataset.write(array, 1)
+    out_dataset.close()
 
-    driver = gdal.GetDriverByName('GTiff')
-
-    dataset = driver.Create(
-        dst_filename,
-        x_pixels,
-        y_pixels,
-        1,
-        gdal.GDT_Float32)
-
-    dataset.SetGeoTransform((
-        x_min,  # 0
-        pixel_size,  # 1
-        0,  # 2
-        y_max,  # 3
-        0,  # 4
-        -pixel_size))
-
-    dataset.SetProjection(wkt_projection)
-    dataset.GetRasterBand(1).WriteArray(array)
-    dataset.FlushCache()  # Write to disk.
 
 def array_to_polygons(array, pixel_size, x_min, y_max, wkt, path):
     # Write raster
