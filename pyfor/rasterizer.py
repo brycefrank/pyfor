@@ -137,6 +137,9 @@ class Grid:
         # Summarize (i.e. aggregate) on the max z value and reshape the dataframe into a 2d matrix
         plot_mat = self.cells.agg({dim: func}).reset_index().pivot('bins_y', 'bins_x', 'z')
 
+        if return_plot == True:
+            return(Raster(plot_mat, self).plot(return_plot = True))
+
         Raster(plot_mat, self).plot(return_plot=False)
 
     def plot3d(self):
@@ -155,11 +158,11 @@ class Grid:
         """
         # TODO Add functionality for classifying points as ground
         # Get the interpolated DEM array.
-        dem_array = filter.zhang(self.interpolate("min", "z"), num_windows,
+        dem_array = filter.zhang(self.interpolate("min", "z").array, num_windows,
                                  dh_max, dh_0, self.cell_size, self)
-        dem_array = Raster(dem_array, self)
+        dem = Raster(dem_array, self)
 
-        return(dem_array)
+        return(dem)
 
     def normalize(self, num_windows, dh_max, dh_0):
         """

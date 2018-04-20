@@ -6,6 +6,8 @@ import unittest
 import pandas as pd
 import laspy
 import os
+import matplotlib.figure
+import numpy as np
 
 data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_las = os.path.join(data_dir, 'test.las')
@@ -62,10 +64,6 @@ class CloudTestCase(unittest.TestCase):
         # Does the call to grid return the proper type
         self.assertEqual(type(self.test_cloud.grid(1)), rasterizer.Grid)
 
-    def test_normalize(self):
-        # TODO test if self.test_cloud.min z dimension changes (or something similar)
-        pass
-
     def test_filter_z(self):
         self.test_filter = cloud.Cloud(test_las)
         self.test_filter.filter(350, 351, "z")
@@ -86,16 +84,46 @@ class CloudTestCase(unittest.TestCase):
     def test_clip_circle(self):
         pass
 
+    def test_plot_return(self):
+        plot = self.test_cloud.plot(return_plot=True)
+        self.assertEqual(type(plot), matplotlib.figure.Figure)
+
+    def test_ground_filter_returns_raster(self):
+        ground = self.test_cloud.grid(0.5).ground_filter(3, 2, 1)
+        self.assertEqual(type(ground), rasterizer.Raster)
+        # A very stringent test, ok to reduce:
+        self.assertNotEqual(np.any(ground), 0)
+
+    def test_normalize(self):
+        test_cloud = cloud.Cloud(test_las)
+        test_cloud.normalize(0.5)
+        self.assertLess(test_cloud.las.max[2], 65)
+
+
+
 class GridTestCase(unittest.TestCase):
     def setUp(self):
         self.test_grid = cloud.Cloud(test_las).grid(1)
+
+    def test_m(self):
+        self.assertEqual(99, self.test_grid.m)
+
+    def test_n(self):
+        print(99, self.test_grid.n)
+
+    def test_cloud(self):
+        self.assertEqual(type(self.test_grid.cloud, cloud.Cloud))
+
+    def test_cell_size(self):
+        self.assertEqual(self.test_grid.cell_size, 1)
 
     def test_empty_cells(self):
         empty = self.test_grid.empty_cells
         self.assertEqual(empty.shape, (167, 2))
 
     def test_raster(self):
-        pass
+        raster = self.test_grid.raster("max", "z")
+        self.assertEqual(type(raster), rasterizer.Raster)
 
     def test_interpolate(self):
         pass
@@ -113,9 +141,6 @@ class GISExportTestCase(unittest.TestCase):
         print(os.path.realpath(__file__))
         pcs_path = os.path.join('..', 'pyfor', 'pcs.csv', os.path.dirname(os.path.realpath(__file__)))
         self.assertTrue(os.path.exists(pcs_path))
-
-    def test_utm_lookup(self):
-        pass
 
     def test_array_to_raster_writes(self):
         test_grid = cloud.Cloud(test_las).grid(1)

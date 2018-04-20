@@ -90,7 +90,7 @@ class Cloud:
         """
         return(rasterizer.Grid(self, cell_size))
 
-    def plot(self, cell_size = 1, cmap = "viridis"):
+    def plot(self, cell_size = 1, cmap = "viridis", return_plot = True):
         """
         Plots a basic canopy height model of the Cloud object. This is mainly a convenience function for \
         rasterizer.Grid.plot, check that method docstring for more information and more robust usage cases.
@@ -99,17 +99,15 @@ class Cloud:
         :param return_plot: If true, returns a matplotlib plt object.
         :return: If return_plot == True, returns matplotlib plt object.
         """
+        if return_plot == True:
+            return(rasterizer.Grid(self, cell_size).plot("max", return_plot= True))
 
-        rasterizer.Grid(self, cell_size).plot("max", cmap="viridis")
-
-        # TODO will be restructured when Raster is fully implemented
-        #if return_plot == True:
-        #    return(rasterizer.Grid.plot(self, "max", cell_size, return_plot = True))
+        rasterizer.Grid(self, cell_size).plot("max", cmap, dim = "z")
 
     def iplot3d(self, max_points = 30000, point_size = 0.5):
         """
         Plots the 3d point cloud in a compatible version for Jupyter notebooks using Plotly as a backend. If \
-        max_points exceedds 30,000, the point cloud is downsampled using a uniform random distribution by default. \
+        max_points exceeds 30,000, the point cloud is downsampled using a uniform random distribution by default. \
         This can be changed using the max_points argument.
 
         :param max_points: The maximum number of points to render.
