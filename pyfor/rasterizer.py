@@ -8,6 +8,7 @@ from skimage.feature import peak_local_max
 import matplotlib.pyplot as plt
 from pyfor import gisexport
 from pyfor import filter
+from rasterio.transform import from_origin
 
 # TODO: refactor any grouped dataframe to "cells"
 
@@ -46,7 +47,7 @@ class Grid:
 
         self.cells = self.data.groupby(['bins_x', 'bins_y'])
 
-    def array(self, func, dim):
+    def raster(self, func, dim):
         """
         Generates an m x n matrix with values as calculated for each cell in func. This is a raw array without \
         missing cells interpolated. See self.interpolate for interpolation methods.
@@ -60,9 +61,8 @@ class Grid:
         """
 
         array = self.cells.agg({dim: func}).reset_index().pivot('bins_y', 'bins_x', dim)
-        array = np.array(array)
-
-        return(array)
+        array = np.asarray(array)
+        return(Raster(array, self))
 
     def boolean_summary(self, func, dim):
         # TODO Might not be worth its own function...
@@ -85,7 +85,7 @@ class Grid:
 
         return: An N x 2 numpy array where each row cooresponds to the [y x] coordinate of the empty cell.
         """
-        array = self.array("count", "z")
+        array = self.raster("count", "z").array
         emptys = np.argwhere(np.isnan((array)))
 
         return(emptys)
@@ -111,7 +111,7 @@ class Grid:
 
         interp_grid = griddata(points, values, (X, Y), method = interp_method).T
 
-        return(interp_grid)
+        return(Raster(interp_grid, self))
 
     def metrics(self, func_dict):
         """
@@ -194,6 +194,12 @@ class Raster:
         self.grid = grid
         self.cell_size = self.grid.cell_size
 
+    @property
+    def _affine(self):
+        """Constructs the affine transformation, used for plotting and exporting polygons and rasters."""
+        affine = from_origin(self.grid.las.min[0], self.grid.las.max[1], self.grid.cell_size, self.grid.cell_size)
+        return(affine)
+
     def plot(self, return_plot = False):
         """
         Default plotting method for the Raster object.
@@ -236,9 +242,9 @@ class Raster:
 
         # Convert to gdal.Band
         # TODO I really don't like the temp file but I can't find any other way to do it.
-        #gisexport.array_to_raster(labels, self.grid.cell_size, self.grid.las.min[0],
-        #                          self.grid.las.max[1], self.grid.cloud.wkt, path)
-        return(labels)
+        tops =  gisexport.array_to_polygons(labels, self._affine, self.grid.cloud.wkt)
+
+        return(tops)
 
     def write_raster(self, path):
         if self.grid.cloud.wkt == None:

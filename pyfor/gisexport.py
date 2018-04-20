@@ -5,6 +5,9 @@ import gdal
 import numpy as np
 import rasterio
 from rasterio.features import shapes
+from rasterio.transform import from_origin
+from shapely.geometry import shape
+import geopandas
 
 def export_wkt_multipoints_to_shp(geom, path):
     if os.path.exists(path):
@@ -64,28 +67,25 @@ def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
     out_dataset.close()
 
 
-def array_to_polygons(array, pixel_size, x_min, y_max, wkt, path):
+def array_to_polygons(array, affine, wkt):
     """
-    Writes a shapefile from a numpy array (calls rasterio.polygonize first).
+    Returns a geopandas dataframe of polygons as deduced from an array.
 
     :param array:
-    :param pixel_size:
-    :param x_min:
-    :param y_max:
-    :param wkt:
-    :param path:
     :return:
     """
-    # FIXME not done yet. What to return? I think geopandas may be useful for all this polygon stuff.
 
-    # Convert array to shapely polygons
-    # Read into generator
-    results = (
+
+    results = [
         {'properties': {'raster_val': v}, 'geometry': s}
         for i, (s, v)
-            in enumerate(shapes(array))
-    )
-    geoms = list(results)
+            in enumerate(shapes(array, transform = affine))
+    ]
+
+    tops_df = geopandas.GeoDataFrame({'geometry': [shape(results[geom]['geometry']) for geom in range(len(results))]})
+    tops_df.crs = wkt
+
+    return(tops_df)
 
 def utm_lookup(zone):
     """Returns a wkt string of a given UTM zone. Used as a bypass for older las file specifications that do not
@@ -105,5 +105,5 @@ def utm_lookup(zone):
         name = feature.GetField("COORD_REF_SYS_NAME")
         srs = osr.SpatialReference()
         srs.ImportFromEPSG(int(code))
-        wkt_string.append(srs.ExportToWkt())
+        wkt_string.append(srs.ExportToProj4())
     return ''.join(wkt_string)

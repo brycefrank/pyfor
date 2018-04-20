@@ -94,22 +94,41 @@ class GridTestCase(unittest.TestCase):
         empty = self.test_grid.empty_cells
         self.assertEqual(empty.shape, (167, 2))
 
+    def test_raster(self):
+        pass
+
+    def test_interpolate(self):
+        pass
+
     def tearDown(self):
         del self.test_grid.las.header
 
 class GISExportTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.test_grid = cloud.Cloud(test_las).grid(1)
+        self.test_raster = self.test_grid.raster("max", "z")
 
     def test_pcs_exists(self):
         print(os.path.realpath(__file__))
         pcs_path = os.path.join('..', 'pyfor', 'pcs.csv', os.path.dirname(os.path.realpath(__file__)))
         self.assertTrue(os.path.exists(pcs_path))
 
+    def test_utm_lookup(self):
+        pass
+
     def test_array_to_raster_writes(self):
         test_grid = cloud.Cloud(test_las).grid(1)
         wkt = gisexport.utm_lookup("10N")
-        array = test_grid.array("max", "z")
+        array = test_grid.raster("max", "z").array
         gisexport.array_to_raster(array, 0.5, test_grid.las.header.min[0], test_grid.las.header.max[1],
                                   wkt, os.path.join(data_dir, "temp_raster_array.tif"))
         self.assertTrue(os.path.exists(os.path.join(data_dir, "temp_raster_array.tif")))
         os.remove(os.path.join(data_dir, "temp_raster_array.tif"))
+
+    def test_array_to_polygon(self):
+        # FIXME Wait until Raster is fully implemented otherwise this is a messy test
+        #gisexport.array_to_polygons(self.test_array, self.est_grid._affine, self.test_grid.wkt)
+        pass
+
 
