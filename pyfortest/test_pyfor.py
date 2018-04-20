@@ -112,7 +112,7 @@ class GridTestCase(unittest.TestCase):
         print(99, self.test_grid.n)
 
     def test_cloud(self):
-        self.assertEqual(type(self.test_grid.cloud, cloud.Cloud))
+        self.assertEqual(type(self.test_grid.cloud), cloud.Cloud)
 
     def test_cell_size(self):
         self.assertEqual(self.test_grid.cell_size, 1)
