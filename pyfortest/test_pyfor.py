@@ -133,6 +133,12 @@ class GridTestCase(unittest.TestCase):
     def tearDown(self):
         del self.test_grid.las.header
 
+class RasterTestCase(unittest.TestCase):
+    def setUp(self):
+        pass
+
+
+
 class GISExportTestCase(unittest.TestCase):
 
     def setUp(self):

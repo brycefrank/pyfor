@@ -238,6 +238,12 @@ class Raster:
         :return:
         """
 
+        # TODO Not sure if this should be generalized to another class (like grid)
+        if self.grid.cloud.crs == None:
+            print("Watershed segmentation requires coordinate reference. If your point cloud is referenced in UTM \
+                  lookinto the gisexport.utm_lookup function")
+            return(False)
+
         # TODO Add arguments to parent function with useful defaults.
         tops = peak_local_max(self.array, indices = False, min_distance= 2, threshold_abs=2)
         tops = label(tops)[0]
@@ -245,16 +251,16 @@ class Raster:
 
         # Convert to gdal.Band
         # TODO I really don't like the temp file but I can't find any other way to do it.
-        tops =  gisexport.array_to_polygons(labels, self._affine, self.grid.cloud.wkt)
+        tops = gisexport.array_to_polygons(labels, self._affine, self.grid.cloud.crs)
 
         return(tops)
 
-    def write_raster(self, path):
-        if self.grid.cloud.wkt == None:
+    def write(self, path):
+        if self.grid.cloud.crs == None:
             # This should only be the case for older .las files without CRS information
             print("There is no wkt string set for this Grid object, you must manually pass one to the \
             write_raster function. This likely means you are using an older las specification.")
         else:
             print("Raster file written to {}".format(path))
             gisexport.array_to_raster(self.array, self.cell_size, self.grid.las.min[0], self.grid.las.max[1],
-                                      self.grid.cloud.wkt, path)
+                                      self.grid.cloud.crs, path)

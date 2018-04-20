@@ -217,3 +217,17 @@ class Cloud:
         """
         condition = (self.las.points[dim] > min) & (self.las.points[dim] < max)
         self.las = CloudData(self.las.points[condition], self.las.header)
+
+    def chm(self, cell_size, interp_method = None):
+        """
+        Returns a Raster object of the maximum z value in each cell. Mostly a convenience wrapper.
+        
+        :param cell_size: The cell size for the returned raster in the same units as the parent Cloud or las file.
+        :return: A Raster object.
+        """
+        # TODO Pit free algo
+        if interp_method == None:
+            return(self.grid(cell_size).raster("max", "z"))
+        else:
+            return(self.grid(cell_size).interpolate("max", "z", interp_method))
+
