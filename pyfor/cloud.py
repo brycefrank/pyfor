@@ -90,7 +90,7 @@ class Cloud:
         """
         return(rasterizer.Grid(self, cell_size))
 
-    def plot(self, cell_size = 1, cmap = "viridis", return_plot = True):
+    def plot(self, cell_size = 1, cmap = "viridis", return_plot = False):
         """
         Plots a basic canopy height model of the Cloud object. This is mainly a convenience function for \
         rasterizer.Grid.plot, check that method docstring for more information and more robust usage cases.
