@@ -135,12 +135,20 @@ class GridTestCase(unittest.TestCase):
 
 class RasterTestCase(unittest.TestCase):
     def setUp(self):
-        pass
+        pc = cloud.Cloud(test_las)
+        self.test_raster = pc.grid(1).raster("max", "z")
 
-
+    def test_affine(self):
+        affine = self.test_raster._affine
+        self.assertEqual(affine[0], 1.0)
+        self.assertEqual(affine[1], 0.0)
+        self.assertEqual(affine[2], 472137.75)
+        self.assertEqual(affine[3], 0.0)
+        self.assertEqual(affine[4], -1.0)
+        self.assertEqual(affine[5], 5015782.45)
+        self.assertEqual(affine[6], 0)
 
 class GISExportTestCase(unittest.TestCase):
-
     def setUp(self):
         self.test_grid = cloud.Cloud(test_las).grid(1)
         self.test_raster = self.test_grid.raster("max", "z")
@@ -158,6 +166,13 @@ class GISExportTestCase(unittest.TestCase):
                                   wkt, os.path.join(data_dir, "temp_raster_array.tif"))
         self.assertTrue(os.path.exists(os.path.join(data_dir, "temp_raster_array.tif")))
         os.remove(os.path.join(data_dir, "temp_raster_array.tif"))
+
+    def test_raster_output_transform(self):
+        """
+        Tests if the written raster output was rotated and transformed correctly.
+        :return:
+        """
+        pass
 
     def test_array_to_polygon(self):
         # FIXME Wait until Raster is fully implemented otherwise this is a messy test
