@@ -86,7 +86,7 @@ def array_to_polygons(array, affine, wkt):
     ]
 
     tops_df = geopandas.GeoDataFrame({'geometry': [shape(results[geom]['geometry']) for geom in range(len(results))]})
-    tops_df.crs = wkt
+    #tops_df.crs = wkt
 
     return(tops_df)
 

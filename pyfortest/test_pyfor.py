@@ -15,15 +15,15 @@ test_las = os.path.join(data_dir, 'test.las')
 class CloudDataTestCase(unittest.TestCase):
     def setUp(self):
         self.test_points = {
-            "x" : [0, 1],
-            "y" : [0, 1],
-            "z" : [0, 1],
-            "intensity" : [0, 1],
-            "classification" : [0, 1],
-            "flag_byte" : [0, 1],
-            "scan_angle_rank" : [0, 1],
-            "user_data" : [0, 1],
-            "pt_src_id" : [0, 1]
+            "x": [0, 1],
+            "y": [0, 1],
+            "z": [0, 1],
+            "intensity": [0, 1],
+            "classification": [0, 1],
+            "flag_byte": [0, 1],
+            "scan_angle_rank": [0, 1],
+            "user_data": [0, 1],
+            "pt_src_id": [0, 1]
         }
 
         self.test_header = laspy.file.File(test_las).header
@@ -121,7 +121,9 @@ class GridTestCase(unittest.TestCase):
 
     def test_empty_cells(self):
         empty = self.test_grid.empty_cells
+        # Check that there are the correct number
         self.assertEqual(empty.shape, (167, 2))
+        # TODO Check at least one off-diagonal coordinate is non empty ([0 9] for example)
 
     def test_raster(self):
         raster = self.test_grid.raster("max", "z")

@@ -120,7 +120,7 @@ class Cloud:
         """
         Plots the three dimensional point cloud using a method suitable for non-Jupyter use (i.e. via the Python \
         console). By default, if the point cloud exceeds 5e5 points, then it is downsampled using a uniform random \
-        distribution of 5e5 points.
+        distribution of 5e5 points. This is for performance purposes.
 
         :param point_size: The size of the rendered points.
         :param cmap: The matplotlib color map used to color the height distribution.
@@ -164,20 +164,32 @@ class Cloud:
         view.opts['center'] = pg.Vector(center[0], center[1], center[2])
         view.show()
 
-    def normalize(self, cell_size, num_windows = 7, dh_max = 2.5, dh_0 = 1):
+    def normalize(self, cell_size, num_windows = 7, dh_max = 2.5, dh_0 = 1, interp_method = "nearest"):
         """
         Normalizes this cloud object **in place** by generating a DEM using the default filtering algorithm  and \
         subtracting the underlying ground elevation. This uses a grid-based progressive morphological filter developed \
         in Zhang et al. (2003).
+
+        This algorithm is actually implemented on a raster of the minimum Z value in each cell, but is included in \
+        the Cloud object as a convenience wrapper. Its implementation involves creating a bare earth model and then \
+        subtracting the underlying ground from each point's elevation value.
+
+        If you would like to create a bare earth model, look instead toward Grid.ground_filter.
+
+        Note that this current implementation is best suited for larger tiles. Best practices suggest creating a BEM \
+        at the largest scale possible first, and using that to normalize plot-level point clouds in a production \
+        setting.
 
         :param cell_size: The cell_size at which to rasterize the point cloud into bins, in the same units as the \
         input point cloud.
         :param num_windows: The number of windows to consider.
         :param dh_max: The maximum height threshold.
         :param dh_0: The null height threshold.
+        :param interp_method: The interpolation method used to fill in missing values after the ground filtering \
+        takes place. One of any: "nearest", "linear", or "cubic".
         """
         grid = self.grid(cell_size)
-        dem_grid = grid.normalize(num_windows, dh_max, dh_0)
+        dem_grid = grid.normalize(num_windows, dh_max, dh_0, interp_method)
 
         self.las.points['z'] = dem_grid.data['z']
         self.las.min = [np.min(dem_grid.data.x), np.min(dem_grid.data.y), np.min(dem_grid.data.z)]
@@ -188,7 +200,6 @@ class Cloud:
     def clip(self, geometry):
         """
         Clips the point cloud to the provided geometry (see below for compatible types) using a ray casting algorithm.
-
 
         :param geometry: Either a tuple of bounding box coordinates (square clip), an OGR geometry (polygon clip), \
         or a tuple of a point and radius (circle clip).
@@ -220,8 +231,8 @@ class Cloud:
 
     def chm(self, cell_size, interp_method = None):
         """
-        Returns a Raster object of the maximum z value in each cell. Mostly a convenience wrapper.
-        
+        Returns a Raster object of the maximum z value in each cell.
+
         :param cell_size: The cell size for the returned raster in the same units as the parent Cloud or las file.
         :return: A Raster object.
         """

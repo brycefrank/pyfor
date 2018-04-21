@@ -148,7 +148,7 @@ class Grid:
         """
         pass
 
-    def ground_filter(self, num_windows, dh_max, dh_0, classify = False):
+    def ground_filter(self, num_windows, dh_max, dh_0, interp_method = "nearest"):
         """
         Wrapper call for filter.zhang with convenient defaults.
 
@@ -159,12 +159,12 @@ class Grid:
         # TODO Add functionality for classifying points as ground
         # Get the interpolated DEM array.
         dem_array = filter.zhang(self.interpolate("min", "z").array, num_windows,
-                                 dh_max, dh_0, self.cell_size, self)
+                                 dh_max, dh_0, self.cell_size, self, interp_method = interp_method)
         dem = Raster(dem_array, self)
 
         return(dem)
 
-    def normalize(self, num_windows, dh_max, dh_0):
+    def normalize(self, num_windows, dh_max, dh_0, interp_method = "nearest"):
         """
         Returns a new, normalized Grid object.
         :return:
@@ -175,7 +175,7 @@ class Grid:
             strange results.")
 
         # Retrieve the DEM
-        dem = self.ground_filter(num_windows, dh_max, dh_0)
+        dem = self.ground_filter(num_windows, dh_max, dh_0, interp_method)
 
         # Organize the array into a dataframe and merge
         df = pd.DataFrame(dem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
