@@ -9,46 +9,6 @@ from rasterio.transform import from_origin
 from shapely.geometry import shape
 import geopandas
 
-def export_wkt_multipoints_to_shp(geom, path):
-    if os.path.exists(path):
-        os.remove(path)
-
-    outDriver = ogr.GetDriverByName('ESRI Shapefile')
-    outDataSource = outDriver.CreateDataSource(path)
-    outLayer = outDataSource.CreateLayer(path, geom_type=ogr.wkbMultiPoint)
-    featureDefn = outLayer.GetLayerDefn()
-
-    outFeature = ogr.Feature(featureDefn)
-    outFeature.SetGeometry(geom)
-    outLayer.CreateFeature(outFeature)
-    outFeature.Destroy()
-
-
-def _export_coords_to_shp(coordlist, path):
-    """Creates a multipoint shapefile of the coordinates in a 2d array, used for debugging purposes.
-
-    :param coordlist: 2d list of coordinates.
-    :param path: Output path of the shapefile.
-    """
-    if os.path.exists(path):
-        os.remove(path)
-
-    outDriver = ogr.GetDriverByName('ESRI Shapefile')
-    outDataSource = outDriver.CreateDataSource(path)
-    outLayer = outDataSource.CreateLayer(path, geom_type=ogr.wkbMultiPoint)
-    featureDefn = outLayer.GetLayerDefn()
-
-    multipoint = ogr.Geometry(ogr.wkbMultiPoint)
-    for plot in coordlist:
-        point = ogr.Geometry(ogr.wkbPoint)
-        point.AddPoint(plot[0][0], plot[0][1])
-        multipoint.AddGeometry(point)
-
-    outFeature = ogr.Feature(featureDefn)
-    outFeature.SetGeometry(multipoint)
-    outLayer.CreateFeature(outFeature)
-    outFeature.Destroy()
-
 def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
     """Writes a GeoTIFF raster from a numpy array.
 
@@ -70,7 +30,7 @@ def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
     out_dataset.close()
 
 
-def array_to_polygons(array, affine, wkt):
+def array_to_polygons(array, affine):
     """
     Returns a geopandas dataframe of polygons as deduced from an array.
 

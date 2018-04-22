@@ -8,9 +8,11 @@ import laspy
 import os
 import matplotlib.figure
 import numpy as np
+import geopandas as gpd
 
 data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_las = os.path.join(data_dir, 'test.las')
+proj4str = "+proj=utm +zone=10 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
 
 class CloudDataTestCase(unittest.TestCase):
     def setUp(self):
@@ -130,7 +132,7 @@ class GridTestCase(unittest.TestCase):
         self.assertEqual(type(raster), rasterizer.Raster)
 
     def test_interpolate(self):
-        pass
+        self.test_grid.interpolate("max", "z")
 
     def tearDown(self):
         del self.test_grid.las.header
@@ -139,6 +141,7 @@ class RasterTestCase(unittest.TestCase):
     def setUp(self):
         pc = cloud.Cloud(test_las)
         self.test_raster = pc.grid(1).raster("max", "z")
+        self.test_raster.grid.cloud.crs = proj4str
 
     def test_affine(self):
         affine = self.test_raster._affine
@@ -149,6 +152,11 @@ class RasterTestCase(unittest.TestCase):
         self.assertEqual(affine[4], -1.0)
         self.assertEqual(affine[5], 5015782.45)
         self.assertEqual(affine[6], 0)
+
+    def test_watershed_seg(self):
+        tops = self.test_raster.watershed_seg()
+        self.assertEqual(type(tops), gpd.GeoDataFrame)
+        self.assertEqual(len(tops), 158)
 
 class GISExportTestCase(unittest.TestCase):
     def setUp(self):
@@ -177,8 +185,10 @@ class GISExportTestCase(unittest.TestCase):
         pass
 
     def test_array_to_polygon(self):
-        # FIXME Wait until Raster is fully implemented otherwise this is a messy test
-        #gisexport.array_to_polygons(self.test_array, self.est_grid._affine, self.test_grid.wkt)
-        pass
+        array = np.random.randint(1, 5, size=(99, 99)).astype(np.int32)
+        gisexport.array_to_polygons(array, self.test_raster._affine)
+
+
+
 
 
