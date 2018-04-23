@@ -11,8 +11,6 @@ from pyfor import gisexport
 from pyfor import filter
 from rasterio.transform import from_origin
 
-# TODO: refactor any grouped dataframe to "cells"
-
 class Grid:
     """The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. It is \
     not quite a raster yet. A raster has only one value per cell, whereas the Grid object merely sorts all points \
@@ -63,7 +61,7 @@ class Grid:
 
         array = self.cells.agg({dim: func}).reset_index().pivot('bins_y', 'bins_x', dim)
         array = np.asarray(array)
-        return(Raster(array, self))
+        return Raster(array, self)
 
     def boolean_summary(self, func, dim):
         # TODO Might not be worth its own function...
@@ -77,7 +75,7 @@ class Grid:
         """
 
         mask = self.data.groupby(['bins_x', 'bins_y'])[dim].transform(func) == self.data[dim]
-        return(mask)
+        return mask
 
     @property
     def empty_cells(self):
@@ -87,9 +85,9 @@ class Grid:
         return: An N x 2 numpy array where each row cooresponds to the [y x] coordinate of the empty cell.
         """
         array = self.raster("count", "z").array
-        emptys = np.argwhere(np.isnan((array)))
+        emptys = np.argwhere(np.isnan(array))
 
-        return(emptys)
+        return emptys
 
     def interpolate(self, func, dim, interp_method="nearest"):
         """
@@ -98,6 +96,8 @@ class Grid:
 
         :param func: The function (or function string) to calculate an array on the gridded data.
         :param dim: The dimension (i.e. column name of self.cells) to cast func onto.
+        :param interp_method: The interpolation method call for scipy.griddata, one of any: "nearest", "cubic", \
+        "linear"
 
         :return: An interpolated array.
         """
@@ -110,9 +110,9 @@ class Grid:
         # https://stackoverflow.com/questions/12864445/numpy-meshgrid-points
         X, Y = np.mgrid[1:self.n+1, 1:self.m+1]
 
-        interp_grid = griddata(points, values, (X, Y), method = interp_method).T
+        interp_grid = griddata(points, values, (X, Y), method=interp_method).T
 
-        return(Raster(interp_grid, self))
+        return Raster(interp_grid, self)
 
     def metrics(self, func_dict):
         """
@@ -123,9 +123,9 @@ class Grid:
         :return: A pandas dataframe with the aggregated metrics.
         """
 
-        return(self.cells.agg(func_dict))
+        return self.cells.agg(func_dict)
 
-    def plot(self, func, cmap ="viridis", dim = "z", return_plot = False):
+    def plot(self, func, cmap="viridis", dim="z", return_plot=False):
         """
         Plots a 2 dimensional canopy height model using the maximum z value in each cell. This is intended for visual \
         checking and not for analysis purposes. See the rasterizer.Grid class for analysis.
@@ -149,7 +149,7 @@ class Grid:
         """
         pass
 
-    def ground_filter(self, num_windows, dh_max, dh_0, classify = False):
+    def ground_filter(self, num_windows, dh_max, dh_0, interp_method = "nearest"):
         """
         Wrapper call for filter.zhang with convenient defaults.
 
@@ -160,12 +160,12 @@ class Grid:
         # TODO Add functionality for classifying points as ground
         # Get the interpolated DEM array.
         dem_array = filter.zhang(self.interpolate("min", "z").array, num_windows,
-                                 dh_max, dh_0, self.cell_size, self)
+                                 dh_max, dh_0, self.cell_size, self, interp_method = interp_method)
         dem = Raster(dem_array, self)
 
-        return(dem)
+        return dem
 
-    def normalize(self, num_windows, dh_max, dh_0):
+    def normalize(self, num_windows, dh_max, dh_0, interp_method="nearest"):
         """
         Returns a new, normalized Grid object.
         :return:
@@ -176,7 +176,7 @@ class Grid:
             strange results.")
 
         # Retrieve the DEM
-        dem = self.ground_filter(num_windows, dh_max, dh_0)
+        dem = self.ground_filter(num_windows, dh_max, dh_0, interp_method)
 
         # Organize the array into a dataframe and merge
         df = pd.DataFrame(dem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
@@ -190,7 +190,7 @@ class Grid:
         ground_grid.data = df
         ground_grid.cells = ground_grid.data.groupby(['bins_x', 'bins_y'])
 
-        return(ground_grid)
+        return ground_grid
 
 class Raster:
     def __init__(self, array, grid):
@@ -202,7 +202,7 @@ class Raster:
     def _affine(self):
         """Constructs the affine transformation, used for plotting and exporting polygons and rasters."""
         affine = from_origin(self.grid.las.min[0], self.grid.las.max[1], self.grid.cell_size, self.grid.cell_size)
-        return(affine)
+        return affine
 
     def plot(self, cmap = "viridis", return_plot = False):
         """
@@ -237,15 +237,17 @@ class Raster:
         """
         Returns the watershed segmentation of the Raster as a geopandas dataframe.
 
-        :param min_distance:
-        :param threshold_abs:
+        :param classify: If true, sets the user data of the original point cloud data to the segment ID. The \
+        segment ID is an arbitrary identification number generated by the labels function. This can be useful for \
+        plotting point clouds where each segment color is unique.
+        :return: A geopandas data frame, each record is a crown segment.
         """
 
         # TODO Not sure if this should be generalized to another class (like grid)
-        if self.grid.cloud.crs == None:
-            print("Watershed segmentation requires coordinate reference. If your point cloud is referenced in UTM \
-                  lookinto the gisexport.utm_lookup function")
-            return(False)
+        #if self.grid.cloud.crs == None:
+        #    print("Watershed segmentation requires coordinate reference. If your point cloud is referenced in UTM \
+        #          lookinto the gisexport.utm_lookup function")
+        #    return False
 
         tops = peak_local_max(self.array, indices = False, min_distance= min_distance, threshold_abs= threshold_abs)
         tops = label(tops)[0]
@@ -261,9 +263,9 @@ class Raster:
             self.grid.cells = self.grid.data.groupby(['bins_x', 'bins_y'])
 
 
-        tops = gisexport.array_to_polygons(labels, self._affine, self.grid.cloud.crs)
+        tops = gisexport.array_to_polygons(labels, self._affine)
 
-        return(tops)
+        return tops
 
     def pit_filter(self, kernel_size):
         self.array = medfilt(self.array, kernel_size = kernel_size)

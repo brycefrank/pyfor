@@ -70,7 +70,7 @@ def dilation(Z, w_k, n):
     return(np.asarray(Z_f))
 
 
-def zhang(array, number_of_windows, dh_max, dh_0, c, grid):
+def zhang(array, number_of_windows, dh_max, dh_0, c, grid, interp_method = "nearest"):
     """
     Implements Zhang et. al (2003), a progressive morphological ground filter. This returns a matrix of Z values for
     each grid cell that have been determined to be actual ground cells.
@@ -121,7 +121,7 @@ def zhang(array, number_of_windows, dh_max, dh_0, c, grid):
     X, Y = np.mgrid[0:grid.m, 0:grid.n]
     C = np.where(np.isfinite(B) == True)
     vals = B[C[0], C[1]]
-    dem_array = griddata(np.stack((C[0], C[1]), axis = 1), vals, (X, Y), method="nearest")
+    dem_array = griddata(np.stack((C[0], C[1]), axis = 1), vals, (X, Y), method=interp_method)
 
     return(dem_array)
 
