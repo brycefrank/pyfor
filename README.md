@@ -14,7 +14,7 @@ pyfor is currently undergoing major revisions from its infant stage to incorpora
 These samples are a work in progress, but demonstrate some of the package capabilities.
 
 - [File Input and Plotting](https://github.com/brycefrank/pyfor/blob/pdal-u/samples/Cloud.ipynb)
-- [Normalization](https://github.com/brycefrank/pyfor/blob/pdal-u/samples/Normalization.ipynb)
+- [Canopy Height Models](https://github.com/brycefrank/pyfor/blob/pdal-u/samples/CanopyHeightModel.ipynb)
 
 ## Installation
 
