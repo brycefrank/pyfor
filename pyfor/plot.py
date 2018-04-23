@@ -3,7 +3,7 @@ from plotly.graph_objs import graph_objs as go
 import numpy as np
 
 
-def iplot3d(las, max_points, point_size):
+def iplot3d(las, max_points, point_size, dim, colorscale):
     """
     Plots the 3d point cloud in a compatible version for Jupyter notebooks.
     :return:
@@ -19,6 +19,7 @@ def iplot3d(las, max_points, point_size):
                 x = las.x[rand]
                 y = las.y[rand]
                 z = las.z[rand]
+                color_var = las.points[dim].values[rand]
 
                 trace1 = go.Scatter3d(
                     x=x,
@@ -27,8 +28,8 @@ def iplot3d(las, max_points, point_size):
                     mode='markers',
                     marker=dict(
                         size=point_size,
-                        color=z,
-                        colorscale='Viridis',
+                        color=color_var,
+                        colorscale=colorscale,
                         opacity=1
                     )
                 )

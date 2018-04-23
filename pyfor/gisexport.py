@@ -1,11 +1,6 @@
-import ogr
-import osr
-import os
-import gdal
 import numpy as np
 import rasterio
 from rasterio.features import shapes
-from rasterio.transform import from_origin
 from shapely.geometry import shape
 import geopandas
 
@@ -29,44 +24,21 @@ def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
     out_dataset.write(array, 1)
     out_dataset.close()
 
-
 def array_to_polygons(array, affine):
     """
     Returns a geopandas dataframe of polygons as deduced from an array.
 
-    :param array:
+    :param array: The 2D numpy array to polygonize.
+    :param affine: The affine transformation.
     :return:
     """
-
 
     results = [
         {'properties': {'raster_val': v}, 'geometry': s}
         for i, (s, v)
-            in enumerate(shapes(array, transform = affine))
+            in enumerate(shapes(array, transform=affine))
     ]
 
     tops_df = geopandas.GeoDataFrame({'geometry': [shape(results[geom]['geometry']) for geom in range(len(results))]})
-    #tops_df.crs = wkt
 
     return(tops_df)
-
-def utm_lookup(zone):
-    """Returns a wkt string of a given UTM zone. Used as a bypass for older las file specifications that do not
-    contain wkt strings.
-
-
-    :param zone: The UTM zone (as a string)
-        ex: "10N"
-    """
-    pcs_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pcs.csv')
-    in_ds = ogr.GetDriverByName('CSV').Open(pcs_path)
-    layer = in_ds.GetLayer()
-    layer.SetAttributeFilter("COORD_REF_SYS_NAME LIKE '%UTM zone {}%'".format(zone))
-    wkt_string = []
-    for feature in layer:
-        code = feature.GetField("COORD_REF_SYS_CODE")
-        name = feature.GetField("COORD_REF_SYS_NAME")
-        srs = osr.SpatialReference()
-        srs.ImportFromEPSG(int(code))
-        wkt_string.append(srs.ExportToProj4())
-    return ''.join(wkt_string)

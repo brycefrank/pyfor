@@ -1,9 +1,6 @@
 import numpy as np
-from numba import jit
 from scipy.ndimage.morphology import grey_opening
 from scipy.interpolate import griddata
-
-# Leaving this as functions for now, may become a class later.
 
 def window_size(k):
     b = 2
@@ -48,27 +45,6 @@ def dht(elev_array, w_k, w_k_1, dh_0, dh_max, c):
         return(s * (w_k - w_k_1) * c + dh_0)
     else:
         return(dh_max)
-
-# This function was replaced with the scipy.opening, leaving just in case it gets used again later.
-def erosion(Z, w_k, n):
-    Z_f = []
-    for j in range(1, n+1):
-        lb = np.floor(j - (w_k) / 2)
-        ub = np.ceil(j + (w_k) / 2)
-        a = [Z[l] for l in range(int(lb), int(ub)) if l >= 0 and l <= len(Z) - 1]
-        Z_f.append(np.min(a))
-    return(np.asarray(Z_f))
-
-# This function was replaced with the scipy.opening, leaving just in case it gets used again later.
-def dilation(Z, w_k, n):
-    Z_f = []
-    for j in range(1, n+1):
-        lb = np.floor(j - (w_k) / 2)
-        ub = np.ceil(j + (w_k) / 2)
-        a = [Z[l] for l in range(int(lb), int(ub)) if l >= 0 and l <= len(Z) - 1]
-        Z_f.append(np.max(a))
-    return(np.asarray(Z_f))
-
 
 def zhang(array, number_of_windows, dh_max, dh_0, c, grid, interp_method = "nearest"):
     """

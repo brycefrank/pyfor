@@ -107,7 +107,7 @@ class Cloud:
 
         rasterizer.Grid(self, cell_size).plot("max", cmap, dim = "z")
 
-    def iplot3d(self, max_points = 30000, point_size = 0.5):
+    def iplot3d(self, max_points=30000, point_size=0.5, dim="z", colorscale="Virids"):
         """
         Plots the 3d point cloud in a compatible version for Jupyter notebooks using Plotly as a backend. If \
         max_points exceeds 30,000, the point cloud is downsampled using a uniform random distribution by default. \
@@ -116,12 +116,12 @@ class Cloud:
         :param max_points: The maximum number of points to render.
         :param point_size: The point size of the rendered point cloud.
         """
-        self.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
-        self.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
-        self.count = np.alen(self.points)
-        plot.iplot3d(self.las, max_points, point_size)
+        self.min = [np.min(self.las.x), np.min(self.las.y), np.min(self.las.z)]
+        self.max = [np.max(self.las.x), np.max(self.las.y), np.max(self.las.z)]
+        self.count = np.alen(self.las.points)
+        plot.iplot3d(self.las, max_points, point_size, dim, colorscale)
 
-    def plot3d(self, point_size = 1, cmap = 'Spectral_r', max_points = 5e5):
+    def plot3d(self, point_size=1, cmap='Spectral_r', max_points=5e5):
         """
         Plots the three dimensional point cloud using a method suitable for non-Jupyter use (i.e. via the Python \
         console). By default, if the point cloud exceeds 5e5 points, then it is downsampled using a uniform random \
@@ -201,7 +201,6 @@ class Cloud:
         self.las.max = [np.max(dem_grid.data.x), np.max(dem_grid.data.y), np.max(dem_grid.data.z)]
         self.normalized = True
 
-
     def clip(self, geometry):
         """
         Clips the point cloud to the provided geometry (see below for compatible types) using a ray casting algorithm.
@@ -210,8 +209,6 @@ class Cloud:
         or a tuple of a point and radius (circle clip).
         :return: A new Cloud object clipped to the provided geometry.
         """
-        # TODO Could be nice to add a warning if the shapefile extends beyond the pointcloud bounds
-
         if type(geometry) == tuple and len(geometry) == 4:
             # Square clip
             mask = clip_funcs.square_clip(self, geometry)
@@ -220,7 +217,7 @@ class Cloud:
         elif type(geometry) == ogr.Geometry:
             keep_points = clip_funcs.poly_clip(self, geometry)
 
-        return(Cloud(CloudData(keep_points, self.las.header)))
+        return Cloud(CloudData(keep_points, self.las.header))
 
     def filter(self, min, max, dim):
         """
@@ -234,21 +231,26 @@ class Cloud:
         condition = (self.las.points[dim] > min) & (self.las.points[dim] < max)
         self.las = CloudData(self.las.points[condition], self.las.header)
 
-    def chm(self, cell_size, interp_method = None, pit_filter = None, kernel_size = 3):
+    def chm(self, cell_size, interp_method=None, pit_filter=None, kernel_size=3):
         """
         Returns a Raster object of the maximum z value in each cell.
 
         :param cell_size: The cell size for the returned raster in the same units as the parent Cloud or las file.
-        :return: A Raster object.
+        :param interp_method: The interpolation method to fill in NA values of the produced canopy height model, one \
+        of either "nearest", "cubic", or "linear"
+        :param pit_filter: If "median" passes a median filter over the produced canopy height model.
+        :param kernel_size: The kernel size of the median filter, must be an odd integer.
+        :return: A Raster object of the canopy height model.
         """
 
         if pit_filter == "median":
-            raster = self.grid(cell_size).interpolate("max", "z", interp_method = interp_method)
-            raster.pit_filter(kernel_size = kernel_size)
-            return(raster)
+            raster = self.grid(cell_size).interpolate("max", "z", interp_method=interp_method)
+            raster.pit_filter(kernel_size=kernel_size)
+            return raster
 
-        if interp_method == None:
+        if interp_method==None:
             return(self.grid(cell_size).raster("max", "z"))
+
         else:
             return(self.grid(cell_size).interpolate("max", "z", interp_method))
 

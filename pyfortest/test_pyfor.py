@@ -103,6 +103,9 @@ class CloudTestCase(unittest.TestCase):
         test_cloud.normalize(0.5)
         self.assertLess(test_cloud.las.max[2], 65)
 
+    def test_chm(self):
+        self.test_cloud.chm(0.5, interp_method="nearest", pit_filter= "median")
+
 
 
 class GridTestCase(unittest.TestCase):
@@ -170,10 +173,10 @@ class GISExportTestCase(unittest.TestCase):
 
     def test_array_to_raster_writes(self):
         test_grid = cloud.Cloud(test_las).grid(1)
-        wkt = gisexport.utm_lookup("10N")
+        test_grid.cloud.crs = proj4str
         array = test_grid.raster("max", "z").array
         gisexport.array_to_raster(array, 0.5, test_grid.las.header.min[0], test_grid.las.header.max[1],
-                                  wkt, os.path.join(data_dir, "temp_raster_array.tif"))
+                                  proj4str, os.path.join(data_dir, "temp_raster_array.tif"))
         self.assertTrue(os.path.exists(os.path.join(data_dir, "temp_raster_array.tif")))
         os.remove(os.path.join(data_dir, "temp_raster_array.tif"))
 
