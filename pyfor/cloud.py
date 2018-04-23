@@ -12,7 +12,6 @@ from pyfor import rasterizer
 from pyfor import clip_funcs
 from pyfor import plot
 
-
 class CloudData:
     """
     A simple class composed of a numpy array of points and a laspy header, meant for internal use. This is basically
@@ -49,6 +48,10 @@ class CloudData:
         writer.pt_src_id = self.points["pt_src_id"]
         writer.close()
 
+    def _update(self):
+        self.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
+        self.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
+        self.count = np.alen(self.points)
 
 class Cloud:
     def __init__(self, las):
@@ -113,7 +116,9 @@ class Cloud:
         :param max_points: The maximum number of points to render.
         :param point_size: The point size of the rendered point cloud.
         """
-
+        self.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
+        self.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
+        self.count = np.alen(self.points)
         plot.iplot3d(self.las, max_points, point_size)
 
     def plot3d(self, point_size = 1, cmap = 'Spectral_r', max_points = 5e5):
@@ -218,14 +223,19 @@ class Cloud:
         condition = (self.las.points[dim] > min) & (self.las.points[dim] < max)
         self.las = CloudData(self.las.points[condition], self.las.header)
 
-    def chm(self, cell_size, interp_method = None):
+    def chm(self, cell_size, interp_method = None, pit_filter = None, kernel_size = 3):
         """
         Returns a Raster object of the maximum z value in each cell. Mostly a convenience wrapper.
         
         :param cell_size: The cell size for the returned raster in the same units as the parent Cloud or las file.
         :return: A Raster object.
         """
-        # TODO Pit free algo
+
+        if pit_filter == "median":
+            raster = self.grid(cell_size).interpolate("max", "z", interp_method = interp_method)
+            raster.pit_filter(kernel_size = kernel_size)
+            return(raster)
+
         if interp_method == None:
             return(self.grid(cell_size).raster("max", "z"))
         else:
