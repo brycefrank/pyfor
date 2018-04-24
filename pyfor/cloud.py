@@ -54,6 +54,7 @@ class CloudData:
         self.count = np.alen(self.points)
 
 class Cloud:
+    # TODO Consider inheriting from
     def __init__(self, las):
         """
         A dataframe representation of a point cloud, with some useful functions for manipulating and displaying.
@@ -67,13 +68,6 @@ class Cloud:
                                    "flag_byte":las.flag_byte, "scan_angle_rank":las.scan_angle_rank, "user_data": las.user_data,
                                    "pt_src_id": las.pt_src_id})
             header = las.header
-
-            # Toss out the laspy object in favor of CloudData
-
-            # FIXME the following line produces errors when creating new CloudData objects.
-            # TODO one way to do this might be to move the above code into the __init__ for CloudData and handle close
-            # there
-            # las.close()
             self.las = CloudData(points, header)
         elif type(las) == CloudData:
             self.las = las
@@ -107,7 +101,7 @@ class Cloud:
 
         rasterizer.Grid(self, cell_size).plot("max", cmap, dim = "z")
 
-    def iplot3d(self, max_points=30000, point_size=0.5, dim="z", colorscale="Virids"):
+    def iplot3d(self, max_points=30000, point_size=0.5, dim="z", colorscale="Viridis"):
         """
         Plots the 3d point cloud in a compatible version for Jupyter notebooks using Plotly as a backend. If \
         max_points exceeds 30,000, the point cloud is downsampled using a uniform random distribution by default. \
@@ -116,8 +110,8 @@ class Cloud:
         :param max_points: The maximum number of points to render.
         :param point_size: The point size of the rendered point cloud.
         """
-        self.min = [np.min(self.las.x), np.min(self.las.y), np.min(self.las.z)]
-        self.max = [np.max(self.las.x), np.max(self.las.y), np.max(self.las.z)]
+        self.min = [np.min(self.las.points.x), np.min(self.las.points.y), np.min(self.las.points.z)]
+        self.max = [np.max(self.las.points.x), np.max(self.las.points.y), np.max(self.las.points.z)]
         self.count = np.alen(self.las.points)
         plot.iplot3d(self.las, max_points, point_size, dim, colorscale)
 
@@ -134,14 +128,14 @@ class Cloud:
 
         # Randomly sample down if too large
         if self.las.count > max_points:
-                sample_mask = np.random.randint(self.las.header.count,
+                sample_mask = np.random.randint(self.las.count,
                                                 size = int(max_points))
                 #TODO update this to new pandas framework
-                coordinates = np.stack([self.las.x, self.las.y, self.las.z], axis = 1)[sample_mask,:]
+                coordinates = np.stack([self.las.points.x, self.las.points.y, self.las.points.z], axis = 1)[sample_mask,:]
                 print("Too many points, down sampling for 3d plot performance.")
         else:
             # TODO update this to new pandas framework
-            coordinates = np.stack([self.las.x, self.las.y, self.las.z], axis = 1)
+            coordinates = np.stack([self.las.points.x, self.las.points.y, self.las.points.z], axis = 1)
 
         # Start Qt app and widget
         pg.mkQApp()
@@ -164,12 +158,14 @@ class Cloud:
         view.addItem(points)
 
         # Center on the aritgmetic mean of the point cloud and display
-        # TODO Calculate an adequate zoom out distance
         center = np.mean(coordinates, axis = 0)
         view.opts['center'] = pg.Vector(center[0], center[1], center[2])
+        # Very ad-hoc
+        view.opts['distance'] = (self.las.max[0] - self.las.min[0]) * 1.2
+        #return(view.opts)
         view.show()
 
-    def normalize(self, cell_size, num_windows = 7, dh_max = 2.5, dh_0 = 1, interp_method = "nearest"):
+    def normalize(self, cell_size, num_windows=7, dh_max=2.5, dh_0=1, interp_method="nearest"):
         """
         Normalizes this cloud object **in place** by generating a DEM using the default filtering algorithm  and \
         subtracting the underlying ground elevation. This uses a grid-based progressive morphological filter developed \
@@ -230,6 +226,7 @@ class Cloud:
         """
         condition = (self.las.points[dim] > min) & (self.las.points[dim] < max)
         self.las = CloudData(self.las.points[condition], self.las.header)
+        self.las._update()
 
     def chm(self, cell_size, interp_method=None, pit_filter=None, kernel_size=3):
         """
@@ -253,4 +250,3 @@ class Cloud:
 
         else:
             return(self.grid(cell_size).interpolate("max", "z", interp_method))
-

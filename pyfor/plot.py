@@ -2,7 +2,6 @@ from plotly import offline
 from plotly.graph_objs import graph_objs as go
 import numpy as np
 
-
 def iplot3d(las, max_points, point_size, dim, colorscale):
     """
     Plots the 3d point cloud in a compatible version for Jupyter notebooks.
@@ -16,9 +15,9 @@ def iplot3d(las, max_points, point_size, dim, colorscale):
             if las.header.count > max_points:
                 print("Point cloud too large, down sampling for plot performance.")
                 rand = np.random.randint(0, las.header.count, 30000)
-                x = las.x[rand]
-                y = las.y[rand]
-                z = las.z[rand]
+                x = las.points.x[rand]
+                y = las.points.y[rand]
+                z = las.points.z[rand]
                 color_var = las.points[dim].values[rand]
 
                 trace1 = go.Scatter3d(
@@ -54,3 +53,31 @@ def iplot3d(las, max_points, point_size, dim, colorscale):
             return(False)
     except NameError:
         return(False)
+
+def iplot3d_surface(array, colorscale):
+    data = [
+        go.Surface(
+            z=array,
+            colorscale=colorscale
+        )
+    ]
+
+    layout = go.Layout(
+        autosize=False,
+
+        width=600,
+        height=600,
+        margin=dict(
+            l=65,
+            r=50,
+            b=65,
+            t=90
+        ),
+        scene=dict(
+            aspectmode="data"
+        )
+    )
+    offline.init_notebook_mode(connected=True)
+    fig = go.Figure(data=data, layout=layout)
+    offline.iplot(fig)
+

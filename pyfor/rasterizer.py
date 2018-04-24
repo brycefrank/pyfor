@@ -9,6 +9,7 @@ from skimage.feature import peak_local_max
 import matplotlib.pyplot as plt
 from pyfor import gisexport
 from pyfor import filter
+from pyfor import plot
 from rasterio.transform import from_origin
 
 class Grid:
@@ -143,6 +144,7 @@ class Grid:
 
         Raster(plot_mat, self).plot(return_plot=False)
 
+
     def plot3d(self):
         """
         Not yet implemented.
@@ -231,6 +233,12 @@ class Raster:
 
         else:
             plt.show()
+
+    def iplot3d(self, colorscale="Viridis"):
+        """
+        Plots the raster as a surface using Plotly.
+        """
+        plot.iplot3d_surface(self.array)
 
     def watershed_seg(self, min_distance=2, threshold_abs=2, classify=False):
         """
