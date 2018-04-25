@@ -2,19 +2,22 @@
   <img src="https://github.com/brycefrank/pyfor/blob/pdal-u/docs/tile.png" width="400">
 </p>
 
-[![Documentation Status](https://readthedocs.org/projects/pyfor-pdal-u/badge/?version=pdal-u)](http://pyfor-pdal-u.readthedocs.io/en/pdal-u/?badge=pdal-u)[![Build Status](https://travis-ci.org/brycefrank/pyfor.svg?branch=pdal-u)](https://travis-ci.org/brycefrank/pyfor)[![Coverage Status](https://coveralls.io/repos/github/brycefrank/pyfor/badge.svg?branch=pdal-u)](https://coveralls.io/github/brycefrank/pyfor?branch=pdal-u)
+[![Documentation Status](https://readthedocs.org/projects/pyfor/badge/?version=latest)](http://pyfor.readthedocs.io/en/latest/?badge=latest)[![Build Status](https://travis-ci.org/brycefrank/pyfor.svg?branch=master)](https://travis-ci.org/brycefrank/pyfor)[![Coverage Status](https://coveralls.io/repos/github/brycefrank/pyfor/badge.svg?branch=master)](https://coveralls.io/github/brycefrank/pyfor?branch=master)
+
 
 **pyfor** is a Python module intended as a tool to assist in the processing of point cloud data in the context of forest inventory. It offers functions that convert raw point cloud data to usable information about forested landscapes using an object oriented (OOP) framework accessible for advanced and novice users of Python. pyfor aims to provide a cross platform means to interactively process point cloud data, as well as efficient ways to batch process large acquisitions.
 
-pyfor is currently undergoing major revisions from its infant stage to incorporate several packages that speed up processing time and allow for visualizations of point cloud data. The expected release for a stable working version (0.2.0) is **May 2018**, but this branch will provide rolling release updates for anyone interested in trying the package early.
+The current release is 0.2.0 (this branch). 0.2.0 is adequate for processing single tiles and serves as the foundation for future updates.
+
+An upcoming release, 0.3.0,  will focus on processing large acquisitions, and is slated for release on this branch in **August 2018**. If you would like to track the progress of that release, please see [this](://github.com/brycefrank/pyfor/tree/0.3.0) branch page.
 
 ## Samples
 
 These samples are a work in progress, but demonstrate some of the package capabilities.
 
-- [File Input and Plotting](https://github.com/brycefrank/pyfor/blob/pdal-u/samples/ImportsExports.ipynb)
-- [Normalization](https://github.com/brycefrank/pyfor/blob/pdal-u/samples/Normalization.ipynb)
-- [Canopy Height Models](https://github.com/brycefrank/pyfor/blob/pdal-u/samples/CanopyHeightModel.ipynb)
+- [File Input and Plotting](https://github.com/brycefrank/pyfor/blob/master/samples/ImportsExports.ipynb)
+- [Normalization](https://github.com/brycefrank/pyfor/blob/master/samples/Normalization.ipynb)
+- [Canopy Height Models](https://github.com/brycefrank/pyfor/blob/master/samples/CanopyHeightModel.ipynb)
 
 ## Installation
 
@@ -49,11 +52,9 @@ If you see no errors, you are ready to process!
 
 ## Getting Started
 
-[under construction]
+An early collection of samples is located [here](https://github.com/brycefrank/pyfor/tree/master/samples). These demonstrate some basic tasks.
 
-An early version of the documentation is located [here](http://pyfor-pdal-u.readthedocs.io/en/pdal-u/). Beware of many formatting issues yet to be fixed.
-
-An early collection of samples is located [here](https://github.com/brycefrank/pyfor/tree/pdal-u/samples)
+An early version of the documentation is located [here](http://pyfor-pdal-u.readthedocs.io/en/pdal-u/). This provides specific documentation for each class and function.
 
 ## Features
 
@@ -93,4 +94,5 @@ And forthcoming in the 0.3 stable release, this release is intended for batch pr
 
 If you would like to contribute, especially those experienced with `numba`, `numpy`, `gdal`, `ogr` and `pandas`, please contact me at bfrank70@gmail.com For a list of to do items before our first release, please see the [Working Prototype](https://github.com/brycefrank/pyfor/projects/3) page.
 
-I am also willing to implement features on request. Feel free to [open an issue](https://github.com/brycefrank/pyfor/issues) with your request or email me at the adress above.
+I am also willing to implement features on request. Feel free to [open an issue](https://github.com/brycefrank/pyfor/issues) with your request or email me at the address above.
+
