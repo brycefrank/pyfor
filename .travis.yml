@@ -1,7 +1,4 @@
 language: python
-branches:
-  only:
-    - pdal-u
 python:
   - "3.6"
 install:
