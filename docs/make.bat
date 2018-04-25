@@ -7,9 +7,9 @@ REM Command file for Sphinx documentation
 if "%SPHINXBUILD%" == "" (
 	set SPHINXBUILD=sphinx-build
 )
-set SOURCEDIR=source
-set BUILDDIR=build
-set SPHINXPROJ=PyFor
+set SOURCEDIR=.
+set BUILDDIR=_build
+set SPHINXPROJ=pyfor
 
 if "%1" == "" goto help
 

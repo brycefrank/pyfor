@@ -1,4 +1,0 @@
-gisexport
-=================================
-.. automodule:: gisexport
-   :members:

@@ -1,3 +1,14 @@
 # Sphinx Build files
-/docs/build
+docs/_build/*
+# Environments
+venv/*
+venv/
+# Compiled files
+pyfor/*.pyc
+pyfor/test.py
+pyfor/__pycache__
 
+# Other
+.DS_Store
+htmlcov/
+htmlcov/*

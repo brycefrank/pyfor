@@ -1,4 +1,0 @@
-metrics
-=================================
-.. automodule:: metrics
-    :members:

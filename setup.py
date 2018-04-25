@@ -1,11 +1,11 @@
-from distutils.core import setup
+from setuptools import setup, find_packages, Extension
 
 setup(
-    name='PyFor',
-    version='0.1',
+    name='pyfor',
+    version='0.2',
     author='Bryce Frank',
-    author_email='bryce.frank@oregonstate.edu',
-    packages=['pyfor'],
+    author_email='bfrank70@gmail.com',
+    packages=['pyfor', 'pyfortest'],
     url='https://github.com/brycefrank/pyfor',
     license='LICENSE.txt',
     description='Tools for forest resource LiDAR.',

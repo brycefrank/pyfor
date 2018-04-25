@@ -1,0 +1,20 @@
+name: pyfor_env
+
+dependencies:
+  - python=3.6
+  - numpy
+  - gdal
+  - pandas
+  - scipy
+  - scikit-image
+  - pyqtgraph
+  - matplotlib
+  - pyopengl
+  - plotly
+  - numba
+  - rasterio
+  - geopandas
+  - pip:
+      - laspy
+      - sphinx_bootstrap_theme
+      - python-coveralls

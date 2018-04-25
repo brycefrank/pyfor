@@ -1,0 +1,197 @@
+from pyfor import *
+import unittest
+
+# modeled heavily after laspytest
+# https://github.com/laspy/laspy/blob/master/laspytest/test_laspy.py
+import pandas as pd
+import laspy
+import os
+import matplotlib.figure
+import numpy as np
+import geopandas as gpd
+
+data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+test_las = os.path.join(data_dir, 'test.las')
+proj4str = "+proj=utm +zone=10 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
+
+class CloudDataTestCase(unittest.TestCase):
+    def setUp(self):
+        self.test_points = {
+            "x": [0, 1],
+            "y": [0, 1],
+            "z": [0, 1],
+            "intensity": [0, 1],
+            "classification": [0, 1],
+            "flag_byte": [0, 1],
+            "scan_angle_rank": [0, 1],
+            "user_data": [0, 1],
+            "pt_src_id": [0, 1]
+        }
+
+        self.test_header = laspy.file.File(test_las).header
+
+        self.test_points = pd.DataFrame.from_dict(self.test_points)
+        self.column = [0,1]
+        self.test_cloud_data = cloud.CloudData(self.test_points, self.test_header)
+
+
+    def test_init(self):
+        self.assertEqual(type(self.test_cloud_data), cloud.CloudData)
+
+    def test_data_length(self):
+        self.assertEqual(len(self.test_cloud_data.points), 2)
+
+
+    def test_write(self):
+        self.test_cloud_data.write(os.path.join(data_dir, "temp_test_write.las"))
+        read = laspy.file.File(os.path.join(data_dir, "temp_test_write.las"))
+        self.assertEqual(type(read), laspy.file.File)
+        read.close()
+
+        os.remove(os.path.join(data_dir, "temp_test_write.las"))
+
+    # TODO tear down
+
+class CloudTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.test_cloud = cloud.Cloud(test_las)
+
+    def test_las_load(self):
+        """Tests if a .las file succesfully loads when cloud.Cloud is called"""
+        self.assertEqual(type(self.test_cloud), cloud.Cloud)
+
+    def test_grid_creation(self):
+        """Tests if the grid is successfully created."""
+        # Does the call to grid return the proper type
+        self.assertEqual(type(self.test_cloud.grid(1)), rasterizer.Grid)
+
+    def test_filter_z(self):
+        self.test_filter = cloud.Cloud(test_las)
+        self.test_filter.filter(350, 351, "z")
+        self.assertEqual(self.test_filter.las.count, 30)
+        self.assertLessEqual(self.test_filter.las.max[2], [351])
+        self.assertGreaterEqual(self.test_filter.las.min[2], [350])
+
+    def test_clip_square(self):
+        mins, maxes = self.test_cloud.las.header.min, self.test_cloud.las.header.max
+        clip_cloud = self.test_cloud.clip((mins[0], mins[0]+5, mins[1], mins[1]+5))
+        self.assertEqual(type(clip_cloud), cloud.Cloud)
+        self.assertLess(clip_cloud.las.count, self.test_cloud.las.count)
+        pass
+
+    def test_clip_polygon(self):
+        pass
+
+    def test_clip_circle(self):
+        pass
+
+    def test_plot_return(self):
+        # FIXME broken on travis-ci
+        #plot = self.test_cloud.plot(return_plot=True)
+        #self.assertEqual(type(plot), matplotlib.figure.Figure)
+        pass
+
+    def test_ground_filter_returns_raster(self):
+        ground = self.test_cloud.grid(0.5).ground_filter(3, 2, 1)
+        self.assertEqual(type(ground), rasterizer.Raster)
+        # A very stringent test, ok to reduce:
+        self.assertNotEqual(np.any(ground), 0)
+
+    def test_normalize(self):
+        test_cloud = cloud.Cloud(test_las)
+        test_cloud.normalize(0.5)
+        self.assertLess(test_cloud.las.max[2], 65)
+
+    def test_chm(self):
+        self.test_cloud.chm(0.5, interp_method="nearest", pit_filter= "median")
+
+
+
+class GridTestCase(unittest.TestCase):
+    def setUp(self):
+        self.test_grid = cloud.Cloud(test_las).grid(1)
+
+    def test_m(self):
+        self.assertEqual(99, self.test_grid.m)
+
+    def test_n(self):
+        print(99, self.test_grid.n)
+
+    def test_cloud(self):
+        self.assertEqual(type(self.test_grid.cloud), cloud.Cloud)
+
+    def test_cell_size(self):
+        self.assertEqual(self.test_grid.cell_size, 1)
+
+    def test_empty_cells(self):
+        empty = self.test_grid.empty_cells
+        # Check that there are the correct number
+        self.assertEqual(empty.shape, (167, 2))
+        # TODO Check at least one off-diagonal coordinate is non empty ([0 9] for example)
+
+    def test_raster(self):
+        raster = self.test_grid.raster("max", "z")
+        self.assertEqual(type(raster), rasterizer.Raster)
+
+    def test_interpolate(self):
+        self.test_grid.interpolate("max", "z")
+
+    def tearDown(self):
+        del self.test_grid.las.header
+
+class RasterTestCase(unittest.TestCase):
+    def setUp(self):
+        pc = cloud.Cloud(test_las)
+        self.test_raster = pc.grid(1).raster("max", "z")
+        self.test_raster.grid.cloud.crs = proj4str
+
+    def test_affine(self):
+        affine = self.test_raster._affine
+        self.assertEqual(affine[0], 1.0)
+        self.assertEqual(affine[1], 0.0)
+        self.assertEqual(affine[2], 472137.75)
+        self.assertEqual(affine[3], 0.0)
+        self.assertEqual(affine[4], -1.0)
+        self.assertEqual(affine[5], 5015782.45)
+        self.assertEqual(affine[6], 0)
+
+    def test_watershed_seg(self):
+        tops = self.test_raster.watershed_seg()
+        self.assertEqual(type(tops), gpd.GeoDataFrame)
+        self.assertEqual(len(tops), 158)
+
+class GISExportTestCase(unittest.TestCase):
+    def setUp(self):
+        self.test_grid = cloud.Cloud(test_las).grid(1)
+        self.test_raster = self.test_grid.raster("max", "z")
+
+    def test_pcs_exists(self):
+        print(os.path.realpath(__file__))
+        pcs_path = os.path.join('..', 'pyfor', 'pcs.csv', os.path.dirname(os.path.realpath(__file__)))
+        self.assertTrue(os.path.exists(pcs_path))
+
+    def test_array_to_raster_writes(self):
+        test_grid = cloud.Cloud(test_las).grid(1)
+        test_grid.cloud.crs = proj4str
+        array = test_grid.raster("max", "z").array
+        gisexport.array_to_raster(array, 0.5, test_grid.las.header.min[0], test_grid.las.header.max[1],
+                                  proj4str, os.path.join(data_dir, "temp_raster_array.tif"))
+        self.assertTrue(os.path.exists(os.path.join(data_dir, "temp_raster_array.tif")))
+        os.remove(os.path.join(data_dir, "temp_raster_array.tif"))
+
+    def test_raster_output_transform(self):
+        """
+        Tests if the written raster output was rotated and transformed correctly.
+        :return:
+        """
+        pass
+
+    def test_array_to_polygon(self):
+        array = np.random.randint(1, 5, size=(99, 99)).astype(np.int32)
+        gisexport.array_to_polygons(array, self.test_raster._affine)
+
+
+
+
+
