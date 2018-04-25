@@ -2,6 +2,19 @@
   <img src="https://github.com/brycefrank/pyfor/blob/pdal-u/docs/tile.png" width="400">
 </p>
 
+## 0.3.0 Branch
+
+This is the development branch for release 0.3.0. This release is intended for batch processing of many tiles by providing multiprocessor and cluster support.
+
+- [ ] Batch processing
+	- [ ] Multiprocessor support
+	- [ ] Cluster support
+- [ ] Voxelization methods
+- [ ] More tree detection methods
+
+
+
+
 [![Documentation Status](https://readthedocs.org/projects/pyfor-pdal-u/badge/?version=pdal-u)](http://pyfor-pdal-u.readthedocs.io/en/pdal-u/?badge=pdal-u)[![Build Status](https://travis-ci.org/brycefrank/pyfor.svg?branch=pdal-u)](https://travis-ci.org/brycefrank/pyfor)[![Coverage Status](https://coveralls.io/repos/github/brycefrank/pyfor/badge.svg?branch=pdal-u)](https://coveralls.io/github/brycefrank/pyfor?branch=pdal-u)
 
 **pyfor** is a Python module intended as a tool to assist in the processing of point cloud data in the context of forest inventory. It offers functions that convert raw point cloud data to usable information about forested landscapes using an object oriented (OOP) framework accessible for advanced and novice users of Python. pyfor aims to provide a cross platform means to interactively process point cloud data, as well as efficient ways to batch process large acquisitions.
@@ -73,14 +86,6 @@ Below is a list of features planned for the 0.2 stable release. 0.2 is intended 
 	- [ ] Pit free algorithm (Chen et al. 2017)
 - [X] Clipping point clouds
 - [ ] Area-based approach workflows
-
-And forthcoming in the 0.3 stable release, this release is intended for batch processing of many tiles by providing multiprocessor and cluster support.
-
-- [ ] Batch processing
-	- [ ] Multiprocessor support
-	- [ ] Cluster support
-- [ ] Voxelization methods
-- [ ] More tree detection methods
 
 ## Goals
 
