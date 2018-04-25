@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/brycefrank/pyfor/blob/pdal-u/docs/tile.png" width="400">
+  <img src="docs/tile.png" width="400">
 </p>
 
 [![Documentation Status](https://readthedocs.org/projects/pyfor/badge/?version=latest)](http://pyfor.readthedocs.io/en/latest/?badge=latest)[![Build Status](https://travis-ci.org/brycefrank/pyfor.svg?branch=master)](https://travis-ci.org/brycefrank/pyfor)[![Coverage Status](https://coveralls.io/repos/github/brycefrank/pyfor/badge.svg?branch=master)](https://coveralls.io/github/brycefrank/pyfor?branch=master)
