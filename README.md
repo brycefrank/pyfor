@@ -25,8 +25,6 @@ These samples are a work in progress, but demonstrate some of the package capabi
 
 For installation I highly recommend looking into setting up [miniconda](https://conda.io/miniconda.html) for your system before beginning. pyfor depends on many packages that are otherwise tricky and difficult to install (especially gdal and its bindings), and conda provides a quick and easy way to manage many different Python environments on your system simultaneously.
 
-Note that the following installation procedures will install the rolling release version of pyfor (i.e. this branches' source files). I develop actively on this branch and push commits daily, so beware of intermittent bugs when updating. More stable releases are forthcoming. 
-
 The following bash commands will install this branch of pyfor. It requires installation of miniconda (see above). This will install all of the prerequisites in that environment, named `pyfor_env`. pyfor depends on a lot of heavy libraries, so expect construction of the environment to take a little time.
 
 ```bash
