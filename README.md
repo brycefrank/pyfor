@@ -30,7 +30,6 @@ The following bash commands will install this branch of pyfor. It requires insta
 ```bash
 git clone https://github.com/brycefrank/pyfor.git
 cd pyfor
-git checkout pdal-u
 conda env create -f environment.yml
 
 # For Linux / macOS:
