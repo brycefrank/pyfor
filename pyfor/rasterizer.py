@@ -18,7 +18,7 @@ class Grid:
     into their respective cells."""
     # TODO Decide between self.cloud or self.las
     # TODO bw4sz, cell size units?
-    def __init__(self, cloud, cell_size):
+    def __init__(self, cloud, cell_size, voxelize = "False"):
         """
         Sorts the point cloud into a gridded form such that every point in the las file is assigned a cell coordinate \
         with a resolution equal to cell_size
@@ -28,6 +28,7 @@ class Grid:
         :return: Returns a dataframe with sorted x and y with associated bins in a new columns
         """
         self.cloud = cloud
+        # TODO deprecate self.las, inconsistent with hierarchy
         self.las = self.cloud.las
         self.cell_size = cell_size
 
@@ -143,13 +144,6 @@ class Grid:
             return(Raster(plot_mat, self).plot(cmap = cmap, return_plot = True))
 
         Raster(plot_mat, self).plot(return_plot=False)
-
-
-    def plot3d(self):
-        """
-        Not yet implemented.
-        """
-        pass
 
     def ground_filter(self, num_windows, dh_max, dh_0, interp_method = "nearest"):
         """
