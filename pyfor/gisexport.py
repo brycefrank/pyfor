@@ -24,7 +24,7 @@ def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
     out_dataset.write(array, 1)
     out_dataset.close()
 
-def array_to_polygons(array, affine):
+def array_to_polygons(array, affine=None):
     """
     Returns a geopandas dataframe of polygons as deduced from an array.
 
@@ -33,12 +33,22 @@ def array_to_polygons(array, affine):
     :return:
     """
 
-    results = [
-        {'properties': {'raster_val': v}, 'geometry': s}
-        for i, (s, v)
+    # TODO Messy but functional.
+    if affine == None:
+        results = [
+            {'properties': {'raster_val': v}, 'geometry': s}
+            for i, (s, v)
+                in enumerate(shapes(array))
+        ]
+    else:
+        results = [
+            {'properties': {'raster_val': v}, 'geometry': s}
+            for i, (s, v)
             in enumerate(shapes(array, transform=affine))
-    ]
+        ]
 
-    tops_df = geopandas.GeoDataFrame({'geometry': [shape(results[geom]['geometry']) for geom in range(len(results))]})
+
+    tops_df = geopandas.GeoDataFrame({'geometry': [shape(results[geom]['geometry']) for geom in range(len(results))],
+                                      'raster_val': [results[geom]['properties']['raster_val'] for geom in range(len(results))]})
 
     return(tops_df)

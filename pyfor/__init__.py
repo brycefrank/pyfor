@@ -9,3 +9,4 @@ from pyfor import clip_funcs
 from pyfor import filter
 from pyfor import plot
 from pyfor import collection
+from pyfor import voxelizer
