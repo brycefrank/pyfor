@@ -11,6 +11,7 @@ import ogr
 from pyfor import rasterizer
 from pyfor import clip_funcs
 from pyfor import plot
+import pathlib
 
 class CloudData:
     """
@@ -61,7 +62,7 @@ class Cloud:
 
         :param las: A path to a las file, a laspy.file.File object, or a CloudFrame object
         """
-        if type(las) == str:
+        if type(las) == str or type(las) == pathlib.PosixPath:
             las = laspy.file.File(las)
             # Rip points from laspy
             points = pd.DataFrame({"x": las.x, "y": las.y, "z": las.z, "intensity": las.intensity, "classification": las.classification,

@@ -18,6 +18,7 @@ class Collection:
         """
         Returns a list of laspy las objects.
         """
+        #FIXME laspy breaks with a large number of files
         return [laspy.file.File(las_file) for las_file in self.las_paths]
 
     @property
@@ -25,4 +26,5 @@ class Collection:
         """
         Returns a list of las headers.
         """
+        #FIXME laspy breaks with a large number of files
         return [las_obj.header for las_obj in self._las_objects]
