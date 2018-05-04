@@ -11,7 +11,6 @@ import ogr
 from pyfor import rasterizer
 from pyfor import clip_funcs
 from pyfor import plot
-import pathlib
 
 class CloudData:
     """
@@ -62,7 +61,7 @@ class Cloud:
 
         :param las: A path to a las file, a laspy.file.File object, or a CloudFrame object
         """
-        if type(las) == str or type(las) == pathlib.PosixPath:
+        if type(las) == str:
             las = laspy.file.File(las)
             # Rip points from laspy
             points = pd.DataFrame({"x": las.x, "y": las.y, "z": las.z, "intensity": las.intensity, "classification": las.classification,
@@ -251,3 +250,20 @@ class Cloud:
 
         else:
             return(self.grid(cell_size).interpolate("max", "z", interp_method))
+
+    @property
+    def convex_hull(self):
+        """
+        Calculates the convex hull of the 2d plane.
+
+        :return: A single-element geoseries of the convex hull.
+        """
+        from scipy.spatial import ConvexHull
+        import geopandas as gpd
+        from shapely.geometry import Polygon
+
+        hull = ConvexHull(self.las.points[["x", "y"]].values)
+        hull_poly = Polygon(hull.points[hull.vertices])
+
+        return gpd.GeoSeries(hull_poly).plot()
+
