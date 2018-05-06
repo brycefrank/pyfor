@@ -210,8 +210,12 @@ class Cloud:
             mask = clip_funcs.square_clip(self, geometry)
             keep_points = self.las.points.iloc[mask]
 
-        elif type(geometry) == ogr.Geometry:
+        elif type(geometry) == ogr.Geometry or type(geometry) == pd.core.series.Series:
             keep_points = clip_funcs.poly_clip(self, geometry)
+
+        else:
+            print("Geometry type not supported.")
+            return False
 
         return Cloud(CloudData(keep_points, self.las.header))
 
