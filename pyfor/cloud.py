@@ -197,23 +197,18 @@ class Cloud:
         self.las.max = [np.max(dem_grid.data.x), np.max(dem_grid.data.y), np.max(dem_grid.data.z)]
         self.normalized = True
 
-    def clip(self, geometry):
+    def clip(self, poly):
         """
-        Clips the point cloud to the provided geometry (see below for compatible types) using a ray casting algorithm.
+        Clips the point cloud to the provided polygon using a ray casting algorithm.
 
-        :param geometry: Either a tuple of bounding box coordinates (square clip), an OGR geometry (polygon clip), \
-        or a tuple of a point and radius (circle clip).
-        :return: A new Cloud object clipped to the provided geometry.
+        :param poly: A shapely polygon in the same CRS as the Cloud.
+        :return: A new cloud object clipped to the provided polygon.
         """
-        if type(geometry) == tuple and len(geometry) == 4:
-            # Square clip
-            mask = clip_funcs.square_clip(self, geometry)
-            keep_points = self.las.points.iloc[mask]
+        #TODO Implement geopandas for multiple clipping polygons.
 
-        elif type(geometry) == ogr.Geometry:
-            keep_points = clip_funcs.poly_clip(self, geometry)
+        keep = clip_funcs.poly_clip(self, poly)
+        return Cloud(CloudData(self.las.points.iloc[keep], self.las.header))
 
-        return Cloud(CloudData(keep_points, self.las.header))
 
     def filter(self, min, max, dim):
         """

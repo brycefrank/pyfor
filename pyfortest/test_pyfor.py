@@ -12,6 +12,7 @@ import geopandas as gpd
 
 data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_las = os.path.join(data_dir, 'test.las')
+test_shp = os.path.join(data_dir, 'clip.shp')
 proj4str = "+proj=utm +zone=10 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
 
 class CloudDataTestCase(unittest.TestCase):
@@ -73,19 +74,9 @@ class CloudTestCase(unittest.TestCase):
         self.assertLessEqual(self.test_filter.las.max[2], [351])
         self.assertGreaterEqual(self.test_filter.las.min[2], [350])
 
-    def test_clip_square(self):
-        mins, maxes = self.test_cloud.las.header.min, self.test_cloud.las.header.max
-        clip_cloud = self.test_cloud.clip((mins[0], mins[0]+5, mins[1], mins[1]+5))
-        self.assertEqual(type(clip_cloud), cloud.Cloud)
-        self.assertLess(clip_cloud.las.count, self.test_cloud.las.count)
-        pass
-
     def test_clip_polygon(self):
-        poly = gpd.read_file('data/clip.shp')['geometry'][0]
+        poly = gpd.read_file(test_shp)['geometry'][0]
         self.test_cloud.clip(poly)
-
-    def test_clip_circle(self):
-        pass
 
     def test_plot_return(self):
         # FIXME broken on travis-ci

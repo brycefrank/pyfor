@@ -2,14 +2,15 @@ import json
 import numpy as np
 from numba import vectorize, bool_, float64
 
+# These are the lower level clipping functions.
+
 def square_clip(cloud, bounds):
     """
     Clips a square from a tuple describing the position of the square.
 
     :param las_xy: A N x 2 numpy array of x and y coordinates, x in
     column 0
-    :param bounds: A tuple of length 4, describing the min x, max x,
-    min y and max y coordinates of the square.
+    :param bounds: A tuple of length 4, min y and max y coordinates of the square.
     :return: A boolean mask, true is within the square
     """
 
@@ -17,10 +18,10 @@ def square_clip(cloud, bounds):
     las_xy = cloud.las.points[["x", "y"]]
 
     # Create masks for each axis
-    x_in = (las_xy["x"] >= bounds[0]) & (las_xy["x"] <= bounds[1])
-    y_in = (las_xy["y"] >= bounds[2]) & (las_xy["y"] <= bounds[3])
+    x_in = (las_xy["x"] >= bounds[0]) & (las_xy["x"] <= bounds[2])
+    y_in = (las_xy["y"] >= bounds[1]) & (las_xy["y"] <= bounds[3])
     stack = np.stack((x_in, y_in), axis=1)
-    in_clip = np.where(np.all(stack, axis=1))
+    in_clip = np.all(stack, axis=1)
 
     return(in_clip)
 
@@ -55,18 +56,28 @@ def ray_trace(x, y, poly):
         return inside
     return(ray(x, y))
 
-def poly_clip(cloud, geometry):
-    # Clip to the geometry bounding box
-    bbox = geometry.GetEnvelope()
+
+def poly_clip(cloud, poly):
+    """
+    Returns the indices within a given polygon.
+
+    :param cloud: A cloud object.
+    :param poly: A shapely Polygon, with coordinates in the same CRS as the point cloud (for best results).
+    :return: A 1D numpy array of indices corresponding to points within the given polygon.
+    """
+    # Clip to bounding box
+    bbox = poly.bounds
     pre_clip_mask = square_clip(cloud, bbox)
-    pre_clip = cloud.las.points[pre_clip_mask]
+    pre_clip = cloud.las.points[["x", "y"]].iloc[pre_clip_mask].values
 
-    # Clip the rest
-    geo_json = geometry.ExportToJson()
-    geo_json = json.loads(geo_json)
-    geo_arr = np.array(geo_json['coordinates'])[0]
-    clipped = ray_trace(pre_clip[:,0], pre_clip[:,1], geo_arr)
-    return(pre_clip[clipped])
+    # Store old indices
+    pre_clip_inds = np.where(pre_clip_mask)[0]
 
+    # Clip the preclip
+    poly_coords = np.stack((poly.exterior.coords.xy[0],
+                            poly.exterior.coords.xy[1]), axis = 1)
 
+    full_clip_mask = ray_trace(pre_clip[:,0], pre_clip[:,1], poly_coords)
+    clipped = pre_clip_inds[full_clip_mask]
 
+    return(clipped)
