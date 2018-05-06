@@ -110,9 +110,6 @@ class Cloud:
         :param max_points: The maximum number of points to render.
         :param point_size: The point size of the rendered point cloud.
         """
-        self.min = [np.min(self.las.points.x), np.min(self.las.points.y), np.min(self.las.points.z)]
-        self.max = [np.max(self.las.points.x), np.max(self.las.points.y), np.max(self.las.points.z)]
-        self.count = np.alen(self.las.points)
         plot.iplot3d(self.las, max_points, point_size, dim, colorscale)
 
     def plot3d(self, point_size=1, cmap='Spectral_r', max_points=5e5):

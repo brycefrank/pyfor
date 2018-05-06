@@ -81,7 +81,8 @@ class CloudTestCase(unittest.TestCase):
         pass
 
     def test_clip_polygon(self):
-        pass
+        poly = gpd.read_file('data/clip.shp')['geometry'][0]
+        self.test_cloud.clip(poly)
 
     def test_clip_circle(self):
         pass
