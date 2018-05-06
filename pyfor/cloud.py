@@ -254,3 +254,20 @@ class Cloud:
 
         else:
             return(self.grid(cell_size).interpolate("max", "z", interp_method))
+
+    @property
+    def convex_hull(self):
+        """
+        Calculates the convex hull of the 2d plane.
+
+        :return: A single-element geoseries of the convex hull.
+        """
+        from scipy.spatial import ConvexHull
+        import geopandas as gpd
+        from shapely.geometry import Polygon
+
+        hull = ConvexHull(self.las.points[["x", "y"]].values)
+        hull_poly = Polygon(hull.points[hull.vertices])
+
+        return gpd.GeoSeries(hull_poly).plot()
+
