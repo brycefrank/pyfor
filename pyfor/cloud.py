@@ -54,13 +54,13 @@ class CloudData:
         self.count = np.alen(self.points)
 
 class Cloud:
-    # TODO Consider inheriting from
-    def __init__(self, las):
-        """
-        A dataframe representation of a point cloud, with some useful functions for manipulating and displaying.
+    """
+    The cloud object is the integral unit of pyfor, and is where most of the action takes place. Many of the following \
+    attributes are convenience functions for other classes and modules.
 
-        :param las: A path to a las file, a laspy.file.File object, or a CloudFrame object
-        """
+    :param las: One of either: a string representing the path to a las (or laz) file or a CloudData object.
+    """
+    def __init__(self, las):
         if type(las) == str:
             las = laspy.file.File(las)
             # Rip points from laspy
@@ -80,7 +80,8 @@ class Cloud:
 
     def grid(self, cell_size):
         """
-        Generates a Grid object for this Cloud given a cell size. See the documentation for Grid for more information.
+        Generates a Grid object for this Cloud given a cell size. The Grid is generally used to compute Raster objects
+        See the documentation for Grid for more information.
 
         :param cell_size: The resolution of the plot in the same units as the input file.
         :return: A Grid object.

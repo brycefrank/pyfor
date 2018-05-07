@@ -1,11 +1,7 @@
 # Functions for rasterizing
 import numpy as np
 import pandas as pd
-from scipy.ndimage import label
 from scipy.interpolate import griddata
-from scipy.signal import medfilt
-from skimage.morphology import watershed
-from skimage.feature import peak_local_max
 import matplotlib.pyplot as plt
 from pyfor import gisexport
 from pyfor import filter
@@ -15,18 +11,13 @@ from rasterio.transform import from_origin
 class Grid:
     """The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. It is \
     not quite a raster yet. A raster has only one value per cell, whereas the Grid object merely sorts all points \
-    into their respective cells."""
-    # TODO Decide between self.cloud or self.las
-    # TODO bw4sz, cell size units?
-    def __init__(self, cloud, cell_size, voxelize = "False"):
-        """
-        Sorts the point cloud into a gridded form such that every point in the las file is assigned a cell coordinate \
-        with a resolution equal to cell_size
+    into their respective cells.
 
-        :param cloud: The "parent" cloud object.
-        :param cell_size: The size of the cell for sorting in the units of the input cloud object.
-        :return: Returns a dataframe with sorted x and y with associated bins in a new columns
-        """
+    :param cloud: The "parent" cloud object.
+    :param cell_size: The size of the cell for sorting in the units of the input cloud object.
+    :return: Returns a dataframe with sorted x and y with associated bins in a new columns
+    """
+    def __init__(self, cloud, cell_size, voxelize = "False"):
         self.cloud = cloud
         # TODO deprecate self.las, inconsistent with hierarchy
         self.las = self.cloud.las
@@ -126,24 +117,6 @@ class Grid:
         """
 
         return self.cells.agg(func_dict)
-
-    def plot(self, func, cmap="viridis", dim="z", return_plot=False):
-        """
-        Plots a 2 dimensional canopy height model using the maximum z value in each cell. This is intended for visual \
-        checking and not for analysis purposes. See the rasterizer.Grid class for analysis.
-
-        :param func: The function to aggregate the points in the cell.
-        :param cmap: A matplotlib color map string.
-        :param return_plot: If true, returns a matplotlib plt object.
-        :return: If return_plot == True, returns matplotlib plt object.
-        """
-        # Summarize (i.e. aggregate) on the max z value and reshape the dataframe into a 2d matrix
-        plot_mat = self.cells.agg({dim: func}).reset_index().pivot('bins_y', 'bins_x', dim)
-
-        if return_plot == True:
-            return(Raster(plot_mat, self).plot(cmap = cmap, return_plot = True))
-
-        Raster(plot_mat, self).plot(return_plot=False)
 
     def ground_filter(self, num_windows, dh_max, dh_0, interp_method = "nearest"):
         """
@@ -247,6 +220,9 @@ class Raster:
         :param plot: If plot is set to true then the segmentation will be plotted over the raster object..
         :return: A geopandas data frame, each record is a crown segment.
         """
+        from skimage.morphology import watershed
+        from skimage.feature import peak_local_max
+        from scipy.ndimage import label
 
         # TODO At some point, when more tree detection methods are implemented, the plotting version of this function
         # TODO can be relegated to another class. In the mean time this will function.
@@ -287,6 +263,7 @@ class Raster:
         
         :param kernel_size: The size of the kernel window to pass over the array. For example 3 -> 3x3 kernel window.
         """
+        from scipy.signal import medfilt
         self.array = medfilt(self.array, kernel_size=kernel_size)
 
     def write(self, path):
