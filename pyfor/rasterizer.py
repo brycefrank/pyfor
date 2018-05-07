@@ -205,7 +205,7 @@ class Raster:
         """
         Plots the raster as a surface using Plotly.
         """
-        plot.iplot3d_surface(self.array)
+        plot.iplot3d_surface(self.array, colorscale)
 
     def watershed_seg(self, min_distance=2, threshold_abs=2, classify=False, plot = False):
         """
