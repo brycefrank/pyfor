@@ -111,9 +111,6 @@ class Cloud:
         :param max_points: The maximum number of points to render.
         :param point_size: The point size of the rendered point cloud.
         """
-        self.min = [np.min(self.las.points.x), np.min(self.las.points.y), np.min(self.las.points.z)]
-        self.max = [np.max(self.las.points.x), np.max(self.las.points.y), np.max(self.las.points.z)]
-        self.count = np.alen(self.las.points)
         plot.iplot3d(self.las, max_points, point_size, dim, colorscale)
 
     def plot3d(self, point_size=1, cmap='Spectral_r', max_points=5e5):
@@ -211,8 +208,12 @@ class Cloud:
             mask = clip_funcs.square_clip(self, geometry)
             keep_points = self.las.points.iloc[mask]
 
-        elif type(geometry) == ogr.Geometry:
+        elif type(geometry) == ogr.Geometry or type(geometry) == pd.core.series.Series:
             keep_points = clip_funcs.poly_clip(self, geometry)
+
+        else:
+            print("Geometry type not supported.")
+            return False
 
         return Cloud(CloudData(keep_points, self.las.header))
 
