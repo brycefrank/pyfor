@@ -12,6 +12,7 @@ import geopandas as gpd
 
 data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_las = os.path.join(data_dir, 'test.las')
+test_shp = os.path.join(data_dir, 'clip.shp')
 proj4str = "+proj=utm +zone=10 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
 
 class CloudDataTestCase(unittest.TestCase):
@@ -81,7 +82,7 @@ class CloudTestCase(unittest.TestCase):
         pass
 
     def test_clip_polygon(self):
-        poly = gpd.read_file('data/clip.shp')['geometry'][0]
+        poly = gpd.read_file(test_shp)['geometry'][0]
         self.test_cloud.clip(poly)
 
     def test_clip_circle(self):
@@ -92,6 +93,11 @@ class CloudTestCase(unittest.TestCase):
         #plot = self.test_cloud.plot(return_plot=True)
         #self.assertEqual(type(plot), matplotlib.figure.Figure)
         pass
+
+    def test_plot(self):
+        import matplotlib.pyplot as plt
+        self.test_cloud.plot()
+        plt.close()
 
     def test_ground_filter_returns_raster(self):
         ground = self.test_cloud.grid(0.5).ground_filter(3, 2, 1)

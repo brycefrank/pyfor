@@ -20,6 +20,7 @@ install:
   - pip install coveralls
   - pip install .
 script:
+  - xvfb-run make test
   - coverage run --source pyfor setup.py test
 after_success:
   - coveralls

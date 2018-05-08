@@ -88,19 +88,17 @@ class Cloud:
         """
         return(rasterizer.Grid(self, cell_size))
 
-    def plot(self, cell_size = 1, cmap = "viridis", return_plot = False):
+    def plot(self, cell_size = 1, cmap = "viridis", return_plot = False, block=False):
         """
         Plots a basic canopy height model of the Cloud object. This is mainly a convenience function for \
         rasterizer.Grid.plot, check that method docstring for more information and more robust usage cases.
 
         :param cellf vmin or vmax is not given, they are initialized from the minimum and maximum value respectively of the first input processed. That is, __call__(A) calls autoscale_None(A). If clip _size: The resolution of the plot in the same units as the input file.
         :param return_plot: If true, returns a matplotlib plt object.
-        :return: If return_plot == True, returns matplotlib plt object.
+        :return: If return_plot == True, returns matplotlib plt object. Not yet implemented.
         """
-        if return_plot == True:
-            return(rasterizer.Grid(self, cell_size).plot("max", return_plot= True))
 
-        rasterizer.Grid(self, cell_size).plot("max", cmap, dim = "z")
+        rasterizer.Grid(self, cell_size).raster("max", "z").plot(cmap, block = block, return_plot = return_plot)
 
     def iplot3d(self, max_points=30000, point_size=0.5, dim="z", colorscale="Viridis"):
         """
