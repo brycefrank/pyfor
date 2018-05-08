@@ -93,7 +93,8 @@ class Cloud:
     def plot(self, cell_size = 1, cmap = "viridis", return_plot = False, block=False):
         """
         Plots a basic canopy height model of the Cloud object. This is mainly a convenience function for \
-        rasterizer.Grid.plot, check that method docstring for more information and more robust usage cases.
+        rasterizer.Grid.plot, check that method docstring for more information and more robust usage cases (i.e. \
+        pit filtering and interpolation methods).
 
         :param cellf vmin or vmax is not given, they are initialized from the minimum and maximum value respectively of the first input processed. That is, __call__(A) calls autoscale_None(A). If clip _size: The resolution of the plot in the same units as the input file.
         :param return_plot: If true, returns a matplotlib plt object.
@@ -110,6 +111,8 @@ class Cloud:
 
         :param max_points: The maximum number of points to render.
         :param point_size: The point size of the rendered point cloud.
+        :param dim: The dimension on which to color (i.e. "z", "intensity", etc.)
+        :param colorscale: The Plotly colorscale with which to color.
         """
         plot.iplot3d(self.las, max_points, point_size, dim, colorscale)
 
@@ -128,11 +131,9 @@ class Cloud:
         if self.las.count > max_points:
                 sample_mask = np.random.randint(self.las.count,
                                                 size = int(max_points))
-                #TODO update this to new pandas framework
                 coordinates = np.stack([self.las.points.x, self.las.points.y, self.las.points.z], axis = 1)[sample_mask,:]
                 print("Too many points, down sampling for 3d plot performance.")
         else:
-            # TODO update this to new pandas framework
             coordinates = np.stack([self.las.points.x, self.las.points.y, self.las.points.z], axis = 1)
 
         # Start Qt app and widget
@@ -177,7 +178,7 @@ class Cloud:
 
         Note that this current implementation is best suited for larger tiles. Best practices suggest creating a BEM \
         at the largest scale possible first, and using that to normalize plot-level point clouds in a production \
-        setting.
+        setting. This sets self.normalized to True.
 
         :param cell_size: The cell_size at which to rasterize the point cloud into bins, in the same units as the \
         input point cloud.
@@ -197,7 +198,7 @@ class Cloud:
 
     def clip(self, poly):
         """
-        Clips the point cloud to the provided polygon using a ray casting algorithm.
+        Clips the point cloud to the provided shapely polygon using a ray casting algorithm.
 
         :param poly: A shapely polygon in the same CRS as the Cloud.
         :return: A new cloud object clipped to the provided polygon.
