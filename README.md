@@ -9,7 +9,7 @@
 
 The current release is 0.2.0 (this branch). 0.2.0 is adequate for processing single tiles and serves as the foundation for future updates.
 
-A minor update rolling release branch is located on [0.2.1](http://github.com/brycefrank/pyfor/tree/0.2.1)). 0.2.1 will only improve on single tile functionality (tree detection, bug fixes, etc). Please check the changelog there before submitting issues.
+A minor update rolling release branch is located on [0.2.1](http://github.com/brycefrank/pyfor/tree/0.2.1). 0.2.1 will only improve on single tile functionality (tree detection, bug fixes, etc). Please check the changelog there before submitting issues.
 
 An upcoming release, [0.3.0](http://github.com/brycefrank/pyfor/tree/0.3.0),  will focus on processing large acquisitions, and is slated for release on this branch in **August 2018**.
 
@@ -25,14 +25,11 @@ These samples are a work in progress, but demonstrate some of the package capabi
 
 For installation I highly recommend looking into setting up [miniconda](https://conda.io/miniconda.html) for your system before beginning. pyfor depends on many packages that are otherwise tricky and difficult to install (especially gdal and its bindings), and conda provides a quick and easy way to manage many different Python environments on your system simultaneously.
 
-Note that the following installation procedures will install the rolling release version of pyfor (i.e. this branches' source files). I develop actively on this branch and push commits daily, so beware of intermittent bugs when updating. More stable releases are forthcoming. 
-
 The following bash commands will install this branch of pyfor. It requires installation of miniconda (see above). This will install all of the prerequisites in that environment, named `pyfor_env`. pyfor depends on a lot of heavy libraries, so expect construction of the environment to take a little time.
 
 ```bash
 git clone https://github.com/brycefrank/pyfor.git
 cd pyfor
-git checkout pdal-u
 conda env create -f environment.yml
 
 # For Linux / macOS:
