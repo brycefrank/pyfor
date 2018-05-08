@@ -84,6 +84,11 @@ class CloudTestCase(unittest.TestCase):
         #self.assertEqual(type(plot), matplotlib.figure.Figure)
         pass
 
+    def test_plot(self):
+        import matplotlib.pyplot as plt
+        self.test_cloud.plot()
+        plt.close()
+
     def test_ground_filter_returns_raster(self):
         ground = self.test_cloud.grid(0.5).ground_filter(3, 2, 1)
         self.assertEqual(type(ground), rasterizer.Raster)

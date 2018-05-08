@@ -11,6 +11,7 @@ import ogr
 from pyfor import rasterizer
 from pyfor import clip_funcs
 from pyfor import plot
+import pathlib
 
 class CloudData:
     """
@@ -58,10 +59,16 @@ class Cloud:
     The cloud object is the integral unit of pyfor, and is where most of the action takes place. Many of the following \
     attributes are convenience functions for other classes and modules.
 
+<<<<<<< HEAD
     :param las: One of either: a string representing the path to a las (or laz) file or a CloudData object.
     """
     def __init__(self, las):
         if type(las) == str:
+=======
+        :param las: A path to a las file, a laspy.file.File object, or a CloudFrame object
+        """
+        if type(las) == str or type(las) == pathlib.PosixPath:
+>>>>>>> 53918ea49a49c81bfa3a9c7d0faf3c99c559382c
             las = laspy.file.File(las)
             # Rip points from laspy
             points = pd.DataFrame({"x": las.x, "y": las.y, "z": las.z, "intensity": las.intensity, "classification": las.classification,
@@ -88,19 +95,17 @@ class Cloud:
         """
         return(rasterizer.Grid(self, cell_size))
 
-    def plot(self, cell_size = 1, cmap = "viridis", return_plot = False):
+    def plot(self, cell_size = 1, cmap = "viridis", return_plot = False, block=False):
         """
         Plots a basic canopy height model of the Cloud object. This is mainly a convenience function for \
         rasterizer.Grid.plot, check that method docstring for more information and more robust usage cases.
 
         :param cellf vmin or vmax is not given, they are initialized from the minimum and maximum value respectively of the first input processed. That is, __call__(A) calls autoscale_None(A). If clip _size: The resolution of the plot in the same units as the input file.
         :param return_plot: If true, returns a matplotlib plt object.
-        :return: If return_plot == True, returns matplotlib plt object.
+        :return: If return_plot == True, returns matplotlib plt object. Not yet implemented.
         """
-        if return_plot == True:
-            return(rasterizer.Grid(self, cell_size).plot("max", return_plot= True))
 
-        rasterizer.Grid(self, cell_size).plot("max", cmap, dim = "z")
+        rasterizer.Grid(self, cell_size).raster("max", "z").plot(cmap, block = block, return_plot = return_plot)
 
     def iplot3d(self, max_points=30000, point_size=0.5, dim="z", colorscale="Viridis"):
         """
@@ -111,9 +116,6 @@ class Cloud:
         :param max_points: The maximum number of points to render.
         :param point_size: The point size of the rendered point cloud.
         """
-        self.min = [np.min(self.las.points.x), np.min(self.las.points.y), np.min(self.las.points.z)]
-        self.max = [np.max(self.las.points.x), np.max(self.las.points.y), np.max(self.las.points.z)]
-        self.count = np.alen(self.las.points)
         plot.iplot3d(self.las, max_points, point_size, dim, colorscale)
 
     def plot3d(self, point_size=1, cmap='Spectral_r', max_points=5e5):
@@ -207,9 +209,20 @@ class Cloud:
         """
         #TODO Implement geopandas for multiple clipping polygons.
 
+<<<<<<< HEAD
         keep = clip_funcs.poly_clip(self, poly)
         return Cloud(CloudData(self.las.points.iloc[keep], self.las.header))
 
+=======
+        elif type(geometry) == ogr.Geometry or type(geometry) == pd.core.series.Series:
+            keep_points = clip_funcs.poly_clip(self, geometry)
+
+        else:
+            print("Geometry type not supported.")
+            return False
+
+        return Cloud(CloudData(keep_points, self.las.header))
+>>>>>>> 53918ea49a49c81bfa3a9c7d0faf3c99c559382c
 
     def filter(self, min, max, dim):
         """
@@ -261,5 +274,5 @@ class Cloud:
         hull = ConvexHull(self.las.points[["x", "y"]].values)
         hull_poly = Polygon(hull.points[hull.vertices])
 
-        return gpd.GeoSeries(hull_poly).plot()
+        return gpd.GeoSeries(hull_poly)
 

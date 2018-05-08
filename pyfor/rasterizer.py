@@ -173,7 +173,7 @@ class Raster:
         affine = from_origin(self.grid.las.min[0], self.grid.las.max[1], self.grid.cell_size, self.grid.cell_size)
         return affine
 
-    def plot(self, cmap = "viridis", return_plot = False):
+    def plot(self, cmap = "viridis", block = False, return_plot = False):
         """
         Default plotting method for the Raster object.
 
@@ -199,7 +199,7 @@ class Raster:
             return(ax)
 
         else:
-            plt.show()
+            plt.show(block = block)
 
     def iplot3d(self, colorscale="Viridis"):
         """
