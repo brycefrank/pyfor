@@ -19,7 +19,7 @@
 2. Some slight adjustments to the other functions to accommodate (1).
 
 ## General Maintenance
-1. More tests were added [in progress].
+1. More tests were added.
 	- Cloud.clip
 	- plotting methods
 2. Added a sample polygon shapefile: pyfortest/data/clip.shp, this will be used to test the clipping function.
