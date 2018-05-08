@@ -22,7 +22,8 @@ install:
 before_script: # configure a headless display to test plot generation
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
+  - sleep 3
 script:
-  - coverage run --source pyfor setup.py test - sleep 3 # give xvfb some time to start
+  - coverage run --source pyfor setup.py test
 after_success:
   - coveralls
