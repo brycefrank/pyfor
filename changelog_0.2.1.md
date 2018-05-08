@@ -9,6 +9,8 @@
 1. Added a plot argument to the rasterizer.Raster.watershed_seg() function. This will plot the segment polygons over the raster object.
 2. Removed the plot function from rasterizer.Grid, did not seem to fit with the philosophy of the object.
 3. Fixed a bug in rasterizer.Raster.iplot3d that prevented plotting
+4. Added rasterizer.Raster._convex_hull_mask, this helps plot interpolated rasters correctly by setting values outside
+   of the convex hull to nan. This will help with future plotting and writing function to be written.
 
 ## Cloud
 1. Added cloud.Cloud.convex_hull, returns the convex hull of the two dimensional plane.

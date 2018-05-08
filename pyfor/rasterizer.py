@@ -173,6 +173,28 @@ class Raster:
         affine = from_origin(self.grid.las.min[0], self.grid.las.max[1], self.grid.cell_size, self.grid.cell_size)
         return affine
 
+    @property
+    def _convex_hull_mask(self):
+        """
+        Calculates an m x n boolean numpy array where the value of each cell represents whether or not that cell lies \ 
+        within the convex hull of the "parent" cloud object. This is used when plotting and writing interpolated \
+        rasters.
+        :return: 
+        """
+        import fiona
+        import rasterio
+        from rasterio.mask import mask
+        # TODO for now this uses temp files. I would like to change this.
+        self.grid.cloud.convex_hull.to_file("temp.shp")
+        with fiona.open("temp.shp", "r") as shapefile:
+            features = [feature["geometry"] for feature in shapefile]
+
+        self.write("temp.tif")
+        with rasterio.open("temp.tif") as rast:
+            out_image = mask(rast, features, nodata = np.nan, crop=True)
+
+        return out_image[0].data
+
     def plot(self, cmap = "viridis", block = False, return_plot = False):
         """
         Default plotting method for the Raster object.
@@ -278,6 +300,5 @@ class Raster:
             print("There is no coordinate reference string set for this Grid object, you must set the Cloud.crs \
             attribute to a projection string.")
         else:
-            print("Raster file written to {}".format(path))
             gisexport.array_to_raster(self.array, self.cell_size, self.grid.las.min[0], self.grid.las.max[1],
                                       self.grid.cloud.crs, path)
