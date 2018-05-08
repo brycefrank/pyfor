@@ -19,8 +19,9 @@ install:
   - source activate pyfor_env
   - pip install coveralls
   - pip install .
-script:
-  - xvfb-run make test
-  - coverage run --source pyfor setup.py test
+before_script: # configure a headless display to test plot generation
+- "export DISPLAY=:99.0"
+- "sh -e /etc/init.d/xvfb start"
+- sleep 3 # give xvfb some time to start
 after_success:
   - coveralls

@@ -63,12 +63,7 @@ class Cloud:
     :param las: One of either: a string representing the path to a las (or laz) file or a CloudData object.
     """
     def __init__(self, las):
-        if type(las) == str:
-=======
-        :param las: A path to a las file, a laspy.file.File object, or a CloudFrame object
-        """
         if type(las) == str or type(las) == pathlib.PosixPath:
->>>>>>> 53918ea49a49c81bfa3a9c7d0faf3c99c559382c
             las = laspy.file.File(las)
             # Rip points from laspy
             points = pd.DataFrame({"x": las.x, "y": las.y, "z": las.z, "intensity": las.intensity, "classification": las.classification,
@@ -209,20 +204,8 @@ class Cloud:
         """
         #TODO Implement geopandas for multiple clipping polygons.
 
-<<<<<<< HEAD
         keep = clip_funcs.poly_clip(self, poly)
         return Cloud(CloudData(self.las.points.iloc[keep], self.las.header))
-
-=======
-        elif type(geometry) == ogr.Geometry or type(geometry) == pd.core.series.Series:
-            keep_points = clip_funcs.poly_clip(self, geometry)
-
-        else:
-            print("Geometry type not supported.")
-            return False
-
-        return Cloud(CloudData(keep_points, self.las.header))
->>>>>>> 53918ea49a49c81bfa3a9c7d0faf3c99c559382c
 
     def filter(self, min, max, dim):
         """
