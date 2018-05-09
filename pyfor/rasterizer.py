@@ -107,7 +107,7 @@ class Grid:
 
         return Raster(interp_grid, self)
 
-    def metrics(self, func_dict):
+    def metrics(self, func_dict, as_raster = False):
         """
         Calculates summary statistics for each grid cell in the Grid.
 
@@ -116,7 +116,24 @@ class Grid:
         :return: A pandas dataframe with the aggregated metrics.
         """
 
-        return self.cells.agg(func_dict)
+        # Aggregate on the function
+        aggregate = self.cells.agg(func_dict)
+        if as_raster == False:
+            return aggregate
+        else:
+            rasters = []
+            for column in aggregate:
+                array = np.asarray(aggregate[column].reset_index().pivot('bins_y', 'bins_x'))
+                raster = Raster(array, self)
+                rasters.append(raster)
+            # Get list of dimension names
+            dims = [tup[0] for tup in list(aggregate)]
+            # Get list of metric names
+            metrics = [tup[1] for tup in list(aggregate)]
+            return pd.DataFrame({'dim': dims, 'metric': metrics, 'raster': rasters}).set_index(['dim', 'metric'])
+
+
+
 
     def ground_filter(self, num_windows, dh_max, dh_0, interp_method = "nearest"):
         """
