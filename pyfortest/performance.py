@@ -24,7 +24,7 @@ def time_func(func_string):
 
 
 ## Normalize grid at different sizes
-print('Normalize grid - 0.25: {}'.format(time_func('test_cloud.normalize(0.25)')))
-print('Normalize grid - 0.5: {}'.format(time_func('test_cloud.normalize(0.5)')))
-print('Normalize grid - 1: {}'.format(time_func('test_cloud.normalize(1)')))
+#print('Normalize grid - 0.25: {}'.format(time_func('test_cloud.normalize(0.25)')))
+#print('Normalize grid - 0.5: {}'.format(time_func('test_cloud.normalize(0.5)')))
+#print('Normalize grid - 1: {}'.format(time_func('test_cloud.normalize(1)')))
 
