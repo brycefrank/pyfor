@@ -14,6 +14,7 @@ dependencies:
   - numba
   - rasterio
   - geopandas
+  - joblib
   - pip:
       - laspy
       - sphinx_bootstrap_theme

@@ -1,5 +1,6 @@
 import pathlib
 import laspy
+import pandas as pd
 from joblib import Parallel, delayed
 
 class Collection:
@@ -13,6 +14,7 @@ class Collection:
     def __init__(self, las_dir):
         self.las_dir = las_dir
         self.las_paths = [filepath.absolute() for filepath in pathlib.Path(self.las_dir).glob('**/*')]
+        self.data = pd.DataFrame({'las_paths': self.las_paths})
 
     def apply(self, func, n_jobs=1):
         """
@@ -22,6 +24,12 @@ class Collection:
         :param func: The user defined function, must accept a single argument, the path of the las file.
         :param n_jobs: The number of threads to spawn, default of 1.
         """
-        output = Parallel(n_jobs=n_jobs)(delayed(func)(plot_path) for plot_path in self.las_paths)
+        output = Parallel(n_jobs=n_jobs)(delayed(func)(plot_path) for plot_path in self.data['las_paths'])
         return output
+
+    def plot(self):
+        """
+        
+        :return: 
+        """
 
