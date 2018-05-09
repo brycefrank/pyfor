@@ -1,6 +1,8 @@
 ## Samples
 1. [In Progress] Added a watershed segmentation sample.
 2. [In Progress] Added a clipping sample.
+3. Improved normalization sample
+4. Improved grid metrics sample with the new as_raster argument (see below)
 
 ## Voxelizer
 1. Added basic VoxelGrid class
@@ -11,6 +13,9 @@
 3. Fixed a bug in rasterizer.Raster.iplot3d that prevented plotting
 4. Added rasterizer.Raster._convex_hull_mask, this helps plot interpolated rasters correctly by setting values outside
    of the convex hull to nan. This will help with future plotting and writing function to be written.
+5. Added as_raster argument to rasterizer.Grid.metrics, this returns a pandas dataframe of the Raster objects that has
+   columns that describe which dimension and which metric were calculated for the raster in that row. More details can
+   be seen in the Grid_Metrics sample.
 
 ## Cloud
 1. Added cloud.Cloud.convex_hull, returns the convex hull of the two dimensional plane.
