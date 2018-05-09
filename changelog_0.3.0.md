@@ -1,2 +1,3 @@
 ## collection.Collection
-  - Added collection.Collection object, loads directory of `laspy.file.File` readers into memory
+  1. Added collection.Collection object
+  2. Added collection.Collection.apply, applies a user-defined function to each las file in the loaded directory

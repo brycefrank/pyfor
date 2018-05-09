@@ -1,5 +1,6 @@
 import pathlib
 import laspy
+from joblib import Parallel, delayed
 
 class Collection:
     """
@@ -13,18 +14,14 @@ class Collection:
         self.las_dir = las_dir
         self.las_paths = [filepath.absolute() for filepath in pathlib.Path(self.las_dir).glob('**/*')]
 
-    @property
-    def _las_objects(self):
+    def apply(self, func, n_jobs=1):
         """
-        Returns a list of laspy las objects.
+        Apply a function to each cloud object. Allows for parallelization using the n_jobs argument. This is achieved \
+        via joblib Parallel and delayed.
+        
+        :param func: The user defined function, must accept a single argument, the path of the las file.
+        :param n_jobs: The number of threads to spawn, default of 1.
         """
-        #FIXME laspy breaks with a large number of files
-        return [laspy.file.File(las_file) for las_file in self.las_paths]
+        output = Parallel(n_jobs=n_jobs)(delayed(func)(plot_path) for plot_path in self.las_paths)
+        return output
 
-    @property
-    def las_headers(self):
-        """
-        Returns a list of las headers.
-        """
-        #FIXME laspy breaks with a large number of files
-        return [las_obj.header for las_obj in self._las_objects]
