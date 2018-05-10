@@ -205,7 +205,9 @@ class Cloud:
         #TODO Implement geopandas for multiple clipping polygons.
 
         keep = clip_funcs.poly_clip(self, poly)
-        return Cloud(CloudData(self.las.points.iloc[keep], self.las.header))
+        new_cloud =  Cloud(CloudData(self.las.points.iloc[keep], self.las.header))
+        new_cloud.las._update()
+        return(new_cloud)
 
     def filter(self, min, max, dim):
         """
