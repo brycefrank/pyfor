@@ -1,11 +1,7 @@
 # Functions for rasterizing
 import numpy as np
 import pandas as pd
-from scipy.ndimage import label
 from scipy.interpolate import griddata
-from scipy.signal import medfilt
-from skimage.morphology import watershed
-from skimage.feature import peak_local_max
 import matplotlib.pyplot as plt
 from pyfor import gisexport
 from pyfor import filter
@@ -15,19 +11,15 @@ from rasterio.transform import from_origin
 class Grid:
     """The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. It is \
     not quite a raster yet. A raster has only one value per cell, whereas the Grid object merely sorts all points \
-    into their respective cells."""
-    # TODO Decide between self.cloud or self.las
-    # TODO bw4sz, cell size units?
-    def __init__(self, cloud, cell_size):
-        """
-        Sorts the point cloud into a gridded form such that every point in the las file is assigned a cell coordinate \
-        with a resolution equal to cell_size
+    into their respective cells.
 
-        :param cloud: The "parent" cloud object.
-        :param cell_size: The size of the cell for sorting in the units of the input cloud object.
-        :return: Returns a dataframe with sorted x and y with associated bins in a new columns
-        """
+    :param cloud: The "parent" cloud object.
+    :param cell_size: The size of the cell for sorting in the units of the input cloud object.
+    :return: Returns a dataframe with sorted x and y with associated bins in a new columns
+    """
+    def __init__(self, cloud, cell_size, voxelize = "False"):
         self.cloud = cloud
+        # TODO deprecate self.las, inconsistent with hierarchy
         self.las = self.cloud.las
         self.cell_size = cell_size
 
@@ -115,7 +107,7 @@ class Grid:
 
         return Raster(interp_grid, self)
 
-    def metrics(self, func_dict):
+    def metrics(self, func_dict, as_raster = False):
         """
         Calculates summary statistics for each grid cell in the Grid.
 
@@ -124,32 +116,21 @@ class Grid:
         :return: A pandas dataframe with the aggregated metrics.
         """
 
-        return self.cells.agg(func_dict)
-
-    def plot(self, func, cmap="viridis", dim="z", return_plot=False):
-        """
-        Plots a 2 dimensional canopy height model using the maximum z value in each cell. This is intended for visual \
-        checking and not for analysis purposes. See the rasterizer.Grid class for analysis.
-
-        :param func: The function to aggregate the points in the cell.
-        :param cmap: A matplotlib color map string.
-        :param return_plot: If true, returns a matplotlib plt object.
-        :return: If return_plot == True, returns matplotlib plt object.
-        """
-        # Summarize (i.e. aggregate) on the max z value and reshape the dataframe into a 2d matrix
-        plot_mat = self.cells.agg({dim: func}).reset_index().pivot('bins_y', 'bins_x', dim)
-
-        if return_plot == True:
-            return(Raster(plot_mat, self).plot(cmap = cmap, return_plot = True))
-
-        Raster(plot_mat, self).plot(return_plot=False)
-
-
-    def plot3d(self):
-        """
-        Not yet implemented.
-        """
-        pass
+        # Aggregate on the function
+        aggregate = self.cells.agg(func_dict)
+        if as_raster == False:
+            return aggregate
+        else:
+            rasters = []
+            for column in aggregate:
+                array = np.asarray(aggregate[column].reset_index().pivot('bins_y', 'bins_x'))
+                raster = Raster(array, self)
+                rasters.append(raster)
+            # Get list of dimension names
+            dims = [tup[0] for tup in list(aggregate)]
+            # Get list of metric names
+            metrics = [tup[1] for tup in list(aggregate)]
+            return pd.DataFrame({'dim': dims, 'metric': metrics, 'raster': rasters}).set_index(['dim', 'metric'])
 
     def ground_filter(self, num_windows, dh_max, dh_0, interp_method = "nearest"):
         """
@@ -206,11 +187,33 @@ class Raster:
         affine = from_origin(self.grid.las.min[0], self.grid.las.max[1], self.grid.cell_size, self.grid.cell_size)
         return affine
 
-    def plot(self, cmap = "viridis", return_plot = False):
+    @property
+    def _convex_hull_mask(self):
+        """
+        Calculates an m x n boolean numpy array where the value of each cell represents whether or not that cell lies \ 
+        within the convex hull of the "parent" cloud object. This is used when plotting and writing interpolated \
+        rasters.
+        :return: 
+        """
+        import fiona
+        import rasterio
+        from rasterio.mask import mask
+        # TODO for now this uses temp files. I would like to change this.
+        self.grid.cloud.convex_hull.to_file("temp.shp")
+        with fiona.open("temp.shp", "r") as shapefile:
+            features = [feature["geometry"] for feature in shapefile]
+
+        self.write("temp.tif")
+        with rasterio.open("temp.tif") as rast:
+            out_image = mask(rast, features, nodata = np.nan, crop=True)
+
+        return out_image[0].data
+
+    def plot(self, cmap = "viridis", block = False, return_plot = False):
         """
         Default plotting method for the Raster object.
 
-        :return:
+        :param block: An optional parameter, mostly for debugging purposes.
         """
         #TODO implement cmap
         fig = plt.figure()
@@ -229,18 +232,30 @@ class Raster:
         ax.set_yticklabels(y_ticks)
 
         if return_plot == True:
-            return(fig)
+            return(ax)
 
         else:
-            plt.show()
+            plt.show(block = block)
 
     def iplot3d(self, colorscale="Viridis"):
         """
         Plots the raster as a surface using Plotly.
         """
-        plot.iplot3d_surface(self.array)
+        plot.iplot3d_surface(self.array, colorscale)
 
-    def watershed_seg(self, min_distance=2, threshold_abs=2, classify=False):
+    def local_maxima(self, min_distance=2, threshold_abs=2):
+        """
+        Returns a geopandas dataframe of points found using skimage.feature.peak_local_max
+        :return:
+        """
+        from skimage.feature import peak_local_max
+        from scipy.ndimage import label
+        tops = peak_local_max(self.array, indices=False, min_distance=min_distance, threshold_abs=threshold_abs)
+        tops = label(tops)[0]
+        return(tops)
+
+
+    def watershed_seg(self, min_distance=2, threshold_abs=2, classify=False, plot = False):
         """
         Returns the watershed segmentation of the Raster as a geopandas dataframe.
 
@@ -250,17 +265,16 @@ class Raster:
         :param classify: If true, sets the user data of the original point cloud data to the segment ID. The \
         segment ID is an arbitrary identification number generated by the labels function. This can be useful for \
         plotting point clouds where each segment color is unique.
+        :param plot: If plot is set to true then the segmentation will be plotted over the raster object..
         :return: A geopandas data frame, each record is a crown segment.
         """
+        from skimage.morphology import watershed
+        from skimage.feature import peak_local_max
 
-        # TODO Not sure if this should be generalized to another class (like grid)
-        #if self.grid.cloud.crs == None:
-        #    print("Watershed segmentation requires coordinate reference. If your point cloud is referenced in UTM \
-        #          lookinto the gisexport.utm_lookup function")
-        #    return False
+        # TODO At some point, when more tree detection methods are implemented, the plotting version of this function
+        # TODO can be relegated to another class. In the mean time this will function.
 
-        tops = peak_local_max(self.array, indices=False, min_distance=min_distance, threshold_abs=threshold_abs)
-        tops = label(tops)[0]
+        tops = self.local_maxima(min_distance=min_distance, threshold_abs=threshold_abs)
         labels = watershed(-self.array, tops, mask=self.array)
 
         if classify == True:
@@ -272,9 +286,21 @@ class Raster:
             self.grid.data = self.grid.las.points
             self.grid.cells = self.grid.data.groupby(['bins_x', 'bins_y'])
 
-        tops = gisexport.array_to_polygons(labels, self._affine)
 
-        return tops
+        if plot == False:
+            affine = self._affine
+            tops = gisexport.array_to_polygons(labels, affine)
+            return(tops)
+        else:
+            affine = None
+            tops = gisexport.array_to_polygons(labels, affine)
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            ax.imshow(self.array)
+            tops.plot(ax = ax, edgecolor="black", alpha=0.3)
+            ax.invert_yaxis()
+            plt.xlim((0, self.array.shape[1]))
+            plt.ylim((0, self.array.shape[0]))
 
     def pit_filter(self, kernel_size):
         """
@@ -283,6 +309,7 @@ class Raster:
         
         :param kernel_size: The size of the kernel window to pass over the array. For example 3 -> 3x3 kernel window.
         """
+        from scipy.signal import medfilt
         self.array = medfilt(self.array, kernel_size=kernel_size)
 
     def write(self, path):
@@ -297,6 +324,5 @@ class Raster:
             print("There is no coordinate reference string set for this Grid object, you must set the Cloud.crs \
             attribute to a projection string.")
         else:
-            print("Raster file written to {}".format(path))
             gisexport.array_to_raster(self.array, self.cell_size, self.grid.las.min[0], self.grid.las.max[1],
                                       self.grid.cloud.crs, path)

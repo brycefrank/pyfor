@@ -12,3 +12,4 @@ pyfor/__pycache__
 .DS_Store
 htmlcov/
 htmlcov/*
+changelog_0.2.1.md

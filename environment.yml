@@ -16,5 +16,5 @@ dependencies:
   - geopandas
   - pip:
       - laspy
-      - sphinx_bootstrap_theme
+      - sphinx_rtd_theme
       - python-coveralls
