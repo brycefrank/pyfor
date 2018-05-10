@@ -10,6 +10,11 @@ import matplotlib.figure
 import numpy as np
 import geopandas as gpd
 
+"""
+Many of these tests currently just run the function. If anyone has any more rigorous ideas, please feel free to \
+implement.
+"""
+
 data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_las = os.path.join(data_dir, 'test.las')
 test_shp = os.path.join(data_dir, 'clip.shp')
@@ -106,6 +111,12 @@ class CloudTestCase(unittest.TestCase):
     def test_chm(self):
         self.test_cloud.chm(0.5, interp_method="nearest", pit_filter= "median")
 
+    def test_chm_without_interpolation_method(self):
+        self.assertEqual(type(self.test_cloud.chm(0.5, interp_method=None)), rasterizer.Raster)
+
+    def test_convex_hull(self):
+        self.test_cloud.convex_hull
+
 
 
 class GridTestCase(unittest.TestCase):
@@ -137,6 +148,18 @@ class GridTestCase(unittest.TestCase):
     def test_interpolate(self):
         self.test_grid.interpolate("max", "z")
 
+    def test_metrics(self):
+        def custom_metric(dim):
+            return(np.min(dim))
+
+        test_metrics_dict = {
+            'z': [custom_metric, np.max],
+            'intensity': [np.mean]
+        }
+
+        self.test_grid.metrics(test_metrics_dict)
+        self.test_grid.metrics(test_metrics_dict, as_raster=True)
+
     def tearDown(self):
         del self.test_grid.las.header
 
@@ -160,6 +183,9 @@ class RasterTestCase(unittest.TestCase):
         tops = self.test_raster.watershed_seg()
         self.assertEqual(type(tops), gpd.GeoDataFrame)
         self.assertEqual(len(tops), 158)
+
+    def test_convex_hull_mask(self):
+        self.test_raster._convex_hull_mask
 
 class GISExportTestCase(unittest.TestCase):
     def setUp(self):

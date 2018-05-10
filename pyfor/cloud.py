@@ -59,7 +59,6 @@ class Cloud:
     The cloud object is the integral unit of pyfor, and is where most of the action takes place. Many of the following \
     attributes are convenience functions for other classes and modules.
 
-<<<<<<< HEAD
     :param las: One of either: a string representing the path to a las (or laz) file or a CloudData object.
     """
     def __init__(self, las):
