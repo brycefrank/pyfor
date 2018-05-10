@@ -89,6 +89,9 @@ class CloudTestCase(unittest.TestCase):
         self.test_cloud.plot()
         plt.close()
 
+    def test_plot3d(self):
+        self.test_cloud.plot3d()
+
     def test_ground_filter_returns_raster(self):
         ground = self.test_cloud.grid(0.5).ground_filter(3, 2, 1)
         self.assertEqual(type(ground), rasterizer.Raster)
