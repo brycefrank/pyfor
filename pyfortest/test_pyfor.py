@@ -183,9 +183,23 @@ class RasterTestCase(unittest.TestCase):
         tops = self.test_raster.watershed_seg()
         self.assertEqual(type(tops), gpd.GeoDataFrame)
         self.assertEqual(len(tops), 158)
+        self.test_raster.watershed_seg(classify=True)
+        self.test_raster.watershed_seg(plot=True)
 
     def test_convex_hull_mask(self):
         self.test_raster._convex_hull_mask
+
+    def test_plot(self):
+        self.test_raster.plot()
+        self.test_raster.plot(return_plot=True)
+
+    def test_write_with_crs(self):
+        self.test_raster.write("./thing.tif")
+        os.remove("./thing.tif")
+
+    def test_write_without_crs(self):
+        self.test_raster.crs = None
+        self.test_raster.write("./thing.tif")
 
 class GISExportTestCase(unittest.TestCase):
     def setUp(self):
@@ -217,7 +231,9 @@ class GISExportTestCase(unittest.TestCase):
         array = np.random.randint(1, 5, size=(99, 99)).astype(np.int32)
         gisexport.array_to_polygons(array, self.test_raster._affine)
 
+class VoxelGridTestCase(unittest.TestCase):
+    def setUp(self):
+        self.test_voxel_grid = voxelizer.VoxelGrid(cloud.Cloud(test_las), cell_size=2)
 
-
-
-
+    def test_voxel_raster(self):
+        self.test_voxel_grid.voxel_raster("count", "z")
