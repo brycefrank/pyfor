@@ -213,7 +213,7 @@ class Raster:
         """
         Default plotting method for the Raster object.
 
-        :return:
+        :param block: An optional parameter, mostly for debugging purposes.
         """
         #TODO implement cmap
         fig = plt.figure()
