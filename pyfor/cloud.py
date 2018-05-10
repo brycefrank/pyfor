@@ -11,6 +11,7 @@ import ogr
 from pyfor import rasterizer
 from pyfor import clip_funcs
 from pyfor import plot
+import pathlib
 
 class CloudData:
     """
@@ -54,14 +55,14 @@ class CloudData:
         self.count = np.alen(self.points)
 
 class Cloud:
-    # TODO Consider inheriting from
-    def __init__(self, las):
-        """
-        A dataframe representation of a point cloud, with some useful functions for manipulating and displaying.
+    """
+    The cloud object is the integral unit of pyfor, and is where most of the action takes place. Many of the following \
+    attributes are convenience functions for other classes and modules.
 
-        :param las: A path to a las file, a laspy.file.File object, or a CloudFrame object
-        """
-        if type(las) == str:
+    :param las: One of either: a string representing the path to a las (or laz) file or a CloudData object.
+    """
+    def __init__(self, las):
+        if type(las) == str or type(las) == pathlib.PosixPath:
             las = laspy.file.File(las)
             # Rip points from laspy
             points = pd.DataFrame({"x": las.x, "y": las.y, "z": las.z, "intensity": las.intensity, "classification": las.classification,
@@ -80,26 +81,26 @@ class Cloud:
 
     def grid(self, cell_size):
         """
-        Generates a Grid object for this Cloud given a cell size. See the documentation for Grid for more information.
+        Generates a Grid object for this Cloud given a cell size. The Grid is generally used to compute Raster objects
+        See the documentation for Grid for more information.
 
         :param cell_size: The resolution of the plot in the same units as the input file.
         :return: A Grid object.
         """
         return(rasterizer.Grid(self, cell_size))
 
-    def plot(self, cell_size = 1, cmap = "viridis", return_plot = False):
+    def plot(self, cell_size = 1, cmap = "viridis", return_plot = False, block=False):
         """
         Plots a basic canopy height model of the Cloud object. This is mainly a convenience function for \
-        rasterizer.Grid.plot, check that method docstring for more information and more robust usage cases.
+        rasterizer.Grid.plot, check that method docstring for more information and more robust usage cases (i.e. \
+        pit filtering and interpolation methods).
 
-        :param cell_size: The resolution of the plot in the same units as the input file.
+        :param cellf vmin or vmax is not given, they are initialized from the minimum and maximum value respectively of the first input processed. That is, __call__(A) calls autoscale_None(A). If clip _size: The resolution of the plot in the same units as the input file.
         :param return_plot: If true, returns a matplotlib plt object.
-        :return: If return_plot == True, returns matplotlib plt object.
+        :return: If return_plot == True, returns matplotlib plt object. Not yet implemented.
         """
-        if return_plot == True:
-            return(rasterizer.Grid(self, cell_size).plot("max", return_plot= True))
 
-        rasterizer.Grid(self, cell_size).plot("max", cmap, dim = "z")
+        rasterizer.Grid(self, cell_size).raster("max", "z").plot(cmap, block = block, return_plot = return_plot)
 
     def iplot3d(self, max_points=30000, point_size=0.5, dim="z", colorscale="Viridis"):
         """
@@ -109,10 +110,9 @@ class Cloud:
 
         :param max_points: The maximum number of points to render.
         :param point_size: The point size of the rendered point cloud.
+        :param dim: The dimension on which to color (i.e. "z", "intensity", etc.)
+        :param colorscale: The Plotly colorscale with which to color.
         """
-        self.min = [np.min(self.las.points.x), np.min(self.las.points.y), np.min(self.las.points.z)]
-        self.max = [np.max(self.las.points.x), np.max(self.las.points.y), np.max(self.las.points.z)]
-        self.count = np.alen(self.las.points)
         plot.iplot3d(self.las, max_points, point_size, dim, colorscale)
 
     def plot3d(self, point_size=1, cmap='Spectral_r', max_points=5e5):
@@ -130,11 +130,9 @@ class Cloud:
         if self.las.count > max_points:
                 sample_mask = np.random.randint(self.las.count,
                                                 size = int(max_points))
-                #TODO update this to new pandas framework
                 coordinates = np.stack([self.las.points.x, self.las.points.y, self.las.points.z], axis = 1)[sample_mask,:]
                 print("Too many points, down sampling for 3d plot performance.")
         else:
-            # TODO update this to new pandas framework
             coordinates = np.stack([self.las.points.x, self.las.points.y, self.las.points.z], axis = 1)
 
         # Start Qt app and widget
@@ -179,7 +177,7 @@ class Cloud:
 
         Note that this current implementation is best suited for larger tiles. Best practices suggest creating a BEM \
         at the largest scale possible first, and using that to normalize plot-level point clouds in a production \
-        setting.
+        setting. This sets self.normalized to True.
 
         :param cell_size: The cell_size at which to rasterize the point cloud into bins, in the same units as the \
         input point cloud.
@@ -197,23 +195,19 @@ class Cloud:
         self.las.max = [np.max(dem_grid.data.x), np.max(dem_grid.data.y), np.max(dem_grid.data.z)]
         self.normalized = True
 
-    def clip(self, geometry):
+    def clip(self, poly):
         """
-        Clips the point cloud to the provided geometry (see below for compatible types) using a ray casting algorithm.
+        Clips the point cloud to the provided shapely polygon using a ray casting algorithm.
 
-        :param geometry: Either a tuple of bounding box coordinates (square clip), an OGR geometry (polygon clip), \
-        or a tuple of a point and radius (circle clip).
-        :return: A new Cloud object clipped to the provided geometry.
+        :param poly: A shapely polygon in the same CRS as the Cloud.
+        :return: A new cloud object clipped to the provided polygon.
         """
-        if type(geometry) == tuple and len(geometry) == 4:
-            # Square clip
-            mask = clip_funcs.square_clip(self, geometry)
-            keep_points = self.las.points.iloc[mask]
+        #TODO Implement geopandas for multiple clipping polygons.
 
-        elif type(geometry) == ogr.Geometry:
-            keep_points = clip_funcs.poly_clip(self, geometry)
-
-        return Cloud(CloudData(keep_points, self.las.header))
+        keep = clip_funcs.poly_clip(self, poly)
+        new_cloud =  Cloud(CloudData(self.las.points.iloc[keep], self.las.header))
+        new_cloud.las._update()
+        return(new_cloud)
 
     def filter(self, min, max, dim):
         """
@@ -250,3 +244,20 @@ class Cloud:
 
         else:
             return(self.grid(cell_size).interpolate("max", "z", interp_method))
+
+    @property
+    def convex_hull(self):
+        """
+        Calculates the convex hull of the 2d plane.
+
+        :return: A single-element geoseries of the convex hull.
+        """
+        from scipy.spatial import ConvexHull
+        import geopandas as gpd
+        from shapely.geometry import Polygon
+
+        hull = ConvexHull(self.las.points[["x", "y"]].values)
+        hull_poly = Polygon(hull.points[hull.vertices])
+
+        return gpd.GeoSeries(hull_poly)
+

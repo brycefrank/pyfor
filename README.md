@@ -7,9 +7,10 @@
 
 **pyfor** is a Python package that assists in the processing of point cloud data in the context of forest inventory. It offers functions that convert raw point cloud data to usable information about forested landscapes using an object oriented (OOP) framework accessible for advanced and novice users of Python. pyfor aims to provide a cross platform means to interactively process point cloud data, as well as efficient ways to batch process large acquisitions.
 
-The current release is 0.2.0 (this branch). 0.2.0 is adequate for processing single tiles and serves as the foundation for future updates.
+The current release is 0.2.1 (this branch). 0.2.1 is adequate for processing single tiles and serves as the foundation for future updates. There is a dedicated changelog [here](CHANGELOG.md)
 
-A minor update rolling release branch is located on [0.2.1](http://github.com/brycefrank/pyfor/tree/0.2.1). 0.2.1 will only improve on single tile functionality (tree detection, bug fixes, etc). Please check the changelog there before submitting issues.
+
+A minor update rolling release branch is located on [0.2.2](http://github.com/brycefrank/pyfor/tree/0.2.2). 0.2.2 will only improve on single tile functionality (tree detection, bug fixes, etc). Please check the changelog there before submitting issues.
 
 An upcoming release, [0.3.0](http://github.com/brycefrank/pyfor/tree/0.3.0),  will focus on processing large acquisitions, and is slated for release on this branch in **August 2018**.
 
@@ -20,6 +21,9 @@ These samples are a work in progress, but demonstrate some of the package capabi
 - [File Input and Plotting](https://github.com/brycefrank/pyfor/blob/master/samples/ImportsExports.ipynb)
 - [Normalization](https://github.com/brycefrank/pyfor/blob/master/samples/Normalization.ipynb)
 - [Canopy Height Models](https://github.com/brycefrank/pyfor/blob/master/samples/CanopyHeightModel.ipynb)
+- [Clipping](https://github.com/brycefrank/pyfor/blob/master/samples/Clipping.ipynb)
+- [Watershed Segmentation](https://github.com/brycefrank/pyfor/blob/master/samples/WatersgedSegmentation.ipynb)
+- [Grid Metrics](https://github.com/brycefrank/pyfor/blob/master/samples/GridMetrics.ipynb)
 
 ## Installation
 

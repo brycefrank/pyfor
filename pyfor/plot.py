@@ -14,10 +14,10 @@ def iplot3d(las, max_points, point_size, dim, colorscale):
         if 'jupyter' in cfg['IPKernelApp']['connection_file']:
             if las.header.count > max_points:
                 print("Point cloud too large, down sampling for plot performance.")
-                rand = np.random.randint(0, las.header.count, 30000)
-                x = las.points.x[rand]
-                y = las.points.y[rand]
-                z = las.points.z[rand]
+                rand = np.random.randint(0, las.count, 30000)
+                x = las.points.x.iloc[rand]
+                y = las.points.y.iloc[rand]
+                z = las.points.z.iloc[rand]
                 color_var = las.points[dim].values[rand]
 
                 trace1 = go.Scatter3d(
