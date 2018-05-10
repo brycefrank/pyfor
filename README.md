@@ -22,7 +22,7 @@ These samples are a work in progress, but demonstrate some of the package capabi
 - [Normalization](https://github.com/brycefrank/pyfor/blob/master/samples/Normalization.ipynb)
 - [Canopy Height Models](https://github.com/brycefrank/pyfor/blob/master/samples/CanopyHeightModel.ipynb)
 - [Clipping](https://github.com/brycefrank/pyfor/blob/master/samples/Clipping.ipynb)
-- [Watershed Segmentation](https://github.com/brycefrank/pyfor/blob/master/samples/WatersgedSegmentation.ipynb)
+- [Watershed Segmentation](https://github.com/brycefrank/pyfor/blob/master/samples/WatershedSegmentation.ipynb)
 - [Grid Metrics](https://github.com/brycefrank/pyfor/blob/master/samples/GridMetrics.ipynb)
 
 ## Installation
