@@ -1,8 +1,12 @@
+# 0.2.1
+
+This update was meant to implement features and bug fixes on the tile processing capabilities as well as improve some of the visualization functions. More samples and documentation were added, along with ~90% code coverage. Although the 0.3.0-specific `voxelizer.py` was added, it is not officially supported in this release.
+
 ## Samples
-1. [In Progress] Added a watershed segmentation sample.
-2. [In Progress] Added a clipping sample.
+1. Added a watershed segmentation sample.
+2. Added a clipping sample.
 3. Improved normalization sample
-4. Improved grid metrics sample with the new `as_raster` argument (see below)
+4. Added grid metrics sample with the new `as_raster` argument (see below)
 
 ## Voxelizer
 1. Added basic `VoxelGrid` class with a 3D version of raster
