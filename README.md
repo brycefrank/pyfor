@@ -9,6 +9,7 @@
 
 The current release is 0.2.1 (this branch). 0.2.1 is adequate for processing single tiles and serves as the foundation for future updates. There is a dedicated changelog [here](CHANGELOG.md)
 
+
 A minor update rolling release branch is located on [0.2.2](http://github.com/brycefrank/pyfor/tree/0.2.2). 0.2.2 will only improve on single tile functionality (tree detection, bug fixes, etc). Please check the changelog there before submitting issues.
 
 An upcoming release, [0.3.0](http://github.com/brycefrank/pyfor/tree/0.3.0),  will focus on processing large acquisitions, and is slated for release on this branch in **August 2018**.
