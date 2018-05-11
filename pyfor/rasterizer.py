@@ -132,9 +132,6 @@ class Grid:
             metrics = [tup[1] for tup in list(aggregate)]
             return pd.DataFrame({'dim': dims, 'metric': metrics, 'raster': rasters}).set_index(['dim', 'metric'])
 
-
-
-
     def ground_filter(self, num_windows, dh_max, dh_0, interp_method = "nearest"):
         """
         Wrapper call for filter.zhang with convenient defaults.
@@ -216,7 +213,7 @@ class Raster:
         """
         Default plotting method for the Raster object.
 
-        :return:
+        :param block: An optional parameter, mostly for debugging purposes.
         """
         #TODO implement cmap
         fig = plt.figure()
@@ -246,6 +243,18 @@ class Raster:
         """
         plot.iplot3d_surface(self.array, colorscale)
 
+    def local_maxima(self, min_distance=2, threshold_abs=2):
+        """
+        Returns a geopandas dataframe of points found using skimage.feature.peak_local_max
+        :return:
+        """
+        from skimage.feature import peak_local_max
+        from scipy.ndimage import label
+        tops = peak_local_max(self.array, indices=False, min_distance=min_distance, threshold_abs=threshold_abs)
+        tops = label(tops)[0]
+        return(tops)
+
+
     def watershed_seg(self, min_distance=2, threshold_abs=2, classify=False, plot = False):
         """
         Returns the watershed segmentation of the Raster as a geopandas dataframe.
@@ -261,13 +270,11 @@ class Raster:
         """
         from skimage.morphology import watershed
         from skimage.feature import peak_local_max
-        from scipy.ndimage import label
 
         # TODO At some point, when more tree detection methods are implemented, the plotting version of this function
         # TODO can be relegated to another class. In the mean time this will function.
 
-        tops = peak_local_max(self.array, indices=False, min_distance=min_distance, threshold_abs=threshold_abs)
-        tops = label(tops)[0]
+        tops = self.local_maxima(min_distance=min_distance, threshold_abs=threshold_abs)
         labels = watershed(-self.array, tops, mask=self.array)
 
         if classify == True:

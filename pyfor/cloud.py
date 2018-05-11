@@ -59,7 +59,6 @@ class Cloud:
     The cloud object is the integral unit of pyfor, and is where most of the action takes place. Many of the following \
     attributes are convenience functions for other classes and modules.
 
-<<<<<<< HEAD
     :param las: One of either: a string representing the path to a las (or laz) file or a CloudData object.
     """
     def __init__(self, las):
@@ -206,7 +205,9 @@ class Cloud:
         #TODO Implement geopandas for multiple clipping polygons.
 
         keep = clip_funcs.poly_clip(self, poly)
-        return Cloud(CloudData(self.las.points.iloc[keep], self.las.header))
+        new_cloud =  Cloud(CloudData(self.las.points.iloc[keep], self.las.header))
+        new_cloud.las._update()
+        return(new_cloud)
 
     def filter(self, min, max, dim):
         """
