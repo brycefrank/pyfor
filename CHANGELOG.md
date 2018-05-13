@@ -1,5 +1,7 @@
 # 0.2.1
 
+Update merged to master: May 9th, 2018
+
 This update was meant to implement features and bug fixes on the tile processing capabilities as well as improve some of the visualization functions. More samples and documentation were added, along with ~90% code coverage. Although the 0.3.0-specific `voxelizer.py` was added, it is not officially supported in this release.
 
 ## Samples
