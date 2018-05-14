@@ -7,7 +7,6 @@ import matplotlib.cm as cm
 from pyqtgraph.Qt import QtCore, QtGui
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
-import ogr
 from pyfor import rasterizer
 from pyfor import clip_funcs
 from pyfor import plot
