@@ -6,10 +6,7 @@
 pyfor
 =================================
 
-This is the documentation repository for **pyfor**, a Python package for point cloud data processing in the context of forest inventory.Our GitHub page is located `here <https://github.com/brycefrank/pyfor>`_. Please refer to that page (specifically the Wiki) if you are interested in a "higher-level" user manual, installation instructions and the like.
-
-However, if you are interested in nitty-gritty documentation of functions, this is the place to be. Consider this the last stop before reading source code.
-
+This is the documentation repository for **pyfor**, a Python package for point cloud data processing in the context of forest inventory. Our GitHub page is located `here <https://github.com/brycefrank/pyfor>`_. This website provides documentation of individual classes and functions as well as more general documents about the structure of pyfor.
 
 Classes
 =======
@@ -20,6 +17,7 @@ pyfor is written using an OOP framework. The classes listed below make up the mo
 * `CloudData <source/pyfor.html#pyfor.cloud.CloudData>`_ - handles the point cloud data manipulations (mostly an internal class).
 * `Grid <source/pyfor.html#pyfor.rasterizer.Grid>`_ - represents the point cloud as separated into grid cells (many points per grid cell).
 * `Raster <source/pyfor.html#pyfor.rasterizer.Raster>`_ - represents the point cloud as a two-dimensional raster (one value per grid cell).
+* `CloudDataFrame <source/pyfor.html#pyfor.collection.CloudDataFrame>`_ - represents a collection of Cloud objects.
 
 Functions
 =========
@@ -27,7 +25,7 @@ Functions
 The beating heart of pyfor is its collections of functions, these handle the lower level processing tasks. They are located in a few different scripts:
 
 * `clip_funcs.py <source/pyfor.html#module-pyfor.clip_funcs.html>`_ - holds functions for clipping point cloud data.
-* `gisexport.py <source/pyfor.html#module-pyfor.gisexport.html>`_ - holds functions for writing to GIS file types, mostly a wrapper for GDAL.
+* `gisexport.py <source/pyfor.html#module-pyfor.gisexport.html>`_ - holds functions for writing to GIS data types, mostly implemented via rasterio, fiona and geopandas.
 * `filter.py <source/pyfor.html#module-pyfor.filter.html>`_ - holds ground filtering and related functions.
 
 Indices and tables
