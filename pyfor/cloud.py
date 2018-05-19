@@ -78,6 +78,9 @@ class Cloud:
         self.normalized = None
         self.crs = None
 
+    def __str__(self):
+        return self.las.points
+
     def grid(self, cell_size):
         """
         Generates a Grid object for this Cloud given a cell size. The Grid is generally used to compute Raster objects
