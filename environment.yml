@@ -1,6 +1,7 @@
 name: pyfor_env
 
 dependencies:
+  - poppler<0.62
   - python=3.6
   - numpy
   - gdal
