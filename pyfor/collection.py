@@ -7,7 +7,7 @@ import geopandas as gpd
 
 class CloudDataFrame(gpd.GeoDataFrame):
     """
-    Playing around with subclassing GeoDataFrames
+    Implements a data frame structure for processing and managing multiple cloud objects.
     """
     def __init__(self, *args, **kwargs):
         super(CloudDataFrame, self).__init__(*args, **kwargs)
@@ -15,6 +15,12 @@ class CloudDataFrame(gpd.GeoDataFrame):
 
     @classmethod
     def from_dir(cls, las_dir, n_threads = 1):
+        """
+        Wrapped function for producing a CloudDataFrame from a directory of las files.
+        :param las_dir:
+        :param n_threads:
+        :return:
+        """
         las_path_init = [[os.path.join(root, file) for file in files] for root, dirs, files in os.walk(las_dir)][0]
         cdf = CloudDataFrame({'las_paths': las_path_init})
         cdf.n_threads = n_threads
@@ -31,6 +37,8 @@ class CloudDataFrame(gpd.GeoDataFrame):
         output = Parallel(n_jobs=self.n_threads)(delayed(func)(plot_path) for plot_path in self[column])
         return output
 
+    # TODO Many of these _functions are redundant due to a bug in joblib that prevents lambda functions
+    # once this bug is fixed these functions can be drastically simplified and aggregated.
     def _get_bounding_box(self, las_path):
         """
         Vectorized function to get a bounding box from an individual las path.
@@ -57,11 +65,27 @@ class CloudDataFrame(gpd.GeoDataFrame):
         self["geometry"] = [Polygon(((bbox[0], bbox[2]), (bbox[1], bbox[2]),
                                            (bbox[1], bbox[3]), (bbox[0], bbox[3]))) for bbox in bboxes]
 
+    def plot(self, return_plot = False):
+        """Plots the bounding boxes of the Cloud objects"""
+        self._build_polygons()
+        plot = super(CloudDataFrame, self).plot()
+        plot.figure.show()
+
 def from_dir(las_dir, n_threads = 1):
     """
-    Constructs a CloudDataFrame from a directory of las files. Just a wrapper for awkward syntax.
-    :param las_dir:
-    :return:
+    Constructs a CloudDataFrame from a directory of las files.
+
+    :param las_dir: The directory of las files.
+    :return: A CloudDataFrame constructed from the directory of las files.
     """
 
     return CloudDataFrame.from_dir(las_dir, n_threads = n_threads)
+
+class Indexer:
+    """
+    An internal class meant to handle the indexing of many las files for arbitrary collection tiling.
+    """
+    def __init__(self, cloud_df):
+        self.cloud_df = cloud_df
+        self.cloud_df._build_polygons()
+

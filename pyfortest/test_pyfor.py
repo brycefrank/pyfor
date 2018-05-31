@@ -237,3 +237,7 @@ class VoxelGridTestCase(unittest.TestCase):
 
     def test_voxel_raster(self):
         self.test_voxel_grid.voxel_raster("count", "z")
+
+class CloudDataFrameTestCase(unittest.TestCase):
+    def setUp(self):
+        pass
