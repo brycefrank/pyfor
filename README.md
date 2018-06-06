@@ -7,8 +7,11 @@
 
 **pyfor** is a Python package that assists in the processing of point cloud data in the context of forest inventory. It offers functions that convert raw point cloud data to usable information about forested landscapes using an object oriented (OOP) framework accessible for advanced and novice users of Python. pyfor aims to provide a cross platform means to interactively process point cloud data, as well as efficient ways to batch process large acquisitions.
 
-The current release is 0.2.1 (this branch). 0.2.1 is adequate for processing single tiles and serves as the foundation for future updates. There is a dedicated changelog [here](CHANGELOG.md)
+For those similarly concerned with the latest Microsoft / GitHub headline, there is a mirror of this repository located on [GitLab](https://gitlab.com/brycefrank/pyfor).
 
+## Release Status
+
+The current release is 0.2.1 (this branch). 0.2.1 is adequate for processing single tiles and serves as the foundation for future updates. There is a dedicated changelog [here](CHANGELOG.md)
 
 A minor update rolling release branch is located on [0.2.2](http://github.com/brycefrank/pyfor/tree/0.2.2). 0.2.2 will only improve on single tile functionality (tree detection, bug fixes, etc). Please check the changelog there before submitting issues.
 
