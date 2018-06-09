@@ -205,7 +205,9 @@ class Cloud:
         #TODO Implement geopandas for multiple clipping polygons.
 
         keep = clip_funcs.poly_clip(self, poly)
-        new_cloud =  Cloud(CloudData(self.las.points.iloc[keep], self.las.header))
+        # Create copy to avoid warnings
+        keep_points = self.las.points.iloc[keep].copy()
+        new_cloud =  Cloud(CloudData(keep_points, self.las.header))
         new_cloud.las._update()
         return(new_cloud)
 

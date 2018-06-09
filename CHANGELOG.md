@@ -1,3 +1,17 @@
+# 0.2.2
+
+## Cloud
+1. Fixed pandas SettingWithCopyWarning after clip + plot, still needs to be tested for performance (i.e. is this copy
+    necessary?)
+
+## Rasterizer
+1. Watershed segmentation output was oriented incorrectly, fixed. (Actually was fixed via master, putting here for
+    reference).
+
+
+## Testing Suite
+1. Added an second feature to the testing shapefile.
+
 # 0.2.1
 
 Update merged to master: May 9th, 2018
