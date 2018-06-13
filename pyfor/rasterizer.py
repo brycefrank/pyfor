@@ -250,7 +250,7 @@ class Raster:
         """
         from skimage.feature import peak_local_max
         from scipy.ndimage import label
-        tops = peak_local_max(self.array, indices=False, min_distance=min_distance, threshold_abs=threshold_abs)
+        tops = peak_local_max(np.flipud(self.array), indices=False, min_distance=min_distance, threshold_abs=threshold_abs)
         tops = label(tops)[0]
         return(tops)
 
@@ -274,8 +274,9 @@ class Raster:
         # TODO At some point, when more tree detection methods are implemented, the plotting version of this function
         # TODO can be relegated to another class. In the mean time this will function.
 
+        watershed_array = np.flipud(self.array)
         tops = self.local_maxima(min_distance=min_distance, threshold_abs=threshold_abs)
-        labels = watershed(-self.array, tops, mask=self.array)
+        labels = watershed(-watershed_array, tops, mask=watershed_array)
 
         if classify == True:
             xy = self.grid.data[["bins_x", "bins_y"]].values
@@ -286,7 +287,6 @@ class Raster:
             self.grid.data = self.grid.las.points
             self.grid.cells = self.grid.data.groupby(['bins_x', 'bins_y'])
 
-
         if plot == False:
             affine = self._affine
             tops = gisexport.array_to_polygons(labels, affine)
@@ -296,11 +296,11 @@ class Raster:
             tops = gisexport.array_to_polygons(labels, affine)
             fig = plt.figure()
             ax = fig.add_subplot(111)
-            ax.imshow(self.array)
+            ax.imshow(watershed_array)
             tops.plot(ax = ax, edgecolor="black", alpha=0.3)
-            ax.invert_yaxis()
             plt.xlim((0, self.array.shape[1]))
             plt.ylim((0, self.array.shape[0]))
+            ax.invert_yaxis()
 
     def pit_filter(self, kernel_size):
         """
