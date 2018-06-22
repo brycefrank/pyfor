@@ -74,10 +74,10 @@ class CloudTestCase(unittest.TestCase):
 
     def test_filter_z(self):
         self.test_filter = cloud.Cloud(test_las)
-        self.test_filter.filter(350, 351, "z")
-        self.assertEqual(self.test_filter.las.count, 30)
-        self.assertLessEqual(self.test_filter.las.max[2], [351])
-        self.assertGreaterEqual(self.test_filter.las.min[2], [350])
+        self.test_filter.filter(40, 41, "z")
+        self.assertEqual(self.test_filter.las.count, 3639)
+        self.assertLessEqual(self.test_filter.las.max[2], [41])
+        self.assertGreaterEqual(self.test_filter.las.min[2], [40])
 
     def test_clip_polygon(self):
         poly = gpd.read_file(test_shp)['geometry'][0]
@@ -124,10 +124,10 @@ class GridTestCase(unittest.TestCase):
         self.test_grid = cloud.Cloud(test_las).grid(1)
 
     def test_m(self):
-        self.assertEqual(99, self.test_grid.m)
+        self.assertEqual(199, self.test_grid.m)
 
     def test_n(self):
-        print(99, self.test_grid.n)
+        self.assertEqual(199, self.test_grid.n)
 
     def test_cloud(self):
         self.assertEqual(type(self.test_grid.cloud), cloud.Cloud)
@@ -138,7 +138,7 @@ class GridTestCase(unittest.TestCase):
     def test_empty_cells(self):
         empty = self.test_grid.empty_cells
         # Check that there are the correct number
-        self.assertEqual(empty.shape, (167, 2))
+        self.assertEqual(empty.shape, (693, 2))
         # TODO Check at least one off-diagonal coordinate is non empty ([0 9] for example)
 
     def test_raster(self):
@@ -173,18 +173,21 @@ class RasterTestCase(unittest.TestCase):
         affine = self.test_raster._affine
         self.assertEqual(affine[0], 1.0)
         self.assertEqual(affine[1], 0.0)
-        self.assertEqual(affine[2], 472137.75)
+        self.assertEqual(affine[2], 405000.01000000001)
         self.assertEqual(affine[3], 0.0)
         self.assertEqual(affine[4], -1.0)
-        self.assertEqual(affine[5], 5015782.45)
+        self.assertEqual(affine[5], 3276499.9900000002)
         self.assertEqual(affine[6], 0)
 
     def test_watershed_seg(self):
         tops = self.test_raster.watershed_seg()
         self.assertEqual(type(tops), gpd.GeoDataFrame)
-        self.assertEqual(len(tops), 158)
+        self.assertEqual(len(tops), 985)
         self.test_raster.watershed_seg(classify=True)
         self.test_raster.watershed_seg(plot=True)
+
+    def test_watershed_seg_out_oriented_correctly(self):
+        pass
 
     def test_convex_hull_mask(self):
         self.test_raster._convex_hull_mask
@@ -200,6 +203,8 @@ class RasterTestCase(unittest.TestCase):
     def test_write_without_crs(self):
         self.test_raster.crs = None
         self.test_raster.write("./thing.tif")
+
+
 
 class GISExportTestCase(unittest.TestCase):
     def setUp(self):

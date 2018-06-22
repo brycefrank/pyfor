@@ -3,6 +3,7 @@
 ## Cloud
 1. Fixed pandas SettingWithCopyWarning after clip + plot, still needs to be tested for performance (i.e. is this copy
     necessary?)
+2. Added plotting for custom dimensions for `Cloud.plot3d()`
 
 ## Rasterizer
 1. Watershed segmentation output was oriented incorrectly, fixed. (Actually was fixed via master, putting here for

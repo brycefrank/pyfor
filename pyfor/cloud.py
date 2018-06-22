@@ -115,37 +115,46 @@ class Cloud:
         """
         plot.iplot3d(self.las, max_points, point_size, dim, colorscale)
 
-    def plot3d(self, point_size=1, cmap='Spectral_r', max_points=5e5):
+    def plot3d(self, dim = "z", point_size=1, cmap='Spectral_r', max_points=5e5):
         """
         Plots the three dimensional point cloud using a method suitable for non-Jupyter use (i.e. via the Python \
         console). By default, if the point cloud exceeds 5e5 points, then it is downsampled using a uniform random \
         distribution of 5e5 points. This is for performance purposes.
 
         :param point_size: The size of the rendered points.
+        :param dim: The dimension upon which to color (i.e. "z", "intensity", etc.)
         :param cmap: The matplotlib color map used to color the height distribution.
         :param max_points: The maximum number of points to render.
         """
-
+        # TODO: Getting a bit messy in here
         # Randomly sample down if too large
         if self.las.count > max_points:
                 sample_mask = np.random.randint(self.las.count,
                                                 size = int(max_points))
                 coordinates = np.stack([self.las.points.x, self.las.points.y, self.las.points.z], axis = 1)[sample_mask,:]
+                color_dim = np.copy(self.las.points[dim].iloc[sample_mask].values)
                 print("Too many points, down sampling for 3d plot performance.")
         else:
             coordinates = np.stack([self.las.points.x, self.las.points.y, self.las.points.z], axis = 1)
+            color_dim = np.copy(self.las.points[dim].values)
+
+        # If dim is user data (probably TREE ID or some such thing) then we want a discrete colormap
+        if dim == "user_data":
+            n = len(np.unique(color_dim))
+            base = cm.get_cmap(cmap)
+            color_list = base(np.linspace(0,1,n))
+            cmap_name = base.name + str(n)
+            cmap = base.from_list(cmap_name, color_list, n)
+        else:
+            color_dim = (color_dim - np.min(color_dim)) / (np.max(color_dim) - np.min(color_dim))
 
         # Start Qt app and widget
         pg.mkQApp()
         view = gl.GLViewWidget()
 
-        # Normalize Z to 0-1 space
-        z = np.copy(coordinates[:,2])
-        z = (z - min(z)) / (max(z) - min(z))
-
         # Get matplotlib color maps
         cmap = cm.get_cmap(cmap)
-        colors = cmap(z)
+        colors = cmap(color_dim)
 
         # Create the points, change to opaque, set size to 1
         points = gl.GLScatterPlotItem(pos = coordinates, color = colors)
