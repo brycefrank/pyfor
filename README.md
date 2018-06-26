@@ -21,6 +21,7 @@ An upcoming release, [0.3.0](http://github.com/brycefrank/pyfor/tree/0.3.0),  wi
 
 These samples are a work in progress, but demonstrate some of the package capabilities.
 
+- [Introduction](https://github.com/brycefrank/pyfor/blob/master/samples/Introduction.ipynb)
 - [File Input and Plotting](https://github.com/brycefrank/pyfor/blob/master/samples/ImportsExports.ipynb)
 - [Normalization](https://github.com/brycefrank/pyfor/blob/master/samples/Normalization.ipynb)
 - [Canopy Height Models](https://github.com/brycefrank/pyfor/blob/master/samples/CanopyHeightModel.ipynb)
