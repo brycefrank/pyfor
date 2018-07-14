@@ -225,8 +225,8 @@ class Raster:
         ax.set_xticks(np.linspace(0, self.grid.n, 3))
         ax.set_yticks(np.linspace(0, self.grid.m, 3))
 
-        x_ticks, y_ticks = np.rint(np.linspace(self.grid.las.header.min[0], self.grid.las.header.max[0], 3)), \
-                           np.rint(np.linspace(self.grid.las.header.min[1], self.grid.las.header.max[1], 3))
+        x_ticks, y_ticks = np.rint(np.linspace(self.grid.las.min[0], self.grid.las.max[0], 3)), \
+                           np.rint(np.linspace(self.grid.las.min[1], self.grid.las.max[1], 3))
 
         ax.set_xticklabels(x_ticks)
         ax.set_yticklabels(y_ticks)
