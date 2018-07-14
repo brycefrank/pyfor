@@ -12,6 +12,7 @@
 
 ## Testing Suite
 1. Added an second feature to the testing shapefile.
+2. Adjusted testing suite to NEON data set for simplicity.
 
 # 0.2.1
 
