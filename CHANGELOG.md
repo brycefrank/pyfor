@@ -4,11 +4,13 @@
 1. Fixed pandas SettingWithCopyWarning after clip + plot, still needs to be tested for performance (i.e. is this copy
     necessary?)
 2. Added plotting for custom dimensions for `Cloud.plot3d()`
+3. Moved `pyqtgraph` import statements witin `Cloud.plot3d()` to improve import perormance
+4. Added functionality for plotting detected trees. Very rough but functional.
 
 ## Rasterizer
 1. Watershed segmentation output was oriented incorrectly, fixed. (Actually was fixed via master, putting here for
     reference).
-
+2. Fixed a bug that produced the wrong axes tick mark labels after modification of the Cloud object.
 
 ## Testing Suite
 1. Added an second feature to the testing shapefile.

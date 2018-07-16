@@ -4,9 +4,6 @@ import laspy
 import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
-from pyqtgraph.Qt import QtCore, QtGui
-import pyqtgraph as pg
-import pyqtgraph.opengl as gl
 import ogr
 from pyfor import rasterizer
 from pyfor import clip_funcs
@@ -79,6 +76,30 @@ class Cloud:
         self.normalized = None
         self.crs = None
 
+    def _discrete_cmap(self, n_bin, base_cmap=None):
+        """Create an N-bin discrete colormap from the specified input map"""
+        import matplotlib.pyplot as plt
+        from matplotlib.colors import LinearSegmentedColormap
+
+        base = plt.cm.get_cmap(base_cmap)
+        color_list = base(np.linspace(0, 1, n_bin))
+        cmap_name = base.name + str(n_bin)
+        return LinearSegmentedColormap.from_list(cmap_name, color_list, n_bin)
+
+    def _set_discrete_color(self, n_bin, series):
+        """Adds a column 'random_id' to Cloud.las.points that reduces the 'user_data' column to a fewer number of random
+        integers. Used to produce clearer 3d visualizations of detected trees.
+
+        :param n_bin: Number of bins to reduce to.
+        :param series: The pandas series to reduce, usually 'user_data' which is set to a unique tree ID after detection.
+        """
+
+        random_ints = np.random.randint(1, n_bin + 1, size = len(np.unique(series)))
+        pre_merge = pd.DataFrame({'unique_id': series.unique(), 'random_id': random_ints})
+
+
+        self.las.points = pd.merge(self.las.points, pre_merge, left_on = 'user_data', right_on = 'unique_id')
+
     def grid(self, cell_size):
         """
         Generates a Grid object for this Cloud given a cell size. The Grid is generally used to compute Raster objects
@@ -115,7 +136,7 @@ class Cloud:
         """
         plot.iplot3d(self.las, max_points, point_size, dim, colorscale)
 
-    def plot3d(self, dim = "z", point_size=1, cmap='Spectral_r', max_points=5e5):
+    def plot3d(self, dim = "z", point_size=1, cmap='Spectral_r', max_points=5e5, n_bin=8, plot_trees=False):
         """
         Plots the three dimensional point cloud using a method suitable for non-Jupyter use (i.e. via the Python \
         console). By default, if the point cloud exceeds 5e5 points, then it is downsampled using a uniform random \
@@ -126,12 +147,22 @@ class Cloud:
         :param cmap: The matplotlib color map used to color the height distribution.
         :param max_points: The maximum number of points to render.
         """
-        # TODO: Getting a bit messy in here
+
+        from pyqtgraph.Qt import QtCore, QtGui
+        import pyqtgraph as pg
+        import pyqtgraph.opengl as gl
+
         # Randomly sample down if too large
+        if dim == 'user_data' and plot_trees:
+            dim = 'random_id'
+            self._set_discrete_color(n_bin, self.las.points['user_data'])
+            cmap = self._discrete_cmap(n_bin, base_cmap=cmap)
+
         if self.las.count > max_points:
                 sample_mask = np.random.randint(self.las.count,
                                                 size = int(max_points))
                 coordinates = np.stack([self.las.points.x, self.las.points.y, self.las.points.z], axis = 1)[sample_mask,:]
+
                 color_dim = np.copy(self.las.points[dim].iloc[sample_mask].values)
                 print("Too many points, down sampling for 3d plot performance.")
         else:
@@ -139,22 +170,18 @@ class Cloud:
             color_dim = np.copy(self.las.points[dim].values)
 
         # If dim is user data (probably TREE ID or some such thing) then we want a discrete colormap
-        if dim == "user_data":
-            n = len(np.unique(color_dim))
-            base = cm.get_cmap(cmap)
-            color_list = base(np.linspace(0,1,n))
-            cmap_name = base.name + str(n)
-            cmap = base.from_list(cmap_name, color_list, n)
-        else:
+        if dim != 'random_id':
             color_dim = (color_dim - np.min(color_dim)) / (np.max(color_dim) - np.min(color_dim))
+            cmap = cm.get_cmap(cmap)
+            colors = cmap(color_dim)
+
+        else:
+            colors = cmap(color_dim)
 
         # Start Qt app and widget
         pg.mkQApp()
         view = gl.GLViewWidget()
 
-        # Get matplotlib color maps
-        cmap = cm.get_cmap(cmap)
-        colors = cmap(color_dim)
 
         # Create the points, change to opaque, set size to 1
         points = gl.GLScatterPlotItem(pos = coordinates, color = colors)
