@@ -60,6 +60,7 @@ class Cloud:
     """
     def __init__(self, las):
         if type(las) == str or type(las) == pathlib.PosixPath:
+            self.filepath = las
             las = laspy.file.File(las)
             # Rip points from laspy
             points = pd.DataFrame({"x": las.x, "y": las.y, "z": las.z, "intensity": las.intensity, "classification": las.classification,
@@ -67,6 +68,7 @@ class Cloud:
                                    "pt_src_id": las.pt_src_id})
             header = las.header
             self.las = CloudData(points, header)
+
         elif type(las) == CloudData:
             self.las = las
         else:
@@ -75,6 +77,28 @@ class Cloud:
         # We're not sure if this is true or false yet
         self.normalized = None
         self.crs = None
+
+
+
+
+    def __str__(self):
+        """
+        Returns a human readable summary of the Cloud object.
+        """
+        from os.path import getsize
+
+        # Format max and min
+        min =  [float('{0:.2f}'.format(elem)) for elem in self.las.min]
+        max =  [float('{0:.2f}'.format(elem)) for elem in self.las.max]
+        filesize = getsize(self.filepath)
+        las_version = self.las.header.version
+
+
+        out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}\nLas Version: {}
+        
+        """.format(self.filepath, filesize, self.las.count, min, max, las_version)
+
+        return(out)
 
     def _discrete_cmap(self, n_bin, base_cmap=None):
         """Create an N-bin discrete colormap from the specified input map"""

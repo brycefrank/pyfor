@@ -32,8 +32,6 @@ def array_to_polygons(array, affine=None):
     :param affine: The affine transformation.
     :return:
     """
-
-    # TODO Messy but functional.
     if affine == None:
         results = [
             {'properties': {'raster_val': v}, 'geometry': s}

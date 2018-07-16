@@ -6,6 +6,7 @@
 2. Added plotting for custom dimensions for `Cloud.plot3d()`
 3. Moved `pyqtgraph` import statements witin `Cloud.plot3d()` to improve import perormance
 4. Added functionality for plotting detected trees. Very rough but functional.
+5. Added summary functionality, use `print(some_cloud_object)` to view.
 
 ## Rasterizer
 1. Watershed segmentation output was oriented incorrectly, fixed. (Actually was fixed via master, putting here for

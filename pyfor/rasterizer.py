@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 from pyfor import gisexport
 from pyfor import filter
 from pyfor import plot
-from rasterio.transform import from_origin
 
 class Grid:
     """The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. It is \
@@ -184,6 +183,7 @@ class Raster:
     @property
     def _affine(self):
         """Constructs the affine transformation, used for plotting and exporting polygons and rasters."""
+        from rasterio.transform import from_origin
         affine = from_origin(self.grid.las.min[0], self.grid.las.max[1], self.grid.cell_size, self.grid.cell_size)
         return affine
 
