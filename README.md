@@ -9,8 +9,6 @@
 
 pyfor is supported in part by the [AWS Cloud Credits for Research program](https://aws.amazon.com/research-credits/)
 
-For those similarly concerned with the latest Microsoft / GitHub headline, there is a mirror of this repository located on [GitLab](https://gitlab.com/brycefrank/pyfor).
-
 ## Release Status
 
 The current release is 0.2.1 (this branch). 0.2.1 is adequate for processing single tiles and serves as the foundation for future updates. There is a dedicated changelog [here](CHANGELOG.md)
