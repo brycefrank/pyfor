@@ -38,6 +38,7 @@ class CloudData:
         writer.x = self.points["x"]
         writer.y = self.points["y"]
         writer.z = self.points["z"]
+        writer.return_num = self.points["return_num"]
         writer.intesity = self.points["intensity"]
         writer.classification = self.points["classification"]
         writer.flag_byte = self.points["flag_byte"]
@@ -63,7 +64,7 @@ class Cloud:
             self.filepath = las
             las = laspy.file.File(las)
             # Rip points from laspy
-            points = pd.DataFrame({"x": las.x, "y": las.y, "z": las.z, "intensity": las.intensity, "classification": las.classification,
+            points = pd.DataFrame({"x": las.x, "y": las.y, "z": las.z, "intensity": las.intensity, "return_num": las.return_num, "classification": las.classification,
                                    "flag_byte":las.flag_byte, "scan_angle_rank":las.scan_angle_rank, "user_data": las.user_data,
                                    "pt_src_id": las.pt_src_id})
             header = las.header
@@ -322,4 +323,13 @@ class Cloud:
         hull_poly = Polygon(hull.points[hull.vertices])
 
         return gpd.GeoSeries(hull_poly)
+
+    def write(self, path):
+        """
+        Write the Cloud to a las file.
+
+        :param path: The path of the output file.
+        :return:
+        """
+        self.las.write(path)
 

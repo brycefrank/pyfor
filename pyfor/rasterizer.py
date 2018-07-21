@@ -269,7 +269,6 @@ class Raster:
         :return: A geopandas data frame, each record is a crown segment.
         """
         from skimage.morphology import watershed
-        from skimage.feature import peak_local_max
 
         # TODO At some point, when more tree detection methods are implemented, the plotting version of this function
         # TODO can be relegated to another class. In the mean time this will function.
