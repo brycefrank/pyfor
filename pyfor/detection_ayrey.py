@@ -5,11 +5,7 @@ from sklearn.cluster import KMeans
 from skimage.feature import corner_peaks
 import matplotlib.pyplot as plt
 from shapely.geometry import asMultiPoint
-
-
-test_cloud = pyfor.cloud.Cloud("/home/bryce/Programming/PyFor/pyfortest/data/test.las")
-test_cloud.normalize(cell_size=0.5)
-
+import geopandas as gpd
 
 class LayerStacking:
     # TODO Make inherent from a generic tree detection class
@@ -27,8 +23,10 @@ class LayerStacking:
         self.points = self.cloud.las.points
         self.chm = self.cloud.chm(chm_resolution, interp_method= "nearest", pit_filter= "median")
         self.n_jobs = n_jobs
+        self.buffer_distance = buffer_distance
 
         # TODO Make into functions below?
+        # FIXME this should be generalized for unit (i.e. point clouds in feet or in meters)
         # Bin the layers in the cloud
         layer_bins = np.searchsorted(np.arange(0.5, self.cloud.las.max[2] + 1), self.points['z'])
         self.points['bins_z'] = layer_bins
@@ -50,13 +48,14 @@ class LayerStacking:
         seed_xy = np.stack(seed_xy, axis = 1)
         return(seed_xy)
 
-    def get_detected_top_coordinates(self, min_distance = 3):
+    def get_detected_top_coordinates(self, min_distance = 3, threshold_abs=3):
         """
         Gets the coordinates of detected tops.
         :return:
         """
 
-        top_indices = corner_peaks(np.flipud(self.chm.local_maxima(min_distance = min_distance) !=0))
+        top_indices = corner_peaks(np.flipud(self.chm.local_maxima(min_distance = min_distance,
+                                                                   threshold_abs=threshold_abs) !=0))
         self.top_coordinates = self.project_indices(top_indices)
 
     def get_layer(self, layer_index):
@@ -104,35 +103,55 @@ class LayerStacking:
         :param layer_index:
         :return:
         """
-
+        print("Clustering layer {}".format(layer_index + 1))
         layer = self.get_layer(layer_index)
-        clusters = KMeans(n_clusters=self.top_coordinates.shape[0], init = self.top_coordinates, n_jobs=self.n_jobs).fit(layer[['x', 'y']])
-        return(clusters)
+        if len(layer) >= self.top_coordinates.shape[0]:
+            clusters = KMeans(n_clusters=self.top_coordinates.shape[0], init = self.top_coordinates, n_jobs=self.n_jobs,
+                              ).fit(layer[['x', 'y']])
+            return(clusters)
+        else:
+            return(None)
 
     def cluster_all_layers(self):
         """
         Clusters every layer present in the parent cloud object.
 
-        :return: A list of cluster objects.
+        :return: A list of cluster objects, one for each layer in the cloud object.
         """
-
-        self.get_detected_top_coordinates()
-        # TODO handle the case where the number of points is less than the number of tree tops
-        # probably just terminate the loop?
-        return [self.cluster_layer(i) for i in range(self.n_layers)]
+        # TODO handle the case where the number of points is less than the number of tree otops
+        # FIXME seems to be calling cluster layer twice!
+        return [self.cluster_layer(i) for i in range(self.n_layers) if self.cluster_layer(i) is not None]
 
     def buffer_cluster_layers(self):
         """
         Converts clusters to points and buffers
         :return:
         """
-        cluster_points = asMultiPoint(self.cluster_layer(3))
-        buffer_points = cluster_points.buffer(self.buffer_distance)
+        clustered_layers = self.cluster_all_layers()
+        #clustered_layers[0].labels_
 
+        this = asMultiPoint(self.get_layer(0)[["x", "y"]].values)
+
+        # Buffer the points and assign clusters
+        # TODO iterate
+        # TODO do labels even matter? It seems we are just tryingto produce the overlap map
+        # TODO fill holes
+        buffer_points = gpd.GeoSeries(this.geoms).buffer(self.buffer_distance)
+        clustered_geoms = gpd.GeoDataFrame({'cluster_label': clustered_layers[0].labels_, 'geometry': buffer_points})
+        clustered_geoms = clustered_geoms.dissolve(by = "cluster_label")
+
+        return([clustered_geoms])
+
+    def overlap_polygons(self):
+        # Get list of polygon layers
+        layers_of_polygons = self.buffer_cluster_layers()
+
+        # Rasterize each.
         pass
-
 
     def detect(self):
+        """
+        Executes the detection algoritm on the input point cloud with set parameters.
+        :return:
+        """
         pass
-
-algo = LayerStacking(cloud = test_cloud, n_jobs=8)

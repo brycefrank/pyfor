@@ -50,3 +50,6 @@ def array_to_polygons(array, affine=None):
                                       'raster_val': [results[geom]['properties']['raster_val'] for geom in range(len(results))]})
 
     return(tops_df)
+
+def polygons_to_raster(polygons):
+    pass
