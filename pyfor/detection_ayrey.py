@@ -6,6 +6,8 @@ from skimage.feature import corner_peaks
 import matplotlib.pyplot as plt
 from shapely.geometry import asMultiPoint
 import geopandas as gpd
+from rasterio.io import MemoryFile
+from rasterio import features
 
 class LayerStacking:
     # TODO Make inherent from a generic tree detection class
@@ -123,6 +125,7 @@ class LayerStacking:
         return [self.cluster_layer(i) for i in range(self.n_layers) if self.cluster_layer(i) is not None]
 
     def buffer_cluster_layers(self):
+        # FIXME this iterators are very sloppy.
         """
         Converts clusters to points and buffers
         :return:
@@ -130,24 +133,43 @@ class LayerStacking:
         clustered_layers = self.cluster_all_layers()
         #clustered_layers[0].labels_
 
-        this = asMultiPoint(self.get_layer(0)[["x", "y"]].values)
+        this = [asMultiPoint(self.get_layer(i)[["x", "y"]].values) for i in range(self.n_layers)]
 
-        # Buffer the points and assign clusters
-        # TODO iterate
-        # TODO do labels even matter? It seems we are just tryingto produce the overlap map
         # TODO fill holes
-        buffer_points = gpd.GeoSeries(this.geoms).buffer(self.buffer_distance)
-        clustered_geoms = gpd.GeoDataFrame({'cluster_label': clustered_layers[0].labels_, 'geometry': buffer_points})
-        clustered_geoms = clustered_geoms.dissolve(by = "cluster_label")
+        buffer_points = [gpd.GeoSeries(this[i].geoms).buffer(self.buffer_distance) for i in range(len(this))]
+        # FIXME broken line
+        clustered_geoms = [gpd.GeoDataFrame(buffer_points[i]) \
+                           for i in range(len(buffer_points))]
+        clustered_geoms = [clustered_geoms[i].dissolve(by = "cluster_label") for i in range(len(clustered_geoms))]
+        return(clustered_geoms)
 
-        return([clustered_geoms])
+    def rasterize(self, geodataframe, value):
+        transform = self.chm._affine
+
+        # TODO may be re-usable for other features. Consider moving to gisexport
+        with MemoryFile() as memfile:
+            with memfile.open(driver='GTiff',
+                              width = self.chm.array.shape[1],
+                              height = self.chm.array.shape[0],
+                              count = self.chm.grid.cell_size,
+                              dtype = np.uint8,
+                              nodata=0,
+                              transform=transform) as out:
+
+                shapes = ((geom, value) for geom, value in zip(geodataframe.geometry, np.repeat(value, len(geodataframe))))
+                burned = features.rasterize(shapes = shapes, fill = 0, out_shape = (self.chm.array.shape[0], self.chm.array.shape[1]),
+                                            transform=transform)
+
+                memfile.close()
+                return(burned)
+
 
     def overlap_polygons(self):
         # Get list of polygon layers
         layers_of_polygons = self.buffer_cluster_layers()
 
         # Rasterize each.
-        pass
+        layers_of_rasters = [self.rasterize(layers_of_polygons[i]) for i in range(len(layers_of_polygons))]
 
     def detect(self):
         """
