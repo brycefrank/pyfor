@@ -10,4 +10,4 @@ from pyfor import filter
 from pyfor import plot
 from pyfor import collection
 from pyfor import voxelizer
-from pyfor import detection_ayrey
+from pyfor import detection

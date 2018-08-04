@@ -17,6 +17,9 @@
 1. Added an second feature to the testing shapefile.
 2. Adjusted testing suite to NEON data set for simplicity.
 
+## Environment
+1. Enforcing rasterio version >= 1.0.2 in the environment for use of MemoryFiles (involved with LayerStacking)
+
 # 0.2.1
 
 Update merged to master: May 9th, 2018

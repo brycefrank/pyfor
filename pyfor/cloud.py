@@ -4,7 +4,6 @@ import laspy
 import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
-import ogr
 from pyfor import rasterizer
 from pyfor import clip_funcs
 from pyfor import plot
