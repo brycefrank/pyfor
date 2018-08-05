@@ -1,5 +1,7 @@
 # 0.2.2
 
+Updates between May 9, 2018 and August 5, 2018.
+
 ## Cloud
 1. Fixed pandas SettingWithCopyWarning after clip + plot, still needs to be tested for performance (i.e. is this copy
     necessary?)

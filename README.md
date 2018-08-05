@@ -7,15 +7,16 @@
 
 **pyfor** is a Python package that assists in the processing of point cloud data in the context of forest inventory. It offers functions that convert raw point cloud data to usable information about forested landscapes using an object oriented (OOP) framework accessible for advanced and novice users of Python. pyfor aims to provide a cross platform means to interactively process point cloud data, as well as efficient ways to batch process large acquisitions.
 
-For those similarly concerned with the latest Microsoft / GitHub headline, there is a mirror of this repository located on [GitLab](https://gitlab.com/brycefrank/pyfor).
-
 ## Release Status
 
-The current release is 0.2.1 (this branch). 0.2.1 is adequate for processing single tiles and serves as the foundation for future updates. There is a dedicated changelog [here](CHANGELOG.md)
+Current Release: 0.2.2
+Release Date: August 5, 2018
 
-A minor update rolling release branch is located on [0.2.2](http://github.com/brycefrank/pyfor/tree/0.2.2). 0.2.2 will only improve on single tile functionality (tree detection, bug fixes, etc). Please check the changelog there before submitting issues.
+This release is adequate for processing single tiles and serves as the foundation for future updates. There is a dedicated changelog [here](CHANGELOG.md)
 
-An upcoming release, [0.3.0](http://github.com/brycefrank/pyfor/tree/0.3.0),  will focus on processing large acquisitions, and is slated for release on this branch in **August 2018**.
+A minor update rolling release branch is located on [0.2.3](http://github.com/brycefrank/pyfor/tree/0.2.3). 0.2.3 will only improve on single tile functionality (tree detection, bug fixes, etc). Please check the changelog there before submitting issues.
+
+An upcoming release, [0.3.0](http://github.com/brycefrank/pyfor/tree/0.3.0),  will focus on processing large acquisitions, and is slated for release on this branch later this month (August 2018).
 
 ## Samples
 
@@ -75,9 +76,9 @@ Below is a list of features, complete and otherwise.
 	- [X] Point cloud plotting
 	- [X] Raster plotting
 - [X] Grid metrics extraction
-- [ ] Tree detection methods
+- [X] Tree detection methods
     - [X] Watershed segmentation
-    - [ ] Layer stacking (Ayrey et al. 2017)
+    - [X] Layer stacking (Ayrey et al. 2017)
 - [X] Canopy height model
 	- [X] Median pit filter
 	- [ ] Pit free algorithm (Chen et al. 2017)
