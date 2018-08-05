@@ -13,6 +13,10 @@
     reference).
 2. Fixed a bug that produced the wrong axes tick mark labels after modification of the Cloud object.
 
+## Detection
+1. Added dedicated detection module
+2. Added early version of LayerStacking (Ayrey et al. 2017)
+
 ## Testing Suite
 1. Added an second feature to the testing shapefile.
 2. Adjusted testing suite to NEON data set for simplicity.

@@ -252,6 +252,7 @@ class Raster:
         from scipy.ndimage import label
         tops = peak_local_max(np.flipud(self.array), indices=False, min_distance=min_distance, threshold_abs=threshold_abs)
         tops = label(tops)[0]
+        # TODO return a geopandas DF of point geometries projected to cloud space
         return(tops)
 
 
