@@ -7,6 +7,8 @@
 
 **pyfor** is a Python package that assists in the processing of point cloud data in the context of forest inventory. It offers functions that convert raw point cloud data to usable information about forested landscapes using an object oriented (OOP) framework accessible for advanced and novice users of Python. pyfor aims to provide a cross platform means to interactively process point cloud data, as well as efficient ways to batch process large acquisitions.
 
+pyfor is supported in part by the [AWS Cloud Credits for Research program](https://aws.amazon.com/research-credits/)
+
 ## Release Status
 
 Current Release: 0.2.2
