@@ -11,16 +11,20 @@ pyfor is supported in part by the [AWS Cloud Credits for Research program](https
 
 ## Release Status
 
-The current release is 0.2.1 (this branch). 0.2.1 is adequate for processing single tiles and serves as the foundation for future updates. There is a dedicated changelog [here](CHANGELOG.md)
+Current Release: 0.2.2
+Release Date: August 5, 2018
 
-A minor update rolling release branch is located on [0.2.2](http://github.com/brycefrank/pyfor/tree/0.2.2). 0.2.2 will only improve on single tile functionality (tree detection, bug fixes, etc). Please check the changelog there before submitting issues.
+This release is adequate for processing single tiles and serves as the foundation for future updates. There is a dedicated changelog [here](CHANGELOG.md)
 
-An upcoming release, [0.3.0](http://github.com/brycefrank/pyfor/tree/0.3.0),  will focus on processing large acquisitions, and is slated for release on this branch in **August 2018**.
+A minor update rolling release branch is located on [0.2.3](http://github.com/brycefrank/pyfor/tree/0.2.3). 0.2.3 will only improve on single tile functionality (tree detection, bug fixes, etc). Please check the changelog there before submitting issues.
+
+An upcoming release, [0.3.0](http://github.com/brycefrank/pyfor/tree/0.3.0),  will focus on processing large acquisitions, and is slated for release on this branch later this month (August 2018).
 
 ## Samples
 
 These samples are a work in progress, but demonstrate some of the package capabilities.
 
+- [Introduction](https://github.com/brycefrank/pyfor/blob/master/samples/Introduction.ipynb)
 - [File Input and Plotting](https://github.com/brycefrank/pyfor/blob/master/samples/ImportsExports.ipynb)
 - [Normalization](https://github.com/brycefrank/pyfor/blob/master/samples/Normalization.ipynb)
 - [Canopy Height Models](https://github.com/brycefrank/pyfor/blob/master/samples/CanopyHeightModel.ipynb)
@@ -60,7 +64,7 @@ If you see no errors, you are ready to process!
 
 An early collection of samples is located [here](https://github.com/brycefrank/pyfor/tree/master/samples). These demonstrate some basic tasks.
 
-An early version of the documentation is located [here](http://pyfor-pdal-u.readthedocs.io/en/pdal-u/). This provides specific documentation for each class and function.
+A standalone documentation is located [here](http://pyfor-pdal-u.readthedocs.io/en/pdal-u/). This provides specific documentation for each class and function.
 
 ## Features
 
@@ -74,17 +78,17 @@ Below is a list of features, complete and otherwise.
 	- [X] Point cloud plotting
 	- [X] Raster plotting
 - [X] Grid metrics extraction
-- [X] Watershed segmentation
+- [X] Tree detection methods
+    - [X] Watershed segmentation
+    - [X] Layer stacking (Ayrey et al. 2017)
 - [X] Canopy height model
 	- [X] Median pit filter
 	- [ ] Pit free algorithm (Chen et al. 2017)
 - [X] Clipping point clouds
-- [ ] Area-based approach workflows
 - [ ] Batch processing
 	- [ ] Multiprocessor support
 	- [ ] Cluster support
-- [ ] Voxelization methods
-- [ ] More tree detection methods
+- [X] Voxelization methods
 
 ## Goals
 
@@ -98,3 +102,6 @@ If you would like to contribute, especially those experienced with `numba`, `num
 
 I am also willing to implement features on request. Feel free to [open an issue](https://github.com/brycefrank/pyfor/issues) with your request or email me at the address above.
 
+pyfor will always remain a free service. Its development takes time, energy and a bit of money to maintain source code and host documentation. If you are so inclined, donations are accepted at the following:
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WBSUBMJFC4GFY&lc=US&item_name=pyfor%2ddevelopment&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted)

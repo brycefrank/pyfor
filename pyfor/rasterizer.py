@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 from pyfor import gisexport
 from pyfor import filter
 from pyfor import plot
-from rasterio.transform import from_origin
 
 class Grid:
     """The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. It is \
@@ -184,6 +183,7 @@ class Raster:
     @property
     def _affine(self):
         """Constructs the affine transformation, used for plotting and exporting polygons and rasters."""
+        from rasterio.transform import from_origin
         affine = from_origin(self.grid.las.min[0], self.grid.las.max[1], self.grid.cell_size, self.grid.cell_size)
         return affine
 
@@ -209,6 +209,22 @@ class Raster:
 
         return out_image[0].data
 
+    def _project_indices(self, indices):
+        """
+        Converts indices of an array (for example, those indices that describe the location of a local maxima) to the
+        same space as the input cloud object. Assumes the array has already been flipped upside down.
+
+        :param indices: The indices to project, an Nx2 matrix of indices where the first column are the rows (Y) and
+        the second column is the columns (X)
+        :return:
+        """
+
+        seed_xy = indices[:,1] + (self._affine[2] / self._affine[0]), \
+                  indices[:,0] + (self._affine[5] - (self.grid.las.max[1] - self.grid.las.min[1]) /
+                                  abs(self._affine[4]))
+        seed_xy = np.stack(seed_xy, axis = 1)
+        return(seed_xy)
+
     def plot(self, cmap = "viridis", block = False, return_plot = False):
         """
         Default plotting method for the Raster object.
@@ -225,8 +241,8 @@ class Raster:
         ax.set_xticks(np.linspace(0, self.grid.n, 3))
         ax.set_yticks(np.linspace(0, self.grid.m, 3))
 
-        x_ticks, y_ticks = np.rint(np.linspace(self.grid.las.header.min[0], self.grid.las.header.max[0], 3)), \
-                           np.rint(np.linspace(self.grid.las.header.min[1], self.grid.las.header.max[1], 3))
+        x_ticks, y_ticks = np.rint(np.linspace(self.grid.las.min[0], self.grid.las.max[0], 3)), \
+                           np.rint(np.linspace(self.grid.las.min[1], self.grid.las.max[1], 3))
 
         ax.set_xticklabels(x_ticks)
         ax.set_yticklabels(y_ticks)
@@ -243,16 +259,29 @@ class Raster:
         """
         plot.iplot3d_surface(self.array, colorscale)
 
-    def local_maxima(self, min_distance=2, threshold_abs=2):
+    def local_maxima(self, min_distance=2, threshold_abs=2, multi_top = False, as_coordinates = False):
         """
-        Returns a geopandas dataframe of points found using skimage.feature.peak_local_max
+        Returns a new Raster object with tops detected using a local maxima filtering method. See
+        skimage.feature.peak_local_maxima for more information on the filter.
+
+        :param min_distance:
+        :param threshold_abs:
+        :param multi_top: If multi_top is true, a top can consist of more than one pixel.
+        :param as_coordinates: Not yet implemented
         :return:
         """
-        from skimage.feature import peak_local_max
+        from skimage.feature import peak_local_max, corner_peaks
         from scipy.ndimage import label
         tops = peak_local_max(np.flipud(self.array), indices=False, min_distance=min_distance, threshold_abs=threshold_abs)
         tops = label(tops)[0]
-        return(tops)
+
+        if multi_top == False:
+            top_binary = np.flipud(corner_peaks(tops, indices=False).astype(np.float64))
+            tops_raster = Raster(top_binary, self.grid)
+            return(tops_raster)
+        else:
+            tops_raster = Raster(np.flipud(tops), self.grid)
+            return(tops_raster)
 
 
     def watershed_seg(self, min_distance=2, threshold_abs=2, classify=False, plot = False):
@@ -269,13 +298,12 @@ class Raster:
         :return: A geopandas data frame, each record is a crown segment.
         """
         from skimage.morphology import watershed
-        from skimage.feature import peak_local_max
 
         # TODO At some point, when more tree detection methods are implemented, the plotting version of this function
         # TODO can be relegated to another class. In the mean time this will function.
 
         watershed_array = np.flipud(self.array)
-        tops = self.local_maxima(min_distance=min_distance, threshold_abs=threshold_abs)
+        tops = self.local_maxima(min_distance=min_distance, threshold_abs=threshold_abs).array
         labels = watershed(-watershed_array, tops, mask=watershed_array)
 
         if classify == True:
@@ -319,10 +347,6 @@ class Raster:
         
         :param path: The path to write to.
         """
-        if self.grid.cloud.crs == None:
-            # This should only be the case for older .las files without CRS information
-            print("There is no coordinate reference string set for this Grid object, you must set the Cloud.crs \
-            attribute to a projection string.")
-        else:
-            gisexport.array_to_raster(self.array, self.cell_size, self.grid.las.min[0], self.grid.las.max[1],
+
+        gisexport.array_to_raster(self.array, self.cell_size, self.grid.las.min[0], self.grid.las.max[1],
                                       self.grid.cloud.crs, path)

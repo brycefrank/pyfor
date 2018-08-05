@@ -1,3 +1,40 @@
+# 0.2.2
+
+Updates between May 9, 2018 and August 5, 2018.
+
+## Cloud
+1. Fixed pandas SettingWithCopyWarning after clip + plot, still needs to be tested for performance (i.e. is this copy
+    necessary?)
+2. Added plotting for custom dimensions for `Cloud.plot3d()`
+3. Moved `pyqtgraph` import statements witin `Cloud.plot3d()` to improve import perormance
+4. Added functionality for plotting detected trees. Very rough but functional.
+5. Added summary functionality, use `print(some_cloud_object)` to view.
+
+## Rasterizer
+1. Watershed segmentation output was oriented incorrectly, fixed. (Actually was fixed via master, putting here for
+    reference).
+2. Fixed a bug that produced the wrong axes tick mark labels after modification of the Cloud object.
+3. Reworked the behavior of `rasterizer.Raster.local_maxima`
+    - By default only produces one pixel per detected top, whereas before it was possible to produce many pixels per
+    top. This occurred if the detected top pixels were all equal in height.
+    - If you prefer this type of behavior, you can set the argument `multi_top` to True
+    - The other major rework here is that the function now returns a properly geo-referenced Raster, instead of a raw
+    array. This is much more useful w/r/t I/O. 
+
+## Detection
+1. Added dedicated detection module
+2. Added early version of LayerStacking (Ayrey et al. 2017)
+    - This gets as far as the "Overlap map" in their paper
+    - Sample forthcoming
+    
+## Testing Suite
+1. Added an second feature to the testing shapefile.
+2. Adjusted testing suite to NEON data set for simplicity.
+3. Test fixes for the above changes.
+
+## Environment
+1. Enforcing rasterio version >= 1.0.2 in the environment for use of MemoryFiles (involved with LayerStacking)
+
 # 0.2.1
 
 Update merged to master: May 9th, 2018

@@ -31,7 +31,8 @@ class CloudDataTestCase(unittest.TestCase):
             "flag_byte": [0, 1],
             "scan_angle_rank": [0, 1],
             "user_data": [0, 1],
-            "pt_src_id": [0, 1]
+            "pt_src_id": [0, 1],
+            "return_num": [0,1]
         }
 
         self.test_header = laspy.file.File(test_las).header
@@ -182,7 +183,7 @@ class RasterTestCase(unittest.TestCase):
     def test_watershed_seg(self):
         tops = self.test_raster.watershed_seg()
         self.assertEqual(type(tops), gpd.GeoDataFrame)
-        self.assertEqual(len(tops), 985)
+        self.assertEqual(len(tops), 289)
         self.test_raster.watershed_seg(classify=True)
         self.test_raster.watershed_seg(plot=True)
 

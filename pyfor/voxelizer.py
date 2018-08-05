@@ -34,9 +34,6 @@ class VoxelGrid:
         :param func: The function to summarize within each voxel.
         :param dim: The dimension upon which to summarize (i.e. "z", "intensity", etc.)
         """
-
-        # TODO for now this is a standalone function, at some point there will be a VoxelRaster class that will
-        # handle most of the below in its __init__ function.
         voxel_grid = np.zeros((self.m, self.n, self.p))
         cells = self.data.groupby(['bins_x', 'bins_y', 'bins_z']).agg({dim: func}).reset_index()
 
