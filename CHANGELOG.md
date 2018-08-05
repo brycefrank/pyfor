@@ -22,7 +22,9 @@
 ## Detection
 1. Added dedicated detection module
 2. Added early version of LayerStacking (Ayrey et al. 2017)
-
+    - This gets as far as the "Overlap map" in their paper
+    - Sample forthcoming
+    
 ## Testing Suite
 1. Added an second feature to the testing shapefile.
 2. Adjusted testing suite to NEON data set for simplicity.
