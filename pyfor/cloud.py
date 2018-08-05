@@ -78,9 +78,6 @@ class Cloud:
         self.normalized = None
         self.crs = None
 
-
-
-
     def __str__(self):
         """
         Returns a human readable summary of the Cloud object.

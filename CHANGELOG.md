@@ -12,6 +12,12 @@
 1. Watershed segmentation output was oriented incorrectly, fixed. (Actually was fixed via master, putting here for
     reference).
 2. Fixed a bug that produced the wrong axes tick mark labels after modification of the Cloud object.
+3. Reworked the behavior of `rasterizer.Raster.local_maxima`
+    - By default only produces one pixel per detected top, whereas before it was possible to produce many pixels per
+    top. This occurred if the detected top pixels were all equal in height.
+    - If you prefer this type of behavior, you can set the argument `multi_top` to True
+    - The other major rework here is that the function now returns a properly geo-referenced Raster, instead of a raw
+    array. This is much more useful w/r/t I/O. 
 
 ## Detection
 1. Added dedicated detection module

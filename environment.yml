@@ -13,7 +13,7 @@ dependencies:
   - pyopengl
   - plotly
   - numba
-  - rasterio=1.0.2
+  - rasterio>=1.0.2
   - libkml
   - geopandas
   - pip:

@@ -16,6 +16,7 @@ install:
   - conda update -q conda
   - conda info -a
   - conda env create -f environment.yml
+  - conda config --add channels conda-forge
   - source activate pyfor_env
   - pip install coveralls
   - pip install .

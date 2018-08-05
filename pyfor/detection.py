@@ -45,41 +45,30 @@ class LayerStacking:
         self.n_jobs = n_jobs
         self.buffer_distance = buffer_distance
         self.first_pass_min_dist = first_pass_min_dist
+        self.first_pass_threshold_abs = first_pass_threshold_abs
+        self.veg_layers = veg_layers
+        self.percentiles = percentiles
+        self.weights = weights
+        self.overlap_kernel_size = overlap_kernel_size
+        self.scnd_pass_min_dist = scnd_pass_min_dist
+        self.scnd_pass_threshold_abs = scnd_pass_threshold_abs
 
         # Bin the layers in the cloud from 0.5 to the maximum height
         layer_bins = np.searchsorted(np.arange(0.5, self.cloud.las.max[2] + 1), self.points['z'])
         self.points['bins_z'] = layer_bins
         self.n_layers = len(np.unique(layer_bins))
 
-    def project_indices(self, indices):
-        """
-        Converts indices of an array (for example, those indices that describe the location of a local maxima) to the
-        same space as the input cloud object. Assumes the array has already been flipped upside down.
-
-        :param indices: The indices to project, an Nx2 matrix of indices where the first column are the rows (Y) and
-        the second column is the columns (X)
-        :return:
-        """
-
-        seed_xy = indices[:,1] + (self.chm._affine[2] / self.chm._affine[0]), \
-                  indices[:,0] + (self.chm._affine[5] - (self.chm.grid.las.max[1] - self.chm.grid.las.min[1]) /
-                                  abs(self.chm._affine[4]))
-        seed_xy = np.stack(seed_xy, axis = 1)
-        return(seed_xy)
-
     @property
-    def top_coordinates(self, min_distance = 3, threshold_abs=3):
+    def _top_coordinates(self, min_distance = 3, threshold_abs=3):
         """
         Gets the coordinates of detected tops.
         :return:
         """
 
-        top_indices = corner_peaks(np.flipud(self.chm.local_maxima(min_distance = min_distance,
-                                                                   threshold_abs=threshold_abs) !=0))
-        return(self.project_indices(top_indices))
+        return(self.chm.local_maxima(min_distance=min_distance, threshold_abs=threshold_abs))
 
     @property
-    def complete_layers(self):
+    def _complete_layers(self):
         """
         A list of the complete layers. A layer is considered complete if it has more points than the number of top
         coordinates. This is useful for processes downstream in the algorithm because the KMeans algorithm will fail
@@ -89,10 +78,10 @@ class LayerStacking:
         """
 
         num_points = self.points.groupby("bins_z").size()
-        bool_layers = num_points > self.top_coordinates.shape[0]
+        bool_layers = num_points > self._top_coordinates.array.shape[0]
         return(bool_layers[bool_layers==True].index.values)
 
-    def get_layer(self, layer_index):
+    def _get_layer(self, layer_index):
         """
         Returns a given layer.
 
@@ -102,7 +91,7 @@ class LayerStacking:
 
         return self.points.loc[self.points['bins_z'] == layer_index]
 
-    def get_non_veg_indices(self, layer_index):
+    def _get_non_veg_indices(self, layer_index):
         """
         Retrieves the non-vegetation indices. These are the points that are kept for further analysis. Used as a
         subroutine for self.remove_veg (see below).
@@ -116,48 +105,49 @@ class LayerStacking:
         non_veg_inds = layer_xy.index.values[np.where(db.labels_ == -1)]
         return(non_veg_inds)
 
-    def remove_veg(self, veg_layers = (0, 1, 2)):
+    def _remove_veg(self):
         """
-        Removes vegetation from the input cloud object.
+        Removes vegetation  points from the input cloud object.
 
         :param veg_layers: An iterable of the layers to consider as vegetation (Ayrey recommends the first 3), starting
         at 0.
         :return: The indices to keep.
         """
 
-        non_veg_indices = [self.get_non_veg_indices(veg_layer) for veg_layer in veg_layers]
+        non_veg_indices = [self._get_non_veg_indices(veg_layer) for veg_layer in self.veg_layers]
         non_veg_indices = np.concatenate(non_veg_indices).ravel()
-        other_layer_indices = self.points.index.values[np.where(self.points['bins_z'] > veg_layers[-1])]
+        other_layer_indices = self.points.index.values[np.where(self.points['bins_z'] > self.veg_layers[-1])]
         keep_indices = np.concatenate([non_veg_indices, other_layer_indices])
 
         return(keep_indices)
 
-    def cluster_layer(self, layer_index):
+    def _cluster_layer(self, layer_index):
         """
         Performs k-means clustering on an input layer
+
         :param layer_index:
         :return:
         """
         print("Clustering layer {}".format(layer_index + 1))
-        layer = self.get_layer(layer_index)
-        if len(layer) >= self.top_coordinates.shape[0]:
-            clusters = KMeans(n_clusters=self.top_coordinates.shape[0], init = self.top_coordinates, n_jobs=self.n_jobs,
+        layer = self._get_layer(layer_index)
+        if len(layer) >= self._top_coordinates.shape[0]:
+            clusters = KMeans(n_clusters=self._top_coordinates.shape[0], init = self._top_coordinates, n_jobs=self.n_jobs,
                               ).fit(layer[['x', 'y']])
             return(clusters)
         else:
             return(None)
 
-    def cluster_all_layers(self):
+    def _cluster_all_layers(self):
         """
-        Clusters every layer present in the parent cloud object.
+        Clusters every complete layer in the cloud object.
 
         :return: A list of cluster objects, one for each layer in the cloud object.
         """
-        # TODO handle the case where the number of points is less than the number of tree otops
-        # FIXME seems to be calling cluster layer twice!
-        return [self.cluster_layer(i) for i in range(self.n_layers) if self.cluster_layer(i) is not None]
 
-    def buffer_cluster_layers(self):
+        # Get absolute indices of complete layers
+        return [self._cluster_layer(i) for i in self._complete_layers]
+
+    def _buffer_cluster_layers(self):
         """
         Converts clusters to points and buffers
         :return:
@@ -165,25 +155,25 @@ class LayerStacking:
         # TODO fill holes
         # TODO implement cluster labels
         # TODO this can be cleaned up by implementing one big GDF with a layer column
-        multi_points = [asMultiPoint(self.get_layer(i)[["x", "y"]].values) for i in range(self.n_layers)]
+        multi_points = [asMultiPoint(self._get_layer(i)[["x", "y"]].values) for i in range(self.n_layers)]
         buffer_points = [gpd.GeoSeries(multi_points[i].geoms).buffer(self.buffer_distance) for i in range(len(multi_points))]
         clustered_geoms = [gpd.GeoDataFrame(buffer_points[i]) \
                            for i in range(len(buffer_points))]
         clustered_geoms = [clustered_geoms[i].set_geometry(0) for i in range(len(clustered_geoms))]
         return(clustered_geoms)
 
-    def layer_inds_between_pct(self, lb, ub):
+    def _layer_inds_between_pct(self, lb, ub):
         """
         Gets layer indices between upper and lower bound quantiles (inclusive lower, exclusive upper).
         :return:
         """
 
-        true_inds = list(np.where((self.complete_layers >= lb) & (self.complete_layers < ub))[0])
-        all_inds = np.array(range(len(self.complete_layers)))
+        true_inds = list(np.where((self._complete_layers >= lb) & (self._complete_layers < ub))[0])
+        all_inds = np.array(range(len(self._complete_layers)))
         return(all_inds[true_inds])
 
 
-    def layer_weights(self, percentiles = (70, 80, 90, 100), weights = (2, 3, 4, 4)):
+    def _construct_layer_weights(self, percentiles = (70, 80, 90, 100), weights = (2, 3, 4, 4)):
         """
         Ayrey uses a weighting system to assign higher point values to different layers. The top 70th percentile
         clusters receive double weight, the top 80th receive triple and the top 90th receive quadruple. This function
@@ -194,13 +184,13 @@ class LayerStacking:
         :param weights:
         :return:
         """
-        percentile_breaks = [np.percentile(self.complete_layers, percentile) for percentile in percentiles]
-        n_complete = len(self.complete_layers)
+        percentile_breaks = [np.percentile(self._complete_layers, percentile) for percentile in percentiles]
+        n_complete = len(self._complete_layers)
 
         # For each break point and its neighbor, retrieve the complete layer indices
         weighted_layers = []
         for break_point_ind in range(len(percentile_breaks) - 1):
-            weighted_layers.append(self.layer_inds_between_pct(percentile_breaks[break_point_ind], percentile_breaks[break_point_ind + 1]))
+            weighted_layers.append(self._layer_inds_between_pct(percentile_breaks[break_point_ind], percentile_breaks[break_point_ind + 1]))
         weighted_layers.append([n_complete - 1])
 
         # Construct dictionary with layer index as key and weight as value, initiate with all 1s as values
@@ -213,7 +203,7 @@ class LayerStacking:
 
         return(weight_dict)
 
-    def rasterize(self, geodataframe, value):
+    def _rasterize(self, geodataframe, value):
         transform = self.chm._affine
 
         # TODO may be re-usable for other features. Consider moving to gisexport
@@ -241,14 +231,14 @@ class LayerStacking:
         :return: A 2D numpy array of weighted overlaps in each cell
         """
         # Get list of polygon layers
-        layers_of_polygons = self.buffer_cluster_layers()
-        weights_dict = self.layer_weights()
+        layers_of_polygons = self._buffer_cluster_layers()
+        weights_dict = self._construct_layer_weights()
 
         # Rasterize each.
         for key, value in weights_dict.items():
-            self.rasterize(layers_of_polygons[key], value)
+            self._rasterize(layers_of_polygons[key], value)
 
-        layers_of_rasters = [self.rasterize(layers_of_polygons[key], value) for key, value in weights_dict.items()]
+        layers_of_rasters = [self._rasterize(layers_of_polygons[key], value) for key, value in weights_dict.items()]
 
         array = np.sum(np.dstack(layers_of_rasters), axis = 2)
         raster = pyfor.rasterizer.Raster(array, self.chm.grid)
@@ -266,7 +256,7 @@ class LayerStacking:
         :return:
         """
         # TODO expose kernel and min_distance options to user in init
-        self.remove_veg()
+        self._remove_veg()
         raster = self.get_overlap_map(smoothed=True)
         return(raster.local_maxima(min_distance=6))
 
