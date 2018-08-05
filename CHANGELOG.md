@@ -28,6 +28,7 @@
 ## Testing Suite
 1. Added an second feature to the testing shapefile.
 2. Adjusted testing suite to NEON data set for simplicity.
+3. Test fixes for the above changes.
 
 ## Environment
 1. Enforcing rasterio version >= 1.0.2 in the environment for use of MemoryFiles (involved with LayerStacking)

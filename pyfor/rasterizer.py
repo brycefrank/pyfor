@@ -303,7 +303,7 @@ class Raster:
         # TODO can be relegated to another class. In the mean time this will function.
 
         watershed_array = np.flipud(self.array)
-        tops = self.local_maxima(min_distance=min_distance, threshold_abs=threshold_abs)
+        tops = self.local_maxima(min_distance=min_distance, threshold_abs=threshold_abs).array
         labels = watershed(-watershed_array, tops, mask=watershed_array)
 
         if classify == True:
