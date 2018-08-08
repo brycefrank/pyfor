@@ -6,7 +6,7 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = pyfor
 SOURCEDIR     = .
-BUILDDIR      = .
+BUILDDIR      = docs
 
 # Put it first so that "make" without argument is like "make help".
 help:
