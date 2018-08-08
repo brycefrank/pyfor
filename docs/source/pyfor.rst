@@ -4,6 +4,7 @@ pyfor package
 Submodules
 ----------
 
+<<<<<<< HEAD
 pyfor\.clip\_funcs module
 -------------------------
 
@@ -76,6 +77,19 @@ pyfor\.voxelizer module
     :undoc-members:
     :show-inheritance:
 
+=======
+.. toctree::
+
+   pyfor.clip_funcs
+   pyfor.cloud
+   pyfor.collection
+   pyfor.detection
+   pyfor.filter
+   pyfor.gisexport
+   pyfor.plot
+   pyfor.rasterizer
+   pyfor.voxelizer
+>>>>>>> 3a15151392ac37fba574800722f5a8e25f228444
 
 Module contents
 ---------------
