@@ -9,7 +9,7 @@ pyfor/test.py
 pyfor/__pycache__
 
 # ipynb checkpoints
-samples/.ipynb_checkpoints
+samples/.ipynb_checkpoints/*
 
 # Other
 .DS_Store
