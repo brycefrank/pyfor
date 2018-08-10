@@ -65,7 +65,7 @@ If you see no errors, you are ready to process!
 
 An early collection of samples is located [here](https://github.com/brycefrank/pyfor/tree/master/samples). These demonstrate some basic tasks.
 
-A standalone documentation is located [here](http://pyfor-pdal-u.readthedocs.io/en/pdal-u/). This provides specific documentation for each class and function.
+A standalone documentation is located [here](http://brycefrank.com/pyfor). This provides specific documentation for each class and function.
 
 ## Features
 
