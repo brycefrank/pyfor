@@ -2,7 +2,7 @@
   <img src="docs/tile.png" width="400">
 </p>
 
-[![Documentation Status](https://readthedocs.org/projects/pyfor/badge/?version=latest)](http://pyfor.readthedocs.io/en/latest/?badge=latest)[![Build Status](https://travis-ci.org/brycefrank/pyfor.svg?branch=master)](https://travis-ci.org/brycefrank/pyfor)[![Coverage Status](https://coveralls.io/repos/github/brycefrank/pyfor/badge.svg?branch=master)](https://coveralls.io/github/brycefrank/pyfor?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/pyfor/badge/?version=latest)](http://brycefrank.com/pyfor)[![Build Status](https://travis-ci.org/brycefrank/pyfor.svg?branch=master)](https://travis-ci.org/brycefrank/pyfor)[![Coverage Status](https://coveralls.io/repos/github/brycefrank/pyfor/badge.svg?branch=master)](https://coveralls.io/github/brycefrank/pyfor?branch=master)
 
 
 **pyfor** is a Python package that assists in the processing of point cloud data in the context of forest inventory. It offers functions that convert raw point cloud data to usable information about forested landscapes using an object oriented (OOP) framework accessible for advanced and novice users of Python. pyfor aims to provide a cross platform means to interactively process point cloud data, as well as efficient ways to batch process large acquisitions.
@@ -64,7 +64,7 @@ If you see no errors, you are ready to process!
 
 An early collection of samples is located [here](https://github.com/brycefrank/pyfor/tree/master/samples). These demonstrate some basic tasks.
 
-A standalone documentation is located [here](http://pyfor-pdal-u.readthedocs.io/en/pdal-u/). This provides specific documentation for each class and function.
+A standalone documentation is located [here](http://brycefrank.com/pyfor). This provides specific documentation for each class and function.
 
 ## Features
 
