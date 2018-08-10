@@ -12,6 +12,7 @@ pyfor is supported in part by the [AWS Cloud Credits for Research program](https
 ## Release Status
 
 Current Release: 0.2.2
+
 Release Date: August 5, 2018
 
 This release is adequate for processing single tiles and serves as the foundation for future updates. There is a dedicated changelog [here](CHANGELOG.md)

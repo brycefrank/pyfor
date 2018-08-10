@@ -1,0 +1,10 @@
+### Requirements without Version Specifiers ###
+
+#sphinx
+sphinxcontrib-fulltoc
+mock
+
+
+### A Very Specific Version of Laspy ###
+
+#-e git:https://github.com/brycefrank/laspy.git
