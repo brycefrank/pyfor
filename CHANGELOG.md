@@ -2,7 +2,19 @@
 
 Updates between August 5, 2018 and ...
 
+## Documentation
 
+1. Moved documentation from ReadTheDocs to brycefrank.com/pyfor
+2. Updated documentation main page and internal structure
+
+## Testing Suite
+
+1. Fixed broken clip polygons
+
+## Samples
+
+1. Fixed clip sample (from above)
+2. Added LayerStacking sample
 
 # 0.2.2
 

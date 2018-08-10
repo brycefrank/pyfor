@@ -1,12 +1,18 @@
 # Sphinx Build files
 docs/_build/*
+
+
 # Environments
 venv/*
 venv/
+
 # Compiled files
 pyfor/*.pyc
 pyfor/test.py
 pyfor/__pycache__
+
+# ipython checkpoints
+samples/.ipynb_checkpoints/
 
 # Other
 .DS_Store
