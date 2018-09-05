@@ -109,7 +109,6 @@ class LayerStacking:
         :param points:
         :return:
         """
-
         layer_xy = self.points.loc[self.points['bins_z'] == layer_index]
         db = DBSCAN(eps=0.3, min_samples=10).fit(layer_xy)
         non_veg_inds = layer_xy.index.values[np.where(db.labels_ == -1)]
@@ -128,7 +127,7 @@ class LayerStacking:
         non_veg_indices = np.concatenate(non_veg_indices).ravel()
         other_layer_indices = self.points.index.values[np.where(self.points['bins_z'] > self.veg_layers[-1])]
         keep_indices = np.concatenate([non_veg_indices, other_layer_indices])
-        self.points = self.points.iloc[keep_indices,:]
+        self.points = self.points.ix[keep_indices]
 
     def _cluster_layer(self, layer_index):
         """
@@ -160,16 +159,17 @@ class LayerStacking:
         """
         # Subset to only complete layers
         multi_points = self.points[self.points['bins_z'].isin(self._complete_layers)]
+        keep_bins_z = multi_points["bins_z"].values
         multi_points = asMultiPoint(multi_points[['x', 'y']].values)
         buffer_points = gpd.GeoDataFrame(gpd.GeoSeries(multi_points.geoms).buffer(self.buffer_distance))
         ## TODO handle for veg removal
-        buffer_points["bins_z"] = self.points["bins_z"]
+        buffer_points["bins_z"] = keep_bins_z
         labels = [item for sublist in self._cluster_all_layers() for item in sublist]
         buffer_points["labels"] = labels
 
         # Fix some GPD quirks
         buffer_points = buffer_points.set_geometry(0)
-        buffer_points.geometry.geom_type = buffer_points[0].geom_type
+        buffer_points[0].geom_type = buffer_points.geom_type
         return(buffer_points)
 
     def _layer_inds_between_pct(self, lb, ub):
@@ -204,7 +204,7 @@ class LayerStacking:
         weighted_layers.append([n_complete - 1])
 
         # Construct dictionary with layer index as key and weight as value, initiate with all 1s as values
-        weight_dict = dict(zip(range(n_complete), np.repeat(1, n_complete)))
+        weight_dict = dict(zip(self._complete_layers, np.repeat(1, n_complete)))
 
         # Modify values of keys for layers in weighted_layers
         for i in range(len(weighted_layers)):
@@ -249,14 +249,9 @@ class LayerStacking:
         :return: A 2D numpy array of weighted overlaps in each cell
         """
         # Get list of polygon layers
-        layers_of_polygons = self._buffer_cluster_layers()
+        layers_of_polygons = self._buffer_cluster_layers().groupby("bins_z")
         weights_dict = self._construct_layer_weights()
-
-        # Rasterize each.
-        for key, value in weights_dict.items():
-            self._rasterize(layers_of_polygons[key], value)
-
-        layers_of_rasters = [self._rasterize(layers_of_polygons[key], value) for key, value in weights_dict.items()]
+        layers_of_rasters = [self._rasterize(layers_of_polygons.get_group(key), value) for key, value in weights_dict.items()]
 
         array = np.sum(np.dstack(layers_of_rasters), axis = 2)
         # Flip
@@ -269,16 +264,16 @@ class LayerStacking:
         else:
             return(raster)
 
-
     def detect(self):
         """
         Executes the detection algorithm on the input point cloud with set parameters.
         :return:
         """
         # TODO expose kernel and min_distance options to user in init
-        if self.remove_veg is not None:
+        if self.remove_veg == True:
             self._remove_veg()
         raster = self.get_overlap_map(smoothed=True)
-        return(raster)
+        tops = raster.local_maxima(min_distance=self.scnd_pass_min_dist, threshold_abs=self.scnd_pass_threshold_abs)
+        return(tops)
 
 
