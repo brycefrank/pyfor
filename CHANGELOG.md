@@ -1,6 +1,7 @@
 # 0.2.3
 
-Updates between August 5, 2018 and ...
+Updates between August 5, 2018 and September 5, 2018. These updates are minor improvements
+to set up for 0.3.0 release.
 
 ## Documentation
 
@@ -15,6 +16,12 @@ Updates between August 5, 2018 and ...
 
 1. Fixed clip sample (from above)
 2. Added LayerStacking sample
+
+## Detection
+1. Several improvements to `detection.LayerStacking`
+
+## GISExport
+1. Added a project indices function, mostly for internal use.
 
 # 0.2.2
 

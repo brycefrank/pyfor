@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyfor.gisexport module &mdash; pyfor 0.2.2 documentation</title>
+  <title>pyfor.gisexport module &mdash; pyfor 0.2.3 documentation</title>
   
 
   
@@ -206,6 +206,24 @@
 <code class="descclassname">pyfor.gisexport.</code><code class="descname">polygons_to_raster</code><span class="sig-paren">(</span><em>polygons</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.gisexport.polygons_to_raster" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="function">
+<dt id="pyfor.gisexport.project_indices">
+<code class="descclassname">pyfor.gisexport.</code><code class="descname">project_indices</code><span class="sig-paren">(</span><em>indices</em>, <em>raster</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.gisexport.project_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts indices of an array (for example, those indices that describe the location of a local maxima) to the
+same space as the input cloud object. Assumes the array has already been flipped upside down.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>indices</strong> – The indices to project, an Nx2 matrix of indices where the first column are the rows (Y) and</td>
+</tr>
+</tbody>
+</table>
+<p>the second column is the columns (X)
+:param raster: An object of type pyfor.rasterizer.Raster
+:return:</p>
+</dd></dl>
+
 </div>
 
 
@@ -250,7 +268,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.2.2',
+            VERSION:'0.2.3',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
