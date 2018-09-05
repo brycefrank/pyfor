@@ -1,3 +1,28 @@
+# 0.2.3
+
+Updates between August 5, 2018 and September 5, 2018. These updates are minor improvements
+to set up for 0.3.0 release.
+
+## Documentation
+
+1. Moved documentation from ReadTheDocs to brycefrank.com/pyfor
+2. Updated documentation main page and internal structure
+
+## Testing Suite
+
+1. Fixed broken clip polygons
+
+## Samples
+
+1. Fixed clip sample (from above)
+2. Added LayerStacking sample
+
+## Detection
+1. Several improvements to `detection.LayerStacking`
+
+## GISExport
+1. Added a project indices function, mostly for internal use.
+
 # 0.2.2
 
 Updates between May 9, 2018 and August 5, 2018.

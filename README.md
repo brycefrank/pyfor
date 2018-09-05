@@ -13,13 +13,11 @@ pyfor is supported in part by the [AWS Cloud Credits for Research program](https
 
 ## Release Status
 
-Current Release: 0.2.2
+Current Release: 0.2.3
 
-Release Date: August 5, 2018
+Release Date: September 5, 2018
 
 This release is adequate for processing single tiles and serves as the foundation for future updates. There is a dedicated changelog [here](CHANGELOG.md)
-
-A minor update rolling release branch is located on [0.2.3](http://github.com/brycefrank/pyfor/tree/0.2.3). 0.2.3 will only improve on single tile functionality (tree detection, bug fixes, etc). Please check the changelog there before submitting issues.
 
 An upcoming release, [0.3.0](http://github.com/brycefrank/pyfor/tree/0.3.0),  will focus on processing large acquisitions, and is slated for release on this branch later this month (August 2018).
 
