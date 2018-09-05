@@ -139,13 +139,9 @@ class LayerStacking:
         """
         print("Clustering layer {}".format(layer_index + 1))
         layer = self._get_layer(layer_index)
-        if len(layer) >= self._top_coordinates.shape[0]:
-            # Reshape top coordinates to be a Nx2 array of coordinates
-            clusters = KMeans(n_clusters=self._top_coordinates.shape[0], init = self._top_coordinates, n_jobs=self.n_jobs,
+        clusters = KMeans(n_clusters=self._top_coordinates.shape[0], init = self._top_coordinates, n_jobs=self.n_jobs,
                               ).fit(layer[['x', 'y']])
-            return(clusters.labels_)
-        else:
-            return(None)
+        return(clusters.labels_)
 
     def _cluster_all_layers(self):
         """
@@ -162,12 +158,18 @@ class LayerStacking:
         Buffers all points not removed after _remove_veg (or all points of self.remove_veg is set to False)
         :return:
         """
-        multi_points = asMultiPoint(self.cloud.las.points[["x", "y"]].values)
-        buffer_points = gpd.GeoSeries(multi_points.geoms).buffer(self.buffer_distance)
-        # TODO handle for veg removal
+        # Subset to only complete layers
+        multi_points = self.points[self.points['bins_z'].isin(self._complete_layers)]
+        multi_points = asMultiPoint(multi_points[['x', 'y']].values)
+        buffer_points = gpd.GeoDataFrame(gpd.GeoSeries(multi_points.geoms).buffer(self.buffer_distance))
+        ## TODO handle for veg removal
         buffer_points["bins_z"] = self.points["bins_z"]
         labels = [item for sublist in self._cluster_all_layers() for item in sublist]
         buffer_points["labels"] = labels
+
+        # Fix some GPD quirks
+        buffer_points = buffer_points.set_geometry(0)
+        buffer_points.geometry.geom_type = buffer_points[0].geom_type
         return(buffer_points)
 
     def _layer_inds_between_pct(self, lb, ub):
@@ -188,9 +190,9 @@ class LayerStacking:
         returns a dictionary where each key is the index of the complete_layer and each value is its respective weight.
         This is used later to pass the value (i.e. the weight) of each layer to self.rasterize
 
-        :param percentiles:
-        :param weights:
-        :return:
+        :param percentiles: A tuple of percentiles to consider for weighting.
+        :param weights: A tuple of weights, must be the same length as `percentiles`
+        :return: A dictionary of weights for each layer.
         """
         percentile_breaks = [np.percentile(self._complete_layers, percentile) for percentile in percentiles]
         n_complete = len(self._complete_layers)
@@ -212,9 +214,17 @@ class LayerStacking:
         return(weight_dict)
 
     def _rasterize(self, geodataframe, value):
+        """
+        Converts buffered points into rasterized
+
+        :param geodataframe:
+        :param value:
+        :return:
+        """
         transform = self.chm._affine
 
         # TODO may be re-usable for other features. Consider moving to gisexport
+        # FIXME check for cell sizes that are not 1
         with MemoryFile() as memfile:
             with memfile.open(driver='GTiff',
                               width = self.chm.array.shape[1],
