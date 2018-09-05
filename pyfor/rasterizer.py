@@ -209,21 +209,6 @@ class Raster:
 
         return out_image[0].data
 
-    def _project_indices(self, indices):
-        """
-        Converts indices of an array (for example, those indices that describe the location of a local maxima) to the
-        same space as the input cloud object. Assumes the array has already been flipped upside down.
-
-        :param indices: The indices to project, an Nx2 matrix of indices where the first column are the rows (Y) and
-        the second column is the columns (X)
-        :return:
-        """
-
-        seed_xy = indices[:,1] + (self._affine[2] / self._affine[0]), \
-                  indices[:,0] + (self._affine[5] - (self.grid.las.max[1] - self.grid.las.min[1]) /
-                                  abs(self._affine[4]))
-        seed_xy = np.stack(seed_xy, axis = 1)
-        return(seed_xy)
 
     def plot(self, cmap = "viridis", block = False, return_plot = False):
         """
@@ -350,3 +335,16 @@ class Raster:
 
         gisexport.array_to_raster(self.array, self.cell_size, self.grid.las.min[0], self.grid.las.max[1],
                                       self.grid.cloud.crs, path)
+
+
+class DetectedTops(Raster):
+    """
+    This class is for visualization of detected tops with a raster object.
+    """
+    pass
+
+class CrownSegments(Raster):
+    """
+    This class is for visualization of detected crown segments with a raster object.
+    """
+    pass
