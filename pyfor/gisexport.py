@@ -4,6 +4,23 @@ from rasterio.features import shapes
 from shapely.geometry import shape
 import geopandas
 
+def project_indices(indices, raster):
+    """
+    Converts indices of an array (for example, those indices that describe the location of a local maxima) to the
+    same space as the input cloud object. Assumes the array has already been flipped upside down.
+
+    :param indices: The indices to project, an Nx2 matrix of indices where the first column are the rows (Y) and
+    the second column is the columns (X)
+    :param raster: An object of type pyfor.rasterizer.Raster
+    :return:
+    """
+
+    seed_xy = indices[:,1] + (raster._affine[2] / raster._affine[0]), \
+              indices[:,0] + (raster._affine[5] - (raster.grid.las.max[1] - raster.grid.las.min[1]) /
+                              abs(raster._affine[4]))
+    seed_xy = np.stack(seed_xy, axis = 1)
+    return(seed_xy)
+
 def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
     """Writes a GeoTIFF raster from a numpy array.
 

@@ -16,7 +16,8 @@ class LayerStacking:
     """
     def __init__(self, cloud, n_jobs = 1, chm_resolution = 1, buffer_distance = 0.5, first_pass_min_dist = 3,
                  first_pass_threshold_abs = 3, veg_layers = (0, 1, 2), percentiles = (70, 80, 90, 100),
-                 weights = (2, 3, 4, 4), overlap_kernel_size = 3, scnd_pass_min_dist = 3, scnd_pass_threshold_abs = 3):
+                 weights = (2, 3, 4, 4), overlap_kernel_size = 3, scnd_pass_min_dist = 3, scnd_pass_threshold_abs = 3,
+                 remove_veg=True):
         # TODO implement arbitrary layer bin widths
         # TODO check if cloud has been normalized
         """
@@ -52,6 +53,7 @@ class LayerStacking:
         self.overlap_kernel_size = overlap_kernel_size
         self.scnd_pass_min_dist = scnd_pass_min_dist
         self.scnd_pass_threshold_abs = scnd_pass_threshold_abs
+        self.remove_veg = remove_veg
 
         # Bin the layers in the cloud from 0.5 to the maximum height
         layer_bins = np.searchsorted(np.arange(0.5, self.cloud.las.max[2] + 1), self.points['z'])
@@ -62,10 +64,18 @@ class LayerStacking:
     def _top_coordinates(self, min_distance = 3, threshold_abs=3):
         """
         Gets the coordinates of detected tops.
-        :return:
+
+        :param min_distance: The minimum distance to be used in pyfor.raster.Raster.local_maxima
+        :param threshold_abs: The absolute threshold to be used in pyfor.raster.Raster.local_maxima
+        :return: An Nx2 array of coordinates such that the first column is a vector of Y positions and the second column
+        is a vector of X positions.
         """
 
-        return(self.chm.local_maxima(min_distance=min_distance, threshold_abs=threshold_abs))
+        tops_raster = self.chm.local_maxima(min_distance=min_distance, threshold_abs=threshold_abs)
+        top_indices = np.stack(np.where(tops_raster.array > 0)).T
+        projected_indices = pyfor.gisexport.project_indices(top_indices, tops_raster)
+        return projected_indices
+
 
     @property
     def _complete_layers(self):
@@ -78,7 +88,7 @@ class LayerStacking:
         """
 
         num_points = self.points.groupby("bins_z").size()
-        bool_layers = num_points > self._top_coordinates.array.shape[0]
+        bool_layers = num_points > self._top_coordinates.shape[0]
         return(bool_layers[bool_layers==True].index.values)
 
     def _get_layer(self, layer_index):
@@ -107,7 +117,7 @@ class LayerStacking:
 
     def _remove_veg(self):
         """
-        Removes vegetation  points from the input cloud object.
+        Removes vegetation points from the input cloud object.
 
         :param veg_layers: An iterable of the layers to consider as vegetation (Ayrey recommends the first 3), starting
         at 0.
@@ -118,8 +128,7 @@ class LayerStacking:
         non_veg_indices = np.concatenate(non_veg_indices).ravel()
         other_layer_indices = self.points.index.values[np.where(self.points['bins_z'] > self.veg_layers[-1])]
         keep_indices = np.concatenate([non_veg_indices, other_layer_indices])
-
-        return(keep_indices)
+        self.points = self.points.iloc[keep_indices,:]
 
     def _cluster_layer(self, layer_index):
         """
@@ -130,12 +139,9 @@ class LayerStacking:
         """
         print("Clustering layer {}".format(layer_index + 1))
         layer = self._get_layer(layer_index)
-        if len(layer) >= self._top_coordinates.shape[0]:
-            clusters = KMeans(n_clusters=self._top_coordinates.shape[0], init = self._top_coordinates, n_jobs=self.n_jobs,
+        clusters = KMeans(n_clusters=self._top_coordinates.shape[0], init = self._top_coordinates, n_jobs=self.n_jobs,
                               ).fit(layer[['x', 'y']])
-            return(clusters)
-        else:
-            return(None)
+        return(clusters.labels_)
 
     def _cluster_all_layers(self):
         """
@@ -149,18 +155,22 @@ class LayerStacking:
 
     def _buffer_cluster_layers(self):
         """
-        Converts clusters to points and buffers
+        Buffers all points not removed after _remove_veg (or all points of self.remove_veg is set to False)
         :return:
         """
-        # TODO fill holes
-        # TODO implement cluster labels
-        # TODO this can be cleaned up by implementing one big GDF with a layer column
-        multi_points = [asMultiPoint(self._get_layer(i)[["x", "y"]].values) for i in range(self.n_layers)]
-        buffer_points = [gpd.GeoSeries(multi_points[i].geoms).buffer(self.buffer_distance) for i in range(len(multi_points))]
-        clustered_geoms = [gpd.GeoDataFrame(buffer_points[i]) \
-                           for i in range(len(buffer_points))]
-        clustered_geoms = [clustered_geoms[i].set_geometry(0) for i in range(len(clustered_geoms))]
-        return(clustered_geoms)
+        # Subset to only complete layers
+        multi_points = self.points[self.points['bins_z'].isin(self._complete_layers)]
+        multi_points = asMultiPoint(multi_points[['x', 'y']].values)
+        buffer_points = gpd.GeoDataFrame(gpd.GeoSeries(multi_points.geoms).buffer(self.buffer_distance))
+        ## TODO handle for veg removal
+        buffer_points["bins_z"] = self.points["bins_z"]
+        labels = [item for sublist in self._cluster_all_layers() for item in sublist]
+        buffer_points["labels"] = labels
+
+        # Fix some GPD quirks
+        buffer_points = buffer_points.set_geometry(0)
+        buffer_points.geometry.geom_type = buffer_points[0].geom_type
+        return(buffer_points)
 
     def _layer_inds_between_pct(self, lb, ub):
         """
@@ -180,9 +190,9 @@ class LayerStacking:
         returns a dictionary where each key is the index of the complete_layer and each value is its respective weight.
         This is used later to pass the value (i.e. the weight) of each layer to self.rasterize
 
-        :param percentiles:
-        :param weights:
-        :return:
+        :param percentiles: A tuple of percentiles to consider for weighting.
+        :param weights: A tuple of weights, must be the same length as `percentiles`
+        :return: A dictionary of weights for each layer.
         """
         percentile_breaks = [np.percentile(self._complete_layers, percentile) for percentile in percentiles]
         n_complete = len(self._complete_layers)
@@ -204,9 +214,17 @@ class LayerStacking:
         return(weight_dict)
 
     def _rasterize(self, geodataframe, value):
+        """
+        Converts buffered points into rasterized
+
+        :param geodataframe:
+        :param value:
+        :return:
+        """
         transform = self.chm._affine
 
         # TODO may be re-usable for other features. Consider moving to gisexport
+        # FIXME check for cell sizes that are not 1
         with MemoryFile() as memfile:
             with memfile.open(driver='GTiff',
                               width = self.chm.array.shape[1],
@@ -241,6 +259,8 @@ class LayerStacking:
         layers_of_rasters = [self._rasterize(layers_of_polygons[key], value) for key, value in weights_dict.items()]
 
         array = np.sum(np.dstack(layers_of_rasters), axis = 2)
+        # Flip
+        array = np.flipud(array)
         raster = pyfor.rasterizer.Raster(array, self.chm.grid)
 
         if smoothed:
@@ -256,8 +276,9 @@ class LayerStacking:
         :return:
         """
         # TODO expose kernel and min_distance options to user in init
-        self._remove_veg()
+        if self.remove_veg is not None:
+            self._remove_veg()
         raster = self.get_overlap_map(smoothed=True)
-        return(raster.local_maxima(min_distance=6))
+        return(raster)
 
 
