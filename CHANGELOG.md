@@ -1,3 +1,17 @@
+# 0.3.0
+
+Updates between September 5, 2018 and ...
+
+## Collection
+
+1. Added 'CloudDataFrame', an inherited class from GeoDataFrame used to manage large LiDAR acquisitions.
+
+## Samples
+1. Added `Collections` sample
+
+## Readme
+1. Reduced README length
+
 # 0.2.3
 
 Updates between August 5, 2018 and September 5, 2018. These updates are minor improvements

@@ -4,6 +4,15 @@ from rasterio.features import shapes
 from shapely.geometry import shape
 import geopandas
 
+# This module holds internal functions for GIS processing.
+
+def get_las_crs():
+    """
+    Attempts to retrive CRS information from an input `laspy.file.File` object.
+    :return:
+    """
+    pass
+
 def project_indices(indices, raster):
     """
     Converts indices of an array (for example, those indices that describe the location of a local maxima) to the

@@ -5,6 +5,11 @@ from joblib import Parallel, delayed
 from pyfor import cloud
 import geopandas as gpd
 
+class Indexer:
+    """
+    Internal class used to index a directory of las files.
+    """
+
 class CloudDataFrame(gpd.GeoDataFrame):
     """
     Implements a data frame structure for processing and managing multiple cloud objects.
@@ -14,16 +19,16 @@ class CloudDataFrame(gpd.GeoDataFrame):
         self.n_threads = 1
 
     @classmethod
-    def from_dir(cls, las_dir, n_threads = 1):
+    def from_dir(cls, las_dir, n_jobs = 1):
         """
         Wrapped function for producing a CloudDataFrame from a directory of las files.
         :param las_dir:
-        :param n_threads:
+        :param n_jobs:
         :return:
         """
         las_path_init = [[os.path.join(root, file) for file in files] for root, dirs, files in os.walk(las_dir)][0]
         cdf = CloudDataFrame({'las_paths': las_path_init})
-        cdf.n_threads = n_threads
+        cdf.n_threads = n_jobs
         return(cdf)
 
     def par_apply(self, func, column):
@@ -71,7 +76,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
         plot = super(CloudDataFrame, self).plot()
         plot.figure.show()
 
-def from_dir(las_dir, n_threads = 1):
+def from_dir(las_dir, n_jobs = 1):
     """
     Constructs a CloudDataFrame from a directory of las files.
 
@@ -79,13 +84,4 @@ def from_dir(las_dir, n_threads = 1):
     :return: A CloudDataFrame constructed from the directory of las files.
     """
 
-    return CloudDataFrame.from_dir(las_dir, n_threads = n_threads)
-
-class Indexer:
-    """
-    An internal class meant to handle the indexing of many las files for arbitrary collection tiling.
-    """
-    def __init__(self, cloud_df):
-        self.cloud_df = cloud_df
-        self.cloud_df._build_polygons()
-
+    return CloudDataFrame.from_dir(las_dir, n_jobs= n_jobs)
