@@ -34,8 +34,6 @@ def dht(elev_array, w_k, w_k_1, dh_0, dh_max, c):
     :param w_k: An integer representing the window size
     :param w_k_1: An integer representing the previous window size
     """
-
-    # TODO decide if this slope works or not
     s = slope(elev_array, w_k, w_k_1)
     s = 1
 

@@ -1,0 +1,467 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyfor.cloud module &mdash; pyfor 0.2.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyfor.collection module" href="pyfor.collection.html" />
+    <link rel="prev" title="pyfor.clip_funcs module" href="pyfor.clip_funcs.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pyfor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="pyfor.clip_funcs.html">pyfor.clip_funcs module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pyfor.cloud module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.collection.html">pyfor.collection module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.detection.html">pyfor.detection module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.filter.html">pyfor.filter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.gisexport.html">pyfor.gisexport module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.plot.html">pyfor.plot module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.rasterizer.html">pyfor.rasterizer module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.voxelizer.html">pyfor.voxelizer module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyfor</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>pyfor.cloud module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/source/pyfor.cloud.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pyfor.cloud">
+<span id="pyfor-cloud-module"></span><h1>pyfor.cloud module<a class="headerlink" href="#module-pyfor.cloud" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pyfor.cloud.Cloud">
+<em class="property">class </em><code class="descclassname">pyfor.cloud.</code><code class="descname">Cloud</code><span class="sig-paren">(</span><em>las</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The cloud object is the integral unit of pyfor, and is where most of the action takes place. Many of the following     attributes are convenience functions for other classes and modules.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>las</strong> – One of either: a string representing the path to a las (or laz) file or a CloudData object.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>las</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.chm">
+<code class="descname">chm</code><span class="sig-paren">(</span><em>cell_size</em>, <em>interp_method=None</em>, <em>pit_filter=None</em>, <em>kernel_size=3</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.chm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a Raster object of the maximum z value in each cell.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cell_size</strong> – The cell size for the returned raster in the same units as the parent Cloud or las file.</li>
+<li><strong>interp_method</strong> – The interpolation method to fill in NA values of the produced canopy height model, one         of either “nearest”, “cubic”, or “linear”</li>
+<li><strong>pit_filter</strong> – If “median” passes a median filter over the produced canopy height model.</li>
+<li><strong>kernel_size</strong> – The kernel size of the median filter, must be an odd integer.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A Raster object of the canopy height model.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.clip">
+<code class="descname">clip</code><span class="sig-paren">(</span><em>poly</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.clip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clips the point cloud to the provided shapely polygon using a ray casting algorithm.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>poly</strong> – A shapely polygon in the same CRS as the Cloud.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A new cloud object clipped to the provided polygon.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyfor.cloud.Cloud.convex_hull">
+<code class="descname">convex_hull</code><a class="headerlink" href="#pyfor.cloud.Cloud.convex_hull" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the convex hull of the 2d plane.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A single-element geoseries of the convex hull.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.filter">
+<code class="descname">filter</code><span class="sig-paren">(</span><em>min</em>, <em>max</em>, <em>dim</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters a cloud object for a given dimension <strong>in place</strong>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>min</strong> – Minimum dimension to retain.</li>
+<li><strong>max</strong> – Maximum dimension to retain.</li>
+<li><strong>dim</strong> – The dimension of interest as a string. For example “z”. This corresponds to a column label in         self.las.points dataframe.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.grid">
+<code class="descname">grid</code><span class="sig-paren">(</span><em>cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a Grid object for this Cloud given a cell size. The Grid is generally used to compute Raster objects
+See the documentation for Grid for more information.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cell_size</strong> – The resolution of the plot in the same units as the input file.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A Grid object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.iplot3d">
+<code class="descname">iplot3d</code><span class="sig-paren">(</span><em>max_points=30000</em>, <em>point_size=0.5</em>, <em>dim='z'</em>, <em>colorscale='Viridis'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.iplot3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the 3d point cloud in a compatible version for Jupyter notebooks using Plotly as a backend. If         max_points exceeds 30,000, the point cloud is downsampled using a uniform random distribution by default.         This can be changed using the max_points argument.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>max_points</strong> – The maximum number of points to render.</li>
+<li><strong>point_size</strong> – The point size of the rendered point cloud.</li>
+<li><strong>dim</strong> – The dimension on which to color (i.e. “z”, “intensity”, etc.)</li>
+<li><strong>colorscale</strong> – The Plotly colorscale with which to color.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.normalize">
+<code class="descname">normalize</code><span class="sig-paren">(</span><em>cell_size</em>, <em>num_windows=7</em>, <em>dh_max=2.5</em>, <em>dh_0=1</em>, <em>interp_method='nearest'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalizes this cloud object <strong>in place</strong> by generating a DEM using the default filtering algorithm  and         subtracting the underlying ground elevation. This uses a grid-based progressive morphological filter developed         in Zhang et al. (2003).</p>
+<p>This algorithm is actually implemented on a raster of the minimum Z value in each cell, but is included in         the Cloud object as a convenience wrapper. Its implementation involves creating a bare earth model and then         subtracting the underlying ground from each point’s elevation value.</p>
+<p>If you would like to create a bare earth model, look instead toward Grid.ground_filter.</p>
+<p>Note that this current implementation is best suited for larger tiles. Best practices suggest creating a BEM         at the largest scale possible first, and using that to normalize plot-level point clouds in a production         setting. This sets self.normalized to True.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cell_size</strong> – The cell_size at which to rasterize the point cloud into bins, in the same units as the         input point cloud.</li>
+<li><strong>num_windows</strong> – The number of windows to consider.</li>
+<li><strong>dh_max</strong> – The maximum height threshold.</li>
+<li><strong>dh_0</strong> – The null height threshold.</li>
+<li><strong>interp_method</strong> – The interpolation method used to fill in missing values after the ground filtering         takes place. One of any: “nearest”, “linear”, or “cubic”.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>cell_size=1</em>, <em>cmap='viridis'</em>, <em>return_plot=False</em>, <em>block=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots a basic canopy height model of the Cloud object. This is mainly a convenience function for         rasterizer.Grid.plot, check that method docstring for more information and more robust usage cases (i.e.         pit filtering and interpolation methods).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vmin</strong><strong> or </strong><strong>vmax is not given</strong><strong>, </strong><strong>they are initialized from the minimum and maximum value respectively of the first input processed. That is</strong><strong>, </strong><strong>__call__</strong><strong>(</strong><strong>A</strong><strong>) </strong><strong>calls autoscale_None</strong><strong>(</strong><strong>A</strong><strong>)</strong><strong> If clip _size</strong> (<em>cellf</em>) – The resolution of the plot in the same units as the input file.</li>
+<li><strong>return_plot</strong> – If true, returns a matplotlib plt object.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">If return_plot == True, returns matplotlib plt object. Not yet implemented.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.plot3d">
+<code class="descname">plot3d</code><span class="sig-paren">(</span><em>dim='z'</em>, <em>point_size=1</em>, <em>cmap='Spectral_r'</em>, <em>max_points=500000.0</em>, <em>n_bin=8</em>, <em>plot_trees=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.plot3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the three dimensional point cloud using a method suitable for non-Jupyter use (i.e. via the Python         console). By default, if the point cloud exceeds 5e5 points, then it is downsampled using a uniform random         distribution of 5e5 points. This is for performance purposes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>point_size</strong> – The size of the rendered points.</li>
+<li><strong>dim</strong> – The dimension upon which to color (i.e. “z”, “intensity”, etc.)</li>
+<li><strong>cmap</strong> – The matplotlib color map used to color the height distribution.</li>
+<li><strong>max_points</strong> – The maximum number of points to render.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the Cloud to a las file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> – The path of the output file.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyfor.cloud.CloudData">
+<em class="property">class </em><code class="descclassname">pyfor.cloud.</code><code class="descname">CloudData</code><span class="sig-paren">(</span><em>points</em>, <em>header</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.CloudData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A simple class composed of a numpy array of points and a laspy header, meant for internal use. This is basically
+a way to load data from the las file into memory.</p>
+<dl class="method">
+<dt id="pyfor.cloud.CloudData.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>points</em>, <em>header</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.CloudData.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.CloudData.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.CloudData.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the points and header to a .las file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> – The path of the .las file to write to.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pyfor.collection.html" class="btn btn-neutral float-right" title="pyfor.collection module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pyfor.clip_funcs.html" class="btn btn-neutral" title="pyfor.clip_funcs module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Bryce Frank.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.2.3',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

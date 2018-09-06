@@ -6,7 +6,6 @@ def iplot3d(las, max_points, point_size, dim, colorscale):
     """
     Plots the 3d point cloud in a compatible version for Jupyter notebooks.
     :return:
-    # TODO refactor to a name that isn't silly
     """
     # Check if in iPython notebook
     try:

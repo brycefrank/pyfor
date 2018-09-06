@@ -8,8 +8,12 @@ pyfor/*.pyc
 pyfor/test.py
 pyfor/__pycache__
 
+# ipynb checkpoints
+samples/.ipynb_checkpoints/*
+
 # Other
 .DS_Store
 htmlcov/
 htmlcov/*
 changelog_0.2.1.md
+pyfortest/temp.*
