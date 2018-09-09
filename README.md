@@ -58,6 +58,8 @@ import pyfor
 
 If you see no errors, you are ready to process!
 
+**A Note on IDEs:** One of the draws of pyfor is its 3D and 2D plotting methods. These work best in Jupyter notebooks but also work well in PyCharm interactive consoles (version 2018.1 or greater).
+
 ## Features
 
 Below is a list of features, complete and otherwise.
@@ -77,7 +79,7 @@ Below is a list of features, complete and otherwise.
 	- [X] Median pit filter
 	- [ ] Pit free algorithm (Chen et al. 2017)
 - [X] Clipping point clouds
-- [ ] Batch processing
+- [X] Batch processing
 	- [ ] Multiprocessor support
 	- [ ] Cluster support
 - [X] Voxelization methods

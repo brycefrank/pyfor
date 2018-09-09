@@ -5,12 +5,19 @@ Updates between September 5, 2018 and ...
 ## Collection
 
 1. Added 'CloudDataFrame', an inherited class from GeoDataFrame used to manage large LiDAR acquisitions.
+    - Ability to do geopositional indexing of LAS tiles. Much of this class is internal and used to
 
 ## Samples
 1. Added `Collections` sample
 
 ## Readme
 1. Reduced README length
+
+## Windows Compatibility
+1. Addressed issues with plotting on Windows 10 - an up-to-date version of PyCharm should work well.
+
+# Parser
+1. Added a new module, parser, that is mostly used for internal functions that attempt to parse the CRS for a given las file.
 
 # 0.2.3
 
