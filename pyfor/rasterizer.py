@@ -16,7 +16,7 @@ class Grid:
     :param cell_size: The size of the cell for sorting in the units of the input cloud object.
     :return: Returns a dataframe with sorted x and y with associated bins in a new columns
     """
-    def __init__(self, cloud, cell_size, voxelize = "False"):
+    def __init__(self, cloud, cell_size):
         self.cloud = cloud
         # TODO deprecate self.las, inconsistent with hierarchy
         self.las = self.cloud.las
@@ -51,8 +51,9 @@ class Grid:
         :return: A 2D numpy array where the value of each cell is the result of the passed function.
         """
 
-        array = self.cells.agg({dim: func}).reset_index().pivot('bins_y', 'bins_x', dim)
-        array = np.asarray(array)
+        bin_summary = self.cells.agg({dim: func}).reset_index()
+        array = np.full((self.m, self.n), np.nan)
+        array[bin_summary["bins_y"], bin_summary["bins_x"]] = bin_summary[dim]
         return Raster(array, self)
 
     def boolean_summary(self, func, dim):

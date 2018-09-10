@@ -2,7 +2,7 @@ import os
 import laspy
 import pandas as pd
 from joblib import Parallel, delayed
-from pyfor import cloud
+import pyfor
 import geopandas as gpd
 
 class Indexer:
@@ -41,14 +41,32 @@ class CloudDataFrame(gpd.GeoDataFrame):
 
         return(cdf)
 
-    def par_apply(self, func, column, *args):
+    def set_index(self, *args):
+        return CloudDataFrame(super(CloudDataFrame, self).set_index(*args))
+
+    def par_apply(self, func, column='las_path', buffer_distance = 0, *args):
         """
         Apply a function to each las path. Allows for parallelization using the n_jobs argument. This is achieved \
         via joblib Parallel and delayed.
 
         :param func: The user defined function, must accept a single argument, the path of the las file.
         :param n_jobs: The nlumber of threads to spawn, default of 1.
+        :param column: The column to apply on, will be the first argument to func
+        :param buffer_distance: The distance to buffer and aggregate each tile.
         """
+
+        if buffer_distance > 0:
+            self.buffer(buffer_distance)
+            for i, geom in enumerate(self["bounding_box"]):
+                intersecting = self._get_intersecting(i)
+
+                clip_geom = self['buffered_bounding_box'].iloc[i]
+                print(clip_geom)
+                parent_cloud = pyfor.cloud.Cloud(self["las_path"].iloc[i])
+                for path in intersecting["las_path"]:
+                    adjacent_cloud = pyfor.cloud.Cloud(path)
+                    parent_cloud.las._append(adjacent_cloud.las)
+
         output = Parallel(n_jobs=self.n_threads)(delayed(func)(plot_path, *args) for plot_path in self[column])
         return output
 
@@ -90,21 +108,24 @@ class CloudDataFrame(gpd.GeoDataFrame):
         """
         # TODO Seek more efficient solution...
         # FIXME this is probably a sloppy way
-        intersect_bool = self.intersects(self["bounding_box"].iloc[tile_index])
+        intersect_bool = self.intersects(self["buffered_bounding_box"].iloc[tile_index])
         intersect_cdf = CloudDataFrame(self[intersect_bool])
         intersect_cdf.n_threads = self.n_threads
         return intersect_cdf
 
 
-    def buffer(self, distance, in_place = True):
+    def _buffer(self, distance, in_place = True):
         """
         Buffers the CloudDataFrame geometries.
         :return: A new CloudDataFrame with buffered geometries.
         """
         # TODO implement in_place
         # also, pretty sloppy, consider relegating to a function, like "copy" or something
+        norm_geoms = self["bounding_box"].copy()
         buffered = super(CloudDataFrame, self).buffer(distance)
-        cdf = CloudDataFrame({"las_path": self.las_path, "bounding_box": buffered})
+        cdf = CloudDataFrame(self)
+        cdf["bounding_box"] = norm_geoms
+        cdf["buffered_bounding_box"] = buffered
         cdf.n_threads = self.n_threads
         cdf.set_geometry("bounding_box", inplace=True)
         return cdf
@@ -132,3 +153,11 @@ def from_dir(las_dir, n_jobs=1):
     """
 
     return CloudDataFrame.from_dir(las_dir, n_jobs= n_jobs)
+
+
+def stitch_clouds(collection):
+    """
+    Holder function for some ideas.
+    :return:
+
+    """

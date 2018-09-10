@@ -47,9 +47,28 @@ class CloudData:
         writer.close()
 
     def _update(self):
+        self.x = self.points["x"]
+        self.y = self.points["y"]
+        self.z = self.points["z"]
+        self.return_num = self.points["return_num"]
+        self.intesity = self.points["intensity"]
+        self.classification = self.points["classification"]
+        self.flag_byte = self.points["flag_byte"]
+        self.scan_angle_rank = self.points["scan_angle_rank"]
+        self.user_data = self.points["user_data"]
+        self.pt_src_id = self.points["pt_src_id"]
         self.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
         self.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
         self.count = np.alen(self.points)
+
+    def _append(self, other):
+        """
+        Append one CloudData object to another.
+        :return:
+        """
+        self.points = pd.concat([self.points, other.points])
+        self._update()
+
 
 class Cloud:
     """
