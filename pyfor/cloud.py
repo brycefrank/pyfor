@@ -1,6 +1,8 @@
 # An update of the cloudinfo class
 
 import laspy
+import plyfile
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
@@ -9,30 +11,42 @@ from pyfor import clip_funcs
 from pyfor import plot
 import pathlib
 
+# General class
 class CloudData:
-    """
-    A simple class composed of a numpy array of points and a laspy header, meant for internal use. This is basically
-    a way to load data from the las file into memory.
-    """
     def __init__(self, points, header):
+        self.header = header
         self.points = points
         self.x = self.points["x"]
         self.y = self.points["y"]
         self.z = self.points["z"]
-
-        self.header = header
-
         self.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
         self.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
         self.count = np.alen(self.points)
 
-    def write(self, path):
-        """
-        Writes the points and header to a .las file.
+    def _update(self):
+        self.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
+        self.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
+        self.count = np.alen(self.points)
 
-        :param path: The path of the .las file to write to.
+    def _append(self, other):
         """
-        # Make header manager
+        Append one CloudData object to another.
+        :return:
+        """
+        self.points = pd.concat([self.points, other.points])
+        self._update()
+
+class PLYData(CloudData):
+    def write(self, path):
+        #coordinate_array = self.points[["x", "y", "z"]].values.T
+        #vertex_array = list(zip(coordinate_array[0],coordinate_array[1], coordinate_array[2]))
+        #vertex_array = np.array(vertex_array, dtype=[('x', 'f4'), ('y', 'f4'), ('z', 'f4')])
+        vertex_array = self.points.to_records(index=False)
+        elements = plyfile.PlyElement.describe(vertex_array, 'vertex')
+        plyfile.PlyData([elements]).write(path)
+
+class LASData(CloudData):
+    def write(self, path):
         writer = laspy.file.File(path, header = self.header, mode = "w")
         writer.x = self.points["x"]
         writer.y = self.points["y"]
@@ -46,50 +60,38 @@ class CloudData:
         writer.pt_src_id = self.points["pt_src_id"]
         writer.close()
 
-    def _update(self):
-        self.x = self.points["x"]
-        self.y = self.points["y"]
-        self.z = self.points["z"]
-        self.return_num = self.points["return_num"]
-        self.intesity = self.points["intensity"]
-        self.classification = self.points["classification"]
-        self.flag_byte = self.points["flag_byte"]
-        self.scan_angle_rank = self.points["scan_angle_rank"]
-        self.user_data = self.points["user_data"]
-        self.pt_src_id = self.points["pt_src_id"]
-        self.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
-        self.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
-        self.count = np.alen(self.points)
-
-    def _append(self, other):
-        """
-        Append one CloudData object to another.
-        :return:
-        """
-        self.points = pd.concat([self.points, other.points])
-        self._update()
-
-
 class Cloud:
     """
     The cloud object is the integral unit of pyfor, and is where most of the action takes place. Many of the following \
     attributes are convenience functions for other classes and modules.
-
-    :param las: One of either: a string representing the path to a las (or laz) file or a CloudData object.
     """
-    def __init__(self, las):
-        if type(las) == str or type(las) == pathlib.PosixPath:
-            self.filepath = las
-            las = laspy.file.File(las)
-            # Rip points from laspy
-            points = pd.DataFrame({"x": las.x, "y": las.y, "z": las.z, "intensity": las.intensity, "return_num": las.return_num, "classification": las.classification,
-                                   "flag_byte":las.flag_byte, "scan_angle_rank":las.scan_angle_rank, "user_data": las.user_data,
-                                   "pt_src_id": las.pt_src_id})
-            header = las.header
-            self.las = CloudData(points, header)
+    def __init__(self, path):
 
-        elif type(las) == CloudData:
-            self.las = las
+        if type(path) == str or type(path) == pathlib.PosixPath:
+            self.filepath = path
+            self.extension = os.path.splitext(path)[1]
+
+            if self.extension == '.las':
+                las = laspy.file.File(path)
+                points = pd.DataFrame({"x": las.x, "y": las.y, "z": las.z, "intensity": las.intensity, "return_num": las.return_num, "classification": las.classification,
+                                       "flag_byte":las.flag_byte, "scan_angle_rank":las.scan_angle_rank, "user_data": las.user_data,
+                                       "pt_src_id": las.pt_src_id})
+                header = las.header
+                self.data = CloudData(points, header)
+
+            elif self.extension == '.ply':
+                ply = plyfile.PlyData.read(path)
+                ply_points = ply.elements[0].data
+                points = pd.DataFrame({"x": ply_points["x"], "y": ply_points["y"], "z": ply_points["z"],
+                                       "red": ply_points["red"], "green": ply_points["green"], "blue": ply_points["blue"]})
+
+                # ply headers are very basic, this is set here for compatibility with modifications to the header downstream (for now)
+                # TODO handle ply headers
+                header = None
+                self.data = PLYData(points , header)
+
+        elif type(path) == CloudData:
+            self.data = path
         else:
             print("Object type not supported, please input either a las file path or a CloudData object.")
 
@@ -104,15 +106,18 @@ class Cloud:
         from os.path import getsize
 
         # Format max and min
-        min =  [float('{0:.2f}'.format(elem)) for elem in self.las.min]
-        max =  [float('{0:.2f}'.format(elem)) for elem in self.las.max]
+        min =  [float('{0:.2f}'.format(elem)) for elem in self.data.min]
+        max =  [float('{0:.2f}'.format(elem)) for elem in self.data.max]
         filesize = getsize(self.filepath)
-        las_version = self.las.header.version
 
-
-        out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}\nLas Version: {}
-        
-        """.format(self.filepath, filesize, self.las.count, min, max, las_version)
+        # TODO: Incorporate this in CloudData somehow, messy!
+        if self.extension == '.las':
+            las_version = self.data.header.version
+            out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}\nLas Version: {}
+            
+            """.format(self.filepath, filesize, self.data.count, min, max, las_version)
+        elif self.extension == '.ply':
+            out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}""".format(self.filepath, filesize, self.data.count, min, max)
 
         return(out)
 
@@ -138,7 +143,7 @@ class Cloud:
         pre_merge = pd.DataFrame({'unique_id': series.unique(), 'random_id': random_ints})
 
 
-        self.las.points = pd.merge(self.las.points, pre_merge, left_on = 'user_data', right_on = 'unique_id')
+        self.data.points = pd.merge(self.data.points, pre_merge, left_on = 'user_data', right_on = 'unique_id')
 
     def grid(self, cell_size):
         """
@@ -174,7 +179,7 @@ class Cloud:
         :param dim: The dimension on which to color (i.e. "z", "intensity", etc.)
         :param colorscale: The Plotly colorscale with which to color.
         """
-        plot.iplot3d(self.las, max_points, point_size, dim, colorscale)
+        plot.iplot3d(self.data, max_points, point_size, dim, colorscale)
 
     def plot3d(self, dim = "z", point_size=1, cmap='Spectral_r', max_points=5e5, n_bin=8, plot_trees=False):
         """
@@ -195,19 +200,19 @@ class Cloud:
         # Randomly sample down if too large
         if dim == 'user_data' and plot_trees:
             dim = 'random_id'
-            self._set_discrete_color(n_bin, self.las.points['user_data'])
+            self._set_discrete_color(n_bin, self.data.points['user_data'])
             cmap = self._discrete_cmap(n_bin, base_cmap=cmap)
 
-        if self.las.count > max_points:
-                sample_mask = np.random.randint(self.las.count,
+        if self.data.count > max_points:
+                sample_mask = np.random.randint(self.data.count,
                                                 size = int(max_points))
-                coordinates = np.stack([self.las.points.x, self.las.points.y, self.las.points.z], axis = 1)[sample_mask,:]
+                coordinates = np.stack([self.data.points.x, self.data.points.y, self.data.points.z], axis = 1)[sample_mask,:]
 
-                color_dim = np.copy(self.las.points[dim].iloc[sample_mask].values)
+                color_dim = np.copy(self.data.points[dim].iloc[sample_mask].values)
                 print("Too many points, down sampling for 3d plot performance.")
         else:
-            coordinates = np.stack([self.las.points.x, self.las.points.y, self.las.points.z], axis = 1)
-            color_dim = np.copy(self.las.points[dim].values)
+            coordinates = np.stack([self.data.points.x, self.data.points.y, self.data.points.z], axis = 1)
+            color_dim = np.copy(self.data.points[dim].values)
 
         # If dim is user data (probably TREE ID or some such thing) then we want a discrete colormap
         if dim != 'random_id':
@@ -235,7 +240,7 @@ class Cloud:
         center = np.mean(coordinates, axis = 0)
         view.opts['center'] = pg.Vector(center[0], center[1], center[2])
         # Very ad-hoc
-        view.opts['distance'] = (self.las.max[0] - self.las.min[0]) * 1.2
+        view.opts['distance'] = (self.data.max[0] - self.data.min[0]) * 1.2
         #return(view.opts)
         view.show()
 
@@ -266,9 +271,9 @@ class Cloud:
         grid = self.grid(cell_size)
         dem_grid = grid.normalize(num_windows, dh_max, dh_0, interp_method)
 
-        self.las.points['z'] = dem_grid.data['z']
-        self.las.min = [np.min(dem_grid.data.x), np.min(dem_grid.data.y), np.min(dem_grid.data.z)]
-        self.las.max = [np.max(dem_grid.data.x), np.max(dem_grid.data.y), np.max(dem_grid.data.z)]
+        self.data.points['z'] = dem_grid.data['z']
+        self.data.min = [np.min(dem_grid.data.x), np.min(dem_grid.data.y), np.min(dem_grid.data.z)]
+        self.data.max = [np.max(dem_grid.data.x), np.max(dem_grid.data.y), np.max(dem_grid.data.z)]
         self.normalized = True
 
     def clip(self, poly):
@@ -280,12 +285,14 @@ class Cloud:
         """
         #TODO Implement geopandas for multiple clipping polygons.
 
-        keep = clip_funcs.poly_clip(self, poly)
+        keep = clip_funcs.poly_clip(self.data.points, poly)
         # Create copy to avoid warnings
-        keep_points = self.las.points.iloc[keep].copy()
-        new_cloud =  Cloud(CloudData(keep_points, self.las.header))
-        new_cloud.las._update()
-        return(new_cloud)
+        keep_points = self.data.points.iloc[keep].copy()
+
+        new_cloud =  Cloud(CloudData(keep_points, self.data.header))
+        new_cloud.data._update()
+
+        return new_cloud
 
     def filter(self, min, max, dim):
         """
@@ -296,9 +303,10 @@ class Cloud:
         :param dim: The dimension of interest as a string. For example "z". This corresponds to a column label in \
         self.las.points dataframe.
         """
-        condition = (self.las.points[dim] > min) & (self.las.points[dim] < max)
-        self.las = CloudData(self.las.points[condition], self.las.header)
-        self.las._update()
+        condition = (self.data.points[dim] > min) & (self.data.points[dim] < max)
+
+        self.data = CloudData(self.data.points[condition], self.data.header)
+        self.data._update()
 
     def chm(self, cell_size, interp_method=None, pit_filter=None, kernel_size=3):
         """
@@ -334,7 +342,7 @@ class Cloud:
         import geopandas as gpd
         from shapely.geometry import Polygon
 
-        hull = ConvexHull(self.las.points[["x", "y"]].values)
+        hull = ConvexHull(self.data.points[["x", "y"]].values)
         hull_poly = Polygon(hull.points[hull.vertices])
 
         return gpd.GeoSeries(hull_poly)
@@ -346,5 +354,5 @@ class Cloud:
         :param path: The path of the output file.
         :return:
         """
-        self.las.write(path)
+        self.data.write(path)
 

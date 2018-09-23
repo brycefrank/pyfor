@@ -76,9 +76,9 @@ class CloudTestCase(unittest.TestCase):
     def test_filter_z(self):
         self.test_filter = cloud.Cloud(test_las)
         self.test_filter.filter(40, 41, "z")
-        self.assertEqual(self.test_filter.las.count, 3639)
-        self.assertLessEqual(self.test_filter.las.max[2], [41])
-        self.assertGreaterEqual(self.test_filter.las.min[2], [40])
+        self.assertEqual(self.test_filter.data.count, 3639)
+        self.assertLessEqual(self.test_filter.data.max[2], [41])
+        self.assertGreaterEqual(self.test_filter.data.min[2], [40])
 
     def test_clip_polygon(self):
         poly = gpd.read_file(test_shp)['geometry'][0]
@@ -107,7 +107,7 @@ class CloudTestCase(unittest.TestCase):
     def test_normalize(self):
         test_cloud = cloud.Cloud(test_las)
         test_cloud.normalize(0.5)
-        self.assertLess(test_cloud.las.max[2], 65)
+        self.assertLess(test_cloud.data.max[2], 65)
 
     def test_chm(self):
         self.test_cloud.chm(0.5, interp_method="nearest", pit_filter= "median")
@@ -162,7 +162,7 @@ class GridTestCase(unittest.TestCase):
         self.test_grid.metrics(test_metrics_dict, as_raster=True)
 
     def tearDown(self):
-        del self.test_grid.las.header
+        del self.test_grid.cloud.data.header
 
 class RasterTestCase(unittest.TestCase):
     def setUp(self):
@@ -221,7 +221,7 @@ class GISExportTestCase(unittest.TestCase):
         test_grid = cloud.Cloud(test_las).grid(1)
         test_grid.cloud.crs = proj4str
         array = test_grid.raster("max", "z").array
-        gisexport.array_to_raster(array, 0.5, test_grid.las.header.min[0], test_grid.las.header.max[1],
+        gisexport.array_to_raster(array, 0.5, test_grid.cloud.data.header.min[0], test_grid.cloud.data.header.max[1],
                                   proj4str, os.path.join(data_dir, "temp_raster_array.tif"))
         self.assertTrue(os.path.exists(os.path.join(data_dir, "temp_raster_array.tif")))
         os.remove(os.path.join(data_dir, "temp_raster_array.tif"))
