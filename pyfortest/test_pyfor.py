@@ -20,7 +20,7 @@ test_las = os.path.join(data_dir, 'test.las')
 test_shp = os.path.join(data_dir, 'clip.shp')
 proj4str = "+proj=utm +zone=10 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
 
-class CloudDataTestCase(unittest.TestCase):
+class LASDataTestCase(unittest.TestCase):
     def setUp(self):
         self.test_points = {
             "x": [0, 1],
@@ -39,11 +39,11 @@ class CloudDataTestCase(unittest.TestCase):
 
         self.test_points = pd.DataFrame.from_dict(self.test_points)
         self.column = [0,1]
-        self.test_cloud_data = cloud.CloudData(self.test_points, self.test_header)
+        self.test_cloud_data = cloud.LASData(self.test_points, self.test_header)
 
 
     def test_init(self):
-        self.assertEqual(type(self.test_cloud_data), cloud.CloudData)
+        self.assertEqual(type(self.test_cloud_data), cloud.LASData)
 
     def test_data_length(self):
         self.assertEqual(len(self.test_cloud_data.points), 2)
