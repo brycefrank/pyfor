@@ -22,3 +22,4 @@ dependencies:
       - laspy
       - sphinx_rtd_theme
       - python-coveralls
+      - plyfile

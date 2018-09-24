@@ -16,8 +16,11 @@ Updates between September 5, 2018 and ...
 ## Windows Compatibility
 1. Addressed issues with plotting on Windows 10 - an up-to-date version of PyCharm should work well.
 
-# Parser
-1. Added a new module, parser, that is mostly used for internal functions that attempt to parse the CRS for a given las file.
+## Parser
+1. Added a new module, parser, that is mostly used for internal functions that attempt to parse the CRS for a given `.las` file.
+
+## Cloud
+1. Added support for `.ply` files
 
 # 0.2.3
 

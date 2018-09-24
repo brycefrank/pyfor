@@ -18,25 +18,22 @@ class Grid:
     """
     def __init__(self, cloud, cell_size):
         self.cloud = cloud
-        # TODO deprecate self.las, inconsistent with hierarchy
-        self.las = self.cloud.las
         self.cell_size = cell_size
 
-        min_x, max_x = self.las.min[0], self.las.max[0]
-        min_y, max_y = self.las.min[1], self.las.max[1]
+        min_x, max_x = self.cloud.data.min[0], self.cloud.data.max[0]
+        min_y, max_y = self.cloud.data.min[1], self.cloud.data.max[1]
 
         self.m = int(np.floor((max_y - min_y) / cell_size))
         self.n = int(np.floor((max_x - min_x) / cell_size))
 
         # Create bins
-        bins_x = np.searchsorted(np.linspace(min_x, max_x, self.n), self.las.points["x"])
-        bins_y = np.searchsorted(np.linspace(min_y, max_y, self.m), self.las.points["y"])
+        bins_x = np.searchsorted(np.linspace(min_x, max_x, self.n), self.cloud.data.points["x"])
+        bins_y = np.searchsorted(np.linspace(min_y, max_y, self.m), self.cloud.data.points["y"])
 
-        self.data = self.las.points
-        self.data["bins_x"] = bins_x
-        self.data["bins_y"] = bins_y
+        self.cloud.data.points["bins_x"] = bins_x
+        self.cloud.data.points["bins_y"] = bins_y
 
-        self.cells = self.data.groupby(['bins_x', 'bins_y'])
+        self.cells = self.cloud.data.points.groupby(['bins_x', 'bins_y'])
 
     def raster(self, func, dim):
         """
@@ -67,7 +64,7 @@ class Grid:
         :param dim: The dimension of the point cloud as a string (x, y or z)
         """
 
-        mask = self.data.groupby(['bins_x', 'bins_y'])[dim].transform(func) == self.data[dim]
+        mask = self.cloud.data.groupby(['bins_x', 'bins_y'])[dim].transform(func) == self.cloud.data[dim]
         return mask
 
     @property
@@ -165,7 +162,7 @@ class Grid:
         df = pd.DataFrame(dem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
         #df = pd.merge(self.data, df)
 
-        df = self.data.reset_index().merge(df, how = "left").set_index('index')
+        df = self.cloud.data.points.reset_index().merge(df, how = "left").set_index('index')
         df['z'] = df['z'] - df['val']
 
         # Initialize new grid object
@@ -185,7 +182,7 @@ class Raster:
     def _affine(self):
         """Constructs the affine transformation, used for plotting and exporting polygons and rasters."""
         from rasterio.transform import from_origin
-        affine = from_origin(self.grid.las.min[0], self.grid.las.max[1], self.grid.cell_size, self.grid.cell_size)
+        affine = from_origin(self.grid.cloud.data.min[0], self.grid.cloud.data.max[1], self.grid.cell_size, self.grid.cell_size)
         return affine
 
     @property
@@ -227,8 +224,8 @@ class Raster:
         ax.set_xticks(np.linspace(0, self.grid.n, 3))
         ax.set_yticks(np.linspace(0, self.grid.m, 3))
 
-        x_ticks, y_ticks = np.rint(np.linspace(self.grid.las.min[0], self.grid.las.max[0], 3)), \
-                           np.rint(np.linspace(self.grid.las.min[1], self.grid.las.max[1], 3))
+        x_ticks, y_ticks = np.rint(np.linspace(self.grid.cloud.data.min[0], self.grid.cloud.data.max[0], 3)), \
+                           np.rint(np.linspace(self.grid.cloud.data.min[1], self.grid.cloud.data.max[1], 3))
 
         ax.set_xticklabels(x_ticks)
         ax.set_yticklabels(y_ticks)
@@ -293,13 +290,12 @@ class Raster:
         labels = watershed(-watershed_array, tops, mask=watershed_array)
 
         if classify == True:
-            xy = self.grid.data[["bins_x", "bins_y"]].values
+            xy = self.grid.cloud.data.points[["bins_x", "bins_y"]].values
             tree_id = labels[xy[:, 1], xy[:, 0]]
 
             # Update the CloudData and Grid objects
-            self.grid.las.points["user_data"] = tree_id
-            self.grid.data = self.grid.las.points
-            self.grid.cells = self.grid.data.groupby(['bins_x', 'bins_y'])
+            self.grid.cloud.data.points["user_data"] = tree_id
+            self.grid.cells = self.grid.cloud.data.points.groupby(['bins_x', 'bins_y'])
 
         if plot == False:
             affine = self._affine
@@ -334,7 +330,7 @@ class Raster:
         :param path: The path to write to.
         """
 
-        gisexport.array_to_raster(self.array, self.cell_size, self.grid.las.min[0], self.grid.las.max[1],
+        gisexport.array_to_raster(self.array, self.cell_size, self.grid.cloud.data.min[0], self.grid.cloud.data.max[1],
                                       self.grid.cloud.crs, path)
 
 

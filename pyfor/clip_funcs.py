@@ -4,7 +4,7 @@ from numba import vectorize, bool_, float64
 
 # These are the lower level clipping functions.
 
-def square_clip(cloud, bounds):
+def square_clip(points, bounds):
     """
     Clips a square from a tuple describing the position of the square.
 
@@ -15,11 +15,11 @@ def square_clip(cloud, bounds):
     """
 
     # Extact x y coordinates from cloud
-    las_xy = cloud.las.points[["x", "y"]]
+    xy = points[["x", "y"]]
 
     # Create masks for each axis
-    x_in = (las_xy["x"] >= bounds[0]) & (las_xy["x"] <= bounds[2])
-    y_in = (las_xy["y"] >= bounds[1]) & (las_xy["y"] <= bounds[3])
+    x_in = (xy["x"] >= bounds[0]) & (xy["x"] <= bounds[2])
+    y_in = (xy["y"] >= bounds[1]) & (xy["y"] <= bounds[3])
     stack = np.stack((x_in, y_in), axis=1)
     in_clip = np.all(stack, axis=1)
 
@@ -57,7 +57,7 @@ def ray_trace(x, y, poly):
     return(ray(x, y))
 
 
-def poly_clip(cloud, poly):
+def poly_clip(points, poly):
     """
     Returns the indices within a given polygon.
 
@@ -67,8 +67,8 @@ def poly_clip(cloud, poly):
     """
     # Clip to bounding box
     bbox = poly.bounds
-    pre_clip_mask = square_clip(cloud, bbox)
-    pre_clip = cloud.las.points[["x", "y"]].iloc[pre_clip_mask].values
+    pre_clip_mask = square_clip(points, bbox)
+    pre_clip = points[["x", "y"]].iloc[pre_clip_mask].values
 
     # Store old indices
     pre_clip_inds = np.where(pre_clip_mask)[0]
