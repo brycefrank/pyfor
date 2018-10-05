@@ -138,9 +138,9 @@ class CloudDataFrame(gpd.GeoDataFrame):
         pass
 
 
-    def plot(self, return_plot = False):
+    def plot(self, *args):
         """Plots the bounding boxes of the Cloud objects"""
-        plot = super(CloudDataFrame, self).plot()
+        plot = super(CloudDataFrame, self).plot(*args)
         plot.figure.show()
 
 
