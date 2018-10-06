@@ -1,5 +1,7 @@
 name: pyfor_env
 
+channels:
+  - conda-forge
 dependencies:
   - poppler<0.62
   - python=3.6
@@ -14,7 +16,7 @@ dependencies:
   - pyopengl
   - plotly
   - numba
-  - rasterio>=1.0.2
+  - rasterio>1.0
   - libkml
   - geopandas
   - joblib
@@ -22,3 +24,4 @@ dependencies:
       - laspy
       - sphinx_rtd_theme
       - python-coveralls
+      - plyfile
