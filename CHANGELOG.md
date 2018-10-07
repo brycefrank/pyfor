@@ -22,8 +22,16 @@ Updates between September 5, 2018 and ...
 ## Cloud
 1. Added support for `.ply` files
 
+## Rasterizer
+1. Changed `Grid.raster` to allow for keyword arguments for passed functions.
+
+## ground_filter
+1. Restructued filters into their own Classes, each with `.bem`, `.classify()` and `.normalize`. Fits better with the structure of the package.
+2. Added Kraus and Pfeifer (1998) ground filter after having some issues with `zhang`. This filter is a much simpler ground filter but provides reasonable results.
+
 ## environment.yml
 1. Enforcing `rasterio > 1.0` requirement which thereby requires use of `conda-forge` channel.
+2. Added `plyfile` requirement (see above)
 
 # 0.2.3
 

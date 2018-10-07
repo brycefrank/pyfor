@@ -6,7 +6,7 @@ from pyfor import cloud
 from pyfor import rasterizer
 from pyfor import gisexport
 from pyfor import clip_funcs
-from pyfor import filter
+from pyfor import ground_filter
 from pyfor import plot
 from pyfor import collection
 from pyfor import voxelizer

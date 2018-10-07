@@ -4,7 +4,7 @@ import pandas as pd
 from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
 from pyfor import gisexport
-from pyfor import filter
+from pyfor import ground_filter
 from pyfor import plot
 
 class Grid:
@@ -35,7 +35,10 @@ class Grid:
 
         self.cells = self.cloud.data.points.groupby(['bins_x', 'bins_y'])
 
-    def raster(self, func, dim):
+    def _update(self):
+        self.__init__(self.cloud, self.cell_size)
+
+    def raster(self, func, dim, **kwargs):
         """
         Generates an m x n matrix with values as calculated for each cell in func. This is a raw array without \
         missing cells interpolated. See self.interpolate for interpolation methods.
@@ -48,7 +51,7 @@ class Grid:
         :return: A 2D numpy array where the value of each cell is the result of the passed function.
         """
 
-        bin_summary = self.cells.agg({dim: func}).reset_index()
+        bin_summary = self.cells.agg({dim: func}, **kwargs).reset_index()
         array = np.full((self.m, self.n), np.nan)
         array[bin_summary["bins_y"], bin_summary["bins_x"]] = bin_summary[dim]
         return Raster(array, self)
@@ -129,7 +132,7 @@ class Grid:
             metrics = [tup[1] for tup in list(aggregate)]
             return pd.DataFrame({'dim': dims, 'metric': metrics, 'raster': rasters}).set_index(['dim', 'metric'])
 
-    def ground_filter(self, num_windows, dh_max, dh_0, interp_method = "nearest"):
+    def ground_filter(self, num_windows, dh_max, dh_0, b=2, interp_method = "nearest"):
         """
         Wrapper call for filter.zhang with convenient defaults.
 
@@ -139,13 +142,13 @@ class Grid:
         """
         # TODO Add functionality for classifying points as ground
         # Get the interpolated DEM array.
-        dem_array = filter.zhang(self.interpolate("min", "z").array, num_windows,
-                                 dh_max, dh_0, self.cell_size, self, interp_method = interp_method)
+        dem_array = ground_filter.zhang(self.interpolate("min", "z").array, num_windows,
+                                        dh_max, dh_0, self.cell_size, self, interp_method = interp_method)
         dem = Raster(dem_array, self)
 
         return dem
 
-    def normalize(self, num_windows, dh_max, dh_0, interp_method="nearest"):
+    def normalize(self, num_windows, dh_max, dh_0, b=2, interp_method="nearest"):
         """
         Returns a new, normalized Grid object.
         :return:
@@ -156,7 +159,7 @@ class Grid:
             strange results.")
 
         # Retrieve the DEM
-        dem = self.ground_filter(num_windows, dh_max, dh_0, interp_method)
+        dem = self.ground_filter(num_windows, dh_max, dh_0, b, interp_method)
 
         # Organize the array into a dataframe and merge
         df = pd.DataFrame(dem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
@@ -205,7 +208,6 @@ class Raster:
 
         return out_image[0].data
 
-
     def plot(self, cmap = "viridis", block = False, return_plot = False):
         """
         Default plotting method for the Raster object.
@@ -240,7 +242,7 @@ class Raster:
         """
         plot.iplot3d_surface(self.array, colorscale)
 
-    def local_maxima(self, min_distance=2, threshold_abs=2, multi_top = False, as_coordinates = False):
+    def local_maxima(self, min_distance=2, threshold_abs=2, multi_top=False, as_coordinates=False):
         """
         Returns a new Raster object with tops detected using a local maxima filtering method. See
         skimage.feature.peak_local_maxima for more information on the filter.

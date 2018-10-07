@@ -245,7 +245,7 @@ class Cloud:
         #return(view.opts)
         view.show()
 
-    def normalize(self, cell_size, num_windows=7, dh_max=2.5, dh_0=1, interp_method="nearest"):
+    def normalize(self, cell_size, num_windows=7, dh_max=2.5, dh_0=1, b=2, interp_method="nearest"):
         """
         Normalizes this cloud object **in place** by generating a DEM using the default filtering algorithm  and \
         subtracting the underlying ground elevation. This uses a grid-based progressive morphological filter developed \
@@ -270,7 +270,7 @@ class Cloud:
         takes place. One of any: "nearest", "linear", or "cubic".
         """
         grid = self.grid(cell_size)
-        dem_grid = grid.normalize(num_windows, dh_max, dh_0, interp_method)
+        dem_grid = grid.normalize(num_windows, dh_max, dh_0, b, interp_method)
 
         self.data.points['z'] = dem_grid.data['z']
         self.data.min = [np.min(dem_grid.data.x), np.min(dem_grid.data.y), np.min(dem_grid.data.z)]
