@@ -24,7 +24,8 @@
 
   
 
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -89,6 +90,8 @@
 <li class="toctree-l1"><a class="reference internal" href="pyfor.detection.html">pyfor.detection module</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">pyfor.filter module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.gisexport.html">pyfor.gisexport module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.ground_filter.html">pyfor.ground_filter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.parser.html">pyfor.parser module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.plot.html">pyfor.plot module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.rasterizer.html">pyfor.rasterizer module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.voxelizer.html">pyfor.voxelizer module</a></li>
@@ -156,78 +159,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-pyfor.filter">
-<span id="pyfor-filter-module"></span><h1>pyfor.filter module<a class="headerlink" href="#module-pyfor.filter" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
-<dt id="pyfor.filter.dhmax">
-<code class="descclassname">pyfor.filter.</code><code class="descname">dhmax</code><span class="sig-paren">(</span><em>elev_array</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.filter.dhmax" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the maximum height difference for an elevation array.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>elev_array</strong> – </td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyfor.filter.dht">
-<code class="descclassname">pyfor.filter.</code><code class="descname">dht</code><span class="sig-paren">(</span><em>elev_array</em>, <em>w_k</em>, <em>w_k_1</em>, <em>dh_0</em>, <em>dh_max</em>, <em>c</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.filter.dht" title="Permalink to this definition">¶</a></dt>
-<dd><p>”
-Calculates dh_t.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>elev_array</strong> – A 1D array of elevation values</li>
-<li><strong>w_k</strong> – An integer representing the window size</li>
-<li><strong>w_k_1</strong> – An integer representing the previous window size</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyfor.filter.slope">
-<code class="descclassname">pyfor.filter.</code><code class="descname">slope</code><span class="sig-paren">(</span><em>elev_array</em>, <em>w_k</em>, <em>w_k_1</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.filter.slope" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the slope coefficient.</p>
-<p>Returns the slope coefficient s for a given elev_aray and w_k</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyfor.filter.window_size">
-<code class="descclassname">pyfor.filter.</code><code class="descname">window_size</code><span class="sig-paren">(</span><em>k</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.filter.window_size" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="pyfor.filter.zhang">
-<code class="descclassname">pyfor.filter.</code><code class="descname">zhang</code><span class="sig-paren">(</span><em>array</em>, <em>number_of_windows</em>, <em>dh_max</em>, <em>dh_0</em>, <em>c</em>, <em>grid</em>, <em>interp_method='nearest'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.filter.zhang" title="Permalink to this definition">¶</a></dt>
-<dd><p>Implements Zhang et. al (2003), a progressive morphological ground filter. This returns a matrix of Z values for
-each grid cell that have been determined to be actual ground cells.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>array</strong> – The array to interpolate on, usually an aggregate of the minimum Z value</td>
-</tr>
-</tbody>
-</table>
-<p>#TODO fix this to be max window size
-:param number_of_windows:
-:param dh_max: The maximum height threshold
-:param dh_0: The starting null height threshold
-:param c: The cell size used to construct the array
-:param grid: The grid object used to construct the array
-:return: An array corresponding to the filtered points, can be used to construct a DEM via the Raster class</p>
-</dd></dl>
-
+  <div class="section" id="pyfor-filter-module">
+<h1>pyfor.filter module<a class="headerlink" href="#pyfor-filter-module" title="Permalink to this headline">¶</a></h1>
 </div>
 
 
@@ -286,7 +219,10 @@ each grid cell that have been determined to be actual ground cells.</p>
 
   
 
-  <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
 
   <script type="text/javascript">
       jQuery(function () {

@@ -25,7 +25,8 @@
 
   
 
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" /> 
@@ -88,6 +89,8 @@
 <li class="toctree-l1"><a class="reference internal" href="source/pyfor.detection.html">pyfor.detection module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source/pyfor.filter.html">pyfor.filter module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source/pyfor.gisexport.html">pyfor.gisexport module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source/pyfor.ground_filter.html">pyfor.ground_filter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source/pyfor.parser.html">pyfor.parser module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source/pyfor.plot.html">pyfor.plot module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source/pyfor.rasterizer.html">pyfor.rasterizer module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source/pyfor.voxelizer.html">pyfor.voxelizer module</a></li>
@@ -166,6 +169,7 @@
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#K"><strong>K</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
@@ -185,9 +189,11 @@
       <ul>
         <li><a href="source/pyfor.cloud.html#pyfor.cloud.CloudData.__init__">(pyfor.cloud.CloudData method)</a>
 </li>
-        <li><a href="source/pyfor.collection.html#pyfor.collection.Collection.__init__">(pyfor.collection.Collection method)</a>
+        <li><a href="source/pyfor.collection.html#pyfor.collection.CloudDataFrame.__init__">(pyfor.collection.CloudDataFrame method)</a>
 </li>
         <li><a href="source/pyfor.detection.html#pyfor.detection.LayerStacking.__init__">(pyfor.detection.LayerStacking method)</a>
+</li>
+        <li><a href="source/pyfor.ground_filter.html#pyfor.ground_filter.KrausPfeifer1998.__init__">(pyfor.ground_filter.KrausPfeifer1998 method)</a>
 </li>
         <li><a href="source/pyfor.rasterizer.html#pyfor.rasterizer.Grid.__init__">(pyfor.rasterizer.Grid method)</a>
 </li>
@@ -214,6 +220,10 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="source/pyfor.ground_filter.html#pyfor.ground_filter.KrausPfeifer1998.bem">bem() (pyfor.ground_filter.KrausPfeifer1998 method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="source/pyfor.rasterizer.html#pyfor.rasterizer.Grid.boolean_summary">boolean_summary() (pyfor.rasterizer.Grid method)</a>
 </li>
   </ul></td>
@@ -224,15 +234,21 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="source/pyfor.cloud.html#pyfor.cloud.Cloud.chm">chm() (pyfor.cloud.Cloud method)</a>
 </li>
+      <li><a href="source/pyfor.ground_filter.html#pyfor.ground_filter.KrausPfeifer1998.classify">classify() (pyfor.ground_filter.KrausPfeifer1998 method)</a>
+</li>
       <li><a href="source/pyfor.cloud.html#pyfor.cloud.Cloud.clip">clip() (pyfor.cloud.Cloud method)</a>
+
+      <ul>
+        <li><a href="source/pyfor.collection.html#pyfor.collection.CloudDataFrame.clip">(pyfor.collection.CloudDataFrame method)</a>
 </li>
-      <li><a href="source/pyfor.cloud.html#pyfor.cloud.Cloud">Cloud (class in pyfor.cloud)</a>
-</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="source/pyfor.cloud.html#pyfor.cloud.Cloud">Cloud (class in pyfor.cloud)</a>
+</li>
       <li><a href="source/pyfor.cloud.html#pyfor.cloud.CloudData">CloudData (class in pyfor.cloud)</a>
 </li>
-      <li><a href="source/pyfor.collection.html#pyfor.collection.Collection">Collection (class in pyfor.collection)</a>
+      <li><a href="source/pyfor.collection.html#pyfor.collection.CloudDataFrame">CloudDataFrame (class in pyfor.collection)</a>
 </li>
       <li><a href="source/pyfor.cloud.html#pyfor.cloud.Cloud.convex_hull">convex_hull (pyfor.cloud.Cloud attribute)</a>
 </li>
@@ -250,9 +266,9 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/pyfor.filter.html#pyfor.filter.dhmax">dhmax() (in module pyfor.filter)</a>
+      <li><a href="source/pyfor.ground_filter.html#pyfor.ground_filter.dhmax">dhmax() (in module pyfor.ground_filter)</a>
 </li>
-      <li><a href="source/pyfor.filter.html#pyfor.filter.dht">dht() (in module pyfor.filter)</a>
+      <li><a href="source/pyfor.ground_filter.html#pyfor.ground_filter.dht">dht() (in module pyfor.ground_filter)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -271,11 +287,21 @@
       <li><a href="source/pyfor.cloud.html#pyfor.cloud.Cloud.filter">filter() (pyfor.cloud.Cloud method)</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="source/pyfor.collection.html#pyfor.collection.from_dir">from_dir() (in module pyfor.collection)</a>
+
+      <ul>
+        <li><a href="source/pyfor.collection.html#pyfor.collection.CloudDataFrame.from_dir">(pyfor.collection.CloudDataFrame class method)</a>
+</li>
+      </ul></li>
+  </ul></td>
 </tr></table>
 
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="source/pyfor.gisexport.html#pyfor.gisexport.get_las_crs">get_las_crs() (in module pyfor.gisexport)</a>
+</li>
       <li><a href="source/pyfor.detection.html#pyfor.detection.LayerStacking.get_overlap_map">get_overlap_map() (pyfor.detection.LayerStacking method)</a>
 </li>
       <li><a href="source/pyfor.rasterizer.html#pyfor.rasterizer.Grid">Grid (class in pyfor.rasterizer)</a>
@@ -286,12 +312,16 @@
 </li>
       <li><a href="source/pyfor.rasterizer.html#pyfor.rasterizer.Grid.ground_filter">ground_filter() (pyfor.rasterizer.Grid method)</a>
 </li>
+      <li><a href="source/pyfor.ground_filter.html#pyfor.ground_filter.KrausPfeifer1998.ground_points">ground_points (pyfor.ground_filter.KrausPfeifer1998 attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="source/pyfor.collection.html#pyfor.collection.Indexer">Indexer (class in pyfor.collection)</a>
+</li>
       <li><a href="source/pyfor.rasterizer.html#pyfor.rasterizer.Grid.interpolate">interpolate() (pyfor.rasterizer.Grid method)</a>
 </li>
       <li><a href="source/pyfor.plot.html#pyfor.plot.iplot3d">iplot3d() (in module pyfor.plot)</a>
@@ -309,10 +339,18 @@
   </ul></td>
 </tr></table>
 
+<h2 id="K">K</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="source/pyfor.ground_filter.html#pyfor.ground_filter.KrausPfeifer1998">KrausPfeifer1998 (class in pyfor.ground_filter)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/pyfor.collection.html#pyfor.collection.Collection.las_headers">las_headers (pyfor.collection.Collection attribute)</a>
+      <li><a href="source/pyfor.cloud.html#pyfor.cloud.LASData">LASData (class in pyfor.cloud)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -337,6 +375,8 @@
       <li><a href="source/pyfor.cloud.html#pyfor.cloud.Cloud.normalize">normalize() (pyfor.cloud.Cloud method)</a>
 
       <ul>
+        <li><a href="source/pyfor.ground_filter.html#pyfor.ground_filter.KrausPfeifer1998.normalize">(pyfor.ground_filter.KrausPfeifer1998 method)</a>
+</li>
         <li><a href="source/pyfor.rasterizer.html#pyfor.rasterizer.Grid.normalize">(pyfor.rasterizer.Grid method)</a>
 </li>
       </ul></li>
@@ -346,15 +386,23 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="source/pyfor.collection.html#pyfor.collection.CloudDataFrame.par_apply">par_apply() (pyfor.collection.CloudDataFrame method)</a>
+</li>
+      <li><a href="source/pyfor.parser.html#pyfor.parser.parse_crs">parse_crs() (in module pyfor.parser)</a>
+</li>
       <li><a href="source/pyfor.rasterizer.html#pyfor.rasterizer.Raster.pit_filter">pit_filter() (pyfor.rasterizer.Raster method)</a>
 </li>
       <li><a href="source/pyfor.cloud.html#pyfor.cloud.Cloud.plot">plot() (pyfor.cloud.Cloud method)</a>
 
       <ul>
+        <li><a href="source/pyfor.collection.html#pyfor.collection.CloudDataFrame.plot">(pyfor.collection.CloudDataFrame method)</a>
+</li>
         <li><a href="source/pyfor.rasterizer.html#pyfor.rasterizer.Raster.plot">(pyfor.rasterizer.Raster method)</a>
 </li>
       </ul></li>
       <li><a href="source/pyfor.cloud.html#pyfor.cloud.Cloud.plot3d">plot3d() (pyfor.cloud.Cloud method)</a>
+</li>
+      <li><a href="source/pyfor.cloud.html#pyfor.cloud.PLYData">PLYData (class in pyfor.cloud)</a>
 </li>
       <li><a href="source/pyfor.clip_funcs.html#pyfor.clip_funcs.poly_clip">poly_clip() (in module pyfor.clip_funcs)</a>
 </li>
@@ -362,10 +410,10 @@
 </li>
       <li><a href="source/pyfor.gisexport.html#pyfor.gisexport.project_indices">project_indices() (in module pyfor.gisexport)</a>
 </li>
-      <li><a href="source/pyfor.html#module-pyfor">pyfor (module)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="source/pyfor.html#module-pyfor">pyfor (module)</a>
+</li>
       <li><a href="source/pyfor.clip_funcs.html#module-pyfor.clip_funcs">pyfor.clip_funcs (module)</a>
 </li>
       <li><a href="source/pyfor.cloud.html#module-pyfor.cloud">pyfor.cloud (module)</a>
@@ -374,9 +422,11 @@
 </li>
       <li><a href="source/pyfor.detection.html#module-pyfor.detection">pyfor.detection (module)</a>
 </li>
-      <li><a href="source/pyfor.filter.html#module-pyfor.filter">pyfor.filter (module)</a>
-</li>
       <li><a href="source/pyfor.gisexport.html#module-pyfor.gisexport">pyfor.gisexport (module)</a>
+</li>
+      <li><a href="source/pyfor.ground_filter.html#module-pyfor.ground_filter">pyfor.ground_filter (module)</a>
+</li>
+      <li><a href="source/pyfor.parser.html#module-pyfor.parser">pyfor.parser (module)</a>
 </li>
       <li><a href="source/pyfor.plot.html#module-pyfor.plot">pyfor.plot (module)</a>
 </li>
@@ -404,11 +454,15 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/pyfor.filter.html#pyfor.filter.slope">slope() (in module pyfor.filter)</a>
+      <li><a href="source/pyfor.collection.html#pyfor.collection.CloudDataFrame.set_index">set_index() (pyfor.collection.CloudDataFrame method)</a>
+</li>
+      <li><a href="source/pyfor.ground_filter.html#pyfor.ground_filter.slope">slope() (in module pyfor.ground_filter)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="source/pyfor.clip_funcs.html#pyfor.clip_funcs.square_clip">square_clip() (in module pyfor.clip_funcs)</a>
+</li>
+      <li><a href="source/pyfor.collection.html#pyfor.collection.stitch_clouds">stitch_clouds() (in module pyfor.collection)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -430,14 +484,14 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="source/pyfor.rasterizer.html#pyfor.rasterizer.Raster.watershed_seg">watershed_seg() (pyfor.rasterizer.Raster method)</a>
 </li>
-      <li><a href="source/pyfor.filter.html#pyfor.filter.window_size">window_size() (in module pyfor.filter)</a>
+      <li><a href="source/pyfor.ground_filter.html#pyfor.ground_filter.window_size">window_size() (in module pyfor.ground_filter)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="source/pyfor.cloud.html#pyfor.cloud.Cloud.write">write() (pyfor.cloud.Cloud method)</a>
 
       <ul>
-        <li><a href="source/pyfor.cloud.html#pyfor.cloud.CloudData.write">(pyfor.cloud.CloudData method)</a>
+        <li><a href="source/pyfor.cloud.html#pyfor.cloud.LASData.write">(pyfor.cloud.LASData method)</a>
+</li>
+        <li><a href="source/pyfor.cloud.html#pyfor.cloud.PLYData.write">(pyfor.cloud.PLYData method)</a>
 </li>
         <li><a href="source/pyfor.rasterizer.html#pyfor.rasterizer.Raster.write">(pyfor.rasterizer.Raster method)</a>
 </li>
@@ -448,7 +502,7 @@
 <h2 id="Z">Z</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/pyfor.filter.html#pyfor.filter.zhang">zhang() (in module pyfor.filter)</a>
+      <li><a href="source/pyfor.ground_filter.html#pyfor.ground_filter.zhang">zhang() (in module pyfor.ground_filter)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -501,7 +555,10 @@
 
   
 
-  <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
 
   <script type="text/javascript">
       jQuery(function () {

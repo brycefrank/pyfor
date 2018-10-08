@@ -16,14 +16,13 @@ Updates between September 5, 2018 and ...
 ## Windows Compatibility
 1. Addressed issues with plotting on Windows 10 - an up-to-date version of PyCharm should work well.
 
-## Parser
-1. Added a new module, parser, that is mostly used for internal functions that attempt to parse the CRS for a given `.las` file.
-
 ## Cloud
 1. Added support for `.ply` files
+2. Changed default normalization algorithm to `ground_filter.KrausPfeifer1998` while I debug and restructure `ground_filter.zhang`
 
 ## Rasterizer
 1. Changed `Grid.raster` to allow for keyword arguments for passed functions.
+2. Added `DeprecationWarning` to `rasterizer.Grid.normalize`, will be replaced with standalone ground filters in 3.1.
 
 ## ground_filter
 1. Restructued filters into their own Classes, each with `.bem`, `.classify()` and `.normalize`. Fits better with the structure of the package.

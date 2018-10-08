@@ -24,7 +24,8 @@
 
   
 
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -89,6 +90,8 @@
 <li class="toctree-l1"><a class="reference internal" href="pyfor.detection.html">pyfor.detection module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.filter.html">pyfor.filter module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.gisexport.html">pyfor.gisexport module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.ground_filter.html">pyfor.ground_filter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.parser.html">pyfor.parser module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.plot.html">pyfor.plot module</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">pyfor.rasterizer module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.voxelizer.html">pyfor.voxelizer module</a></li>
@@ -174,7 +177,7 @@
 
 <dl class="class">
 <dt id="pyfor.rasterizer.Grid">
-<em class="property">class </em><code class="descclassname">pyfor.rasterizer.</code><code class="descname">Grid</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em>, <em>voxelize='False'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pyfor.rasterizer.</code><code class="descname">Grid</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. It is     not quite a raster yet. A raster has only one value per cell, whereas the Grid object merely sorts all points     into their respective cells.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -194,7 +197,7 @@
 </table>
 <dl class="method">
 <dt id="pyfor.rasterizer.Grid.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em>, <em>voxelize='False'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
 </dd></dl>
 
@@ -225,7 +228,7 @@
 
 <dl class="method">
 <dt id="pyfor.rasterizer.Grid.ground_filter">
-<code class="descname">ground_filter</code><span class="sig-paren">(</span><em>num_windows</em>, <em>dh_max</em>, <em>dh_0</em>, <em>interp_method='nearest'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.ground_filter" title="Permalink to this definition">¶</a></dt>
+<code class="descname">ground_filter</code><span class="sig-paren">(</span><em>num_windows</em>, <em>dh_max</em>, <em>dh_0</em>, <em>b=2</em>, <em>interp_method='nearest'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.ground_filter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper call for filter.zhang with convenient defaults.</p>
 <p>Returns a Raster object corresponding to the filtered ground DEM of this particular grid.
 :param type:
@@ -272,14 +275,14 @@
 
 <dl class="method">
 <dt id="pyfor.rasterizer.Grid.normalize">
-<code class="descname">normalize</code><span class="sig-paren">(</span><em>num_windows</em>, <em>dh_max</em>, <em>dh_0</em>, <em>interp_method='nearest'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.normalize" title="Permalink to this definition">¶</a></dt>
+<code class="descname">normalize</code><span class="sig-paren">(</span><em>num_windows</em>, <em>dh_max</em>, <em>dh_0</em>, <em>b=2</em>, <em>interp_method='nearest'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.normalize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a new, normalized Grid object.
 :return:</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyfor.rasterizer.Grid.raster">
-<code class="descname">raster</code><span class="sig-paren">(</span><em>func</em>, <em>dim</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.raster" title="Permalink to this definition">¶</a></dt>
+<code class="descname">raster</code><span class="sig-paren">(</span><em>func</em>, <em>dim</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.raster" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates an m x n matrix with values as calculated for each cell in func. This is a raw array without         missing cells interpolated. See self.interpolate for interpolation methods.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -466,7 +469,10 @@ This function modifies the raster array <strong>in place</strong>.</p>
 
   
 
-  <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
 
   <script type="text/javascript">
       jQuery(function () {

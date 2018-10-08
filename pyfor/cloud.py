@@ -245,37 +245,19 @@ class Cloud:
         #return(view.opts)
         view.show()
 
-    def normalize(self, cell_size, num_windows=7, dh_max=2.5, dh_0=1, b=2, interp_method="nearest"):
+    def normalize(self, cell_size, **kwargs):
         """
         Normalizes this cloud object **in place** by generating a DEM using the default filtering algorithm  and \
-        subtracting the underlying ground elevation. This uses a grid-based progressive morphological filter developed \
-        in Zhang et al. (2003).
-
-        This algorithm is actually implemented on a raster of the minimum Z value in each cell, but is included in \
-        the Cloud object as a convenience wrapper. Its implementation involves creating a bare earth model and then \
-        subtracting the underlying ground from each point's elevation value.
-
-        If you would like to create a bare earth model, look instead toward Grid.ground_filter.
-
-        Note that this current implementation is best suited for larger tiles. Best practices suggest creating a BEM \
-        at the largest scale possible first, and using that to normalize plot-level point clouds in a production \
-        setting. This sets self.normalized to True.
+        subtracting the underlying ground elevation. This uses Kraus and Pfeifer (1998). This is a convenience \
+        wrapper for `ground_filter.KrausPfeifer1998.normalize`. See that documentation for more information.
 
         :param cell_size: The cell_size at which to rasterize the point cloud into bins, in the same units as the \
         input point cloud.
-        :param num_windows: The number of windows to consider.
-        :param dh_max: The maximum height threshold.
-        :param dh_0: The null height threshold.
-        :param interp_method: The interpolation method used to fill in missing values after the ground filtering \
-        takes place. One of any: "nearest", "linear", or "cubic".
+        :param kwargs: Keyword arguments to `ground_filter.KrausPfeifer1998`
         """
-        grid = self.grid(cell_size)
-        dem_grid = grid.normalize(num_windows, dh_max, dh_0, b, interp_method)
-
-        self.data.points['z'] = dem_grid.data['z']
-        self.data.min = [np.min(dem_grid.data.x), np.min(dem_grid.data.y), np.min(dem_grid.data.z)]
-        self.data.max = [np.max(dem_grid.data.x), np.max(dem_grid.data.y), np.max(dem_grid.data.z)]
-        self.normalized = True
+        from pyfor.ground_filter import KrausPfeifer1998
+        filter = KrausPfeifer1998(self, cell_size, **kwargs)
+        filter.normalize(cell_size)
 
     def clip(self, poly):
         """

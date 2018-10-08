@@ -24,7 +24,8 @@
 
   
 
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -89,6 +90,8 @@
 <li class="toctree-l1"><a class="reference internal" href="pyfor.detection.html">pyfor.detection module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.filter.html">pyfor.filter module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.gisexport.html">pyfor.gisexport module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.ground_filter.html">pyfor.ground_filter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.parser.html">pyfor.parser module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.plot.html">pyfor.plot module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.rasterizer.html">pyfor.rasterizer module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.voxelizer.html">pyfor.voxelizer module</a></li>
@@ -160,7 +163,7 @@
 <span id="pyfor-clip-funcs-module"></span><h1>pyfor.clip_funcs module<a class="headerlink" href="#module-pyfor.clip_funcs" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyfor.clip_funcs.poly_clip">
-<code class="descclassname">pyfor.clip_funcs.</code><code class="descname">poly_clip</code><span class="sig-paren">(</span><em>cloud</em>, <em>poly</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip_funcs.poly_clip" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyfor.clip_funcs.</code><code class="descname">poly_clip</code><span class="sig-paren">(</span><em>points</em>, <em>poly</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip_funcs.poly_clip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the indices within a given polygon.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -203,7 +206,7 @@
 
 <dl class="function">
 <dt id="pyfor.clip_funcs.square_clip">
-<code class="descclassname">pyfor.clip_funcs.</code><code class="descname">square_clip</code><span class="sig-paren">(</span><em>cloud</em>, <em>bounds</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip_funcs.square_clip" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyfor.clip_funcs.</code><code class="descname">square_clip</code><span class="sig-paren">(</span><em>points</em>, <em>bounds</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip_funcs.square_clip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clips a square from a tuple describing the position of the square.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -276,7 +279,10 @@
 
   
 
-  <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
 
   <script type="text/javascript">
       jQuery(function () {

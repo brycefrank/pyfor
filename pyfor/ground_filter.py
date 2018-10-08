@@ -100,10 +100,22 @@ def zhang(array, number_of_windows, dh_max, dh_0, c, grid, b = 2, interp_method 
 
 class KrausPfeifer1998:
     """
-    Holds functions and data for implementing Kraus and Pfeifer (1998) ground filter.
+    Holds functions and data for implementing Kraus and Pfeifer (1998) ground filter. The Kraus and Pfeifer ground filter
+    is a simple filter that uses interpolation of errors and an iteratively constructed surface to filter ground points.
+    This filter is used in FUSION software, and the same default values for the parameters are used in this implementation.
     """
 
     def __init__(self, cloud, cell_size, a=1, b=4, g=-2, w=2.5, iterations=5):
+        """
+        :param cloud: The input `Cloud` object.
+        :param cell_size: The cell size of the intermediate surface used in filtering in the same units as the input
+        cloud. Values from 1 to 6 are used for best performance.
+        :param a: A steepness parameter for the interpolating function.
+        :param b: A steepness parameter for the interpolating function.
+        :param g: The distance from the surface under which all points are given a weight of 1.
+        :param w: The window width from g up considered for weighting.
+        :param iterations: The number of iterations, i.e. the number of surfaces constructed.
+        """
         self.cloud = cloud
         self.cell_size = cell_size
         self.a = a
@@ -113,6 +125,12 @@ class KrausPfeifer1998:
         self.iterations = iterations
 
     def _compute_weights(self, v_i):
+        """
+        Computes the weights (p_i) for the residuals (v_i).
+
+        :param v_i: A vector of residuals.
+        :return: A vector of weights, p_i
+        """
         p_i = np.empty(v_i.shape)
         p_i[v_i <= self.g] = 1
         p_i[np.logical_and(v_i > self.g, v_i <= self.g+self.w)] = 1 / (1 + (self.a * (v_i[np.logical_and(v_i > self.g, v_i <= self.g+self.w)] - self.g)**self.b))
@@ -121,11 +139,11 @@ class KrausPfeifer1998:
 
     def _filter(self):
         """
-        Runs the actual ground filter. Generally used as an internal function that is called by user functions (.bem, .classify, .ground_points)
-        :return:
+        Runs the actual ground filter. Generally used as an internal function that is called by user functions
+        (.bem, .classify, .ground_points).
         """
+
         import pandas as pd
-        from pyfor.cloud import CloudData, Cloud
         import inspect
         grid = self.cloud.grid(self.cell_size)
         surface = grid.raster(np.mean, "z")
@@ -147,41 +165,51 @@ class KrausPfeifer1998:
             array[weighted_cells["bins_y"], weighted_cells["bins_x"]] = weighted_cells[0]
             surface.array = array
 
-        # If _filter was called by bem, return the final surface
-        # TODO This caller stuff is functional but feels awkward. Probably best to break apart this function
-        caller = inspect.stack()[1][3]
-        if caller == 'bem':
-            return surface
-        elif caller == 'classify':
-            self.cloud.data.points[self.cloud.data.points['v_i'] <= self.g+self.w] = 2
-        elif caller == 'ground_points':
-            ground = self.cloud.data.points[self.cloud.data.points['v_i'] <= self.g + self.w]
-            return Cloud(CloudData(ground, self.cloud.data.header))
-        elif caller == 'normalize':
-            # TODO rework cloud.normalize to take a Raster as input and output the normalized cloud?
-            df = pd.DataFrame(surface.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
-            self.cloud.data.points = self.cloud.data.points.reset_index().merge(df, how = "left").set_index('index')
-            self.cloud.data.points['z'] = self.cloud.data.points['z'] - self.cloud.data.points['val']
-            self.cloud.normalized = True
-
-    @property
-    def bem(self):
-        return self._filter()
-
-    def classify(self, ground_int=2):
-        """
-        Sets the classification of the original input cloud points to 'ground'. Not yet implemented.
-        :return:
-        """
-        self._filter()
+        ground = self.cloud.data.points[self.cloud.data.points['v_i'] <= self.g + self.w]
+        return ground
 
     @property
     def ground_points(self):
-        return self._filter()
-
-    def normalize(self):
         """
-        Normalizes the original point cloud in place
+        Returns a new `Cloud` object that only contains the ground points.
         :return:
         """
-        self._filter()
+        from pyfor.cloud import CloudData, Cloud
+        ground = self._filter()
+        return Cloud(CloudData(ground, self.cloud.data.header))
+
+    def bem(self, cell_size):
+        """
+        Retrieve the bare earth model (BEM).
+        :return: A `Raster` object that represents the bare earth model.
+        """
+        ground_cloud = self.ground_points
+        return ground_cloud.grid(cell_size).raster(np.min, "z")
+
+
+    def classify(self, ground_int=2):
+        """
+        Sets the classification of the original input cloud points to ground (default 2 as per las specification). This
+        performs the adjustment of the input `Cloud` object **in place**. Only implemented for `.las` files.
+
+        :param ground_int: The integer to set classified points to, the default is 2 in the las specification for ground
+        points.
+        """
+
+        if self.cloud.extension == '.las':
+            self._filter()
+            self.cloud.data.points["classification"][self.cloud.data.points['v_i'] <= self.g + self.w] = ground_int
+        else:
+            print("This is only implemented for .las files.")
+
+    def normalize(self, cell_size):
+        """
+        Normalizes the original point cloud **in place**. This creates a BEM as an intermediate product, please see
+        `.bem()` to return this directly.
+
+        :param cell_size: The cell_size for the intermediate BEM. Values from 1 to 6 are common.
+        """
+        bem = self.bem(cell_size)
+        df = pd.DataFrame(bem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
+        df = self.cloud.data.points.reset_index().merge(df, how = "left").set_index('index')
+        self.cloud.data.points['z'] = df['z'] - df['val']

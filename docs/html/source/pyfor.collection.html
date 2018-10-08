@@ -24,7 +24,8 @@
 
   
 
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -89,6 +90,8 @@
 <li class="toctree-l1"><a class="reference internal" href="pyfor.detection.html">pyfor.detection module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.filter.html">pyfor.filter module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.gisexport.html">pyfor.gisexport module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.ground_filter.html">pyfor.ground_filter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.parser.html">pyfor.parser module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.plot.html">pyfor.plot module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.rasterizer.html">pyfor.rasterizer module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.voxelizer.html">pyfor.voxelizer module</a></li>
@@ -159,31 +162,153 @@
   <div class="section" id="module-pyfor.collection">
 <span id="pyfor-collection-module"></span><h1>pyfor.collection module<a class="headerlink" href="#module-pyfor.collection" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="pyfor.collection.Collection">
-<em class="property">class </em><code class="descclassname">pyfor.collection.</code><code class="descname">Collection</code><span class="sig-paren">(</span><em>las_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.Collection" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Holds a collection of cloud objects for batch processing. This is preferred if you are trying to process many     point clouds. For example it differs from using Cloud objects in a for loop because it delays loading clouds into
-memory until necessary.</p>
+<dt id="pyfor.collection.CloudDataFrame">
+<em class="property">class </em><code class="descclassname">pyfor.collection.</code><code class="descname">CloudDataFrame</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">geopandas.geodataframe.GeoDataFrame</span></code></p>
+<p>Implements a data frame structure for processing and managing multiple cloud objects.</p>
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.clip">
+<code class="descname">clip</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.clip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clips the CloudDataFrame with the supplied geometries.
+:return:</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="pyfor.collection.CloudDataFrame.from_dir">
+<em class="property">classmethod </em><code class="descname">from_dir</code><span class="sig-paren">(</span><em>las_dir</em>, <em>n_jobs=1</em>, <em>get_bounding_boxes=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.from_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapped function for producing a CloudDataFrame from a directory of las files.
+:param las_dir:
+:param n_jobs: The number of threads used to construct information about the CloudDataFrame.
+:param get_bounding_boxes: If True, builds the bounding boxes for each las tile by manually reading in
+the file and computing the bounding box. For very large collections this may be computationally costly, and
+can be set to False.
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.par_apply">
+<code class="descname">par_apply</code><span class="sig-paren">(</span><em>func</em>, <em>column='las_path'</em>, <em>buffer_distance=0</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.par_apply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply a function to each las path. Allows for parallelization using the n_jobs argument. This is achieved         via joblib Parallel and delayed.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>las_dir</strong> – The directory of las files to reference.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>func</strong> – The user defined function, must accept a single argument, the path of the las file.</li>
+<li><strong>n_jobs</strong> – The nlumber of threads to spawn, default of 1.</li>
+<li><strong>column</strong> – The column to apply on, will be the first argument to func</li>
+<li><strong>buffer_distance</strong> – The distance to buffer and aggregate each tile.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
 <dl class="method">
-<dt id="pyfor.collection.Collection.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>las_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.Collection.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+<dt id="pyfor.collection.CloudDataFrame.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the bounding boxes of the Cloud objects</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="pyfor.collection.Collection.las_headers">
-<code class="descname">las_headers</code><a class="headerlink" href="#pyfor.collection.Collection.las_headers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a list of las headers.</p>
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.set_index">
+<code class="descname">set_index</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.set_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the DataFrame index (row labels) using one or more existing
+columns. By default yields a new object.</p>
+<p>keys : column label or list of column labels / arrays
+drop : boolean, default True</p>
+<blockquote>
+<div>Delete columns to be used as the new index</div></blockquote>
+<dl class="docutils">
+<dt>append <span class="classifier-delimiter">:</span> <span class="classifier">boolean, default False</span></dt>
+<dd>Whether to append columns to existing index</dd>
+<dt>inplace <span class="classifier-delimiter">:</span> <span class="classifier">boolean, default False</span></dt>
+<dd>Modify the DataFrame in place (do not create a new object)</dd>
+<dt>verify_integrity <span class="classifier-delimiter">:</span> <span class="classifier">boolean, default False</span></dt>
+<dd>Check the new index for duplicates. Otherwise defer the check until
+necessary. Setting to False will improve the performance of this
+method</dd>
+</dl>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;month&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+<span class="gp">... </span>                   <span class="s1">&#39;year&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">2012</span><span class="p">,</span> <span class="mi">2014</span><span class="p">,</span> <span class="mi">2013</span><span class="p">,</span> <span class="mi">2014</span><span class="p">],</span>
+<span class="gp">... </span>                   <span class="s1">&#39;sale&#39;</span><span class="p">:[</span><span class="mi">55</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">84</span><span class="p">,</span> <span class="mi">31</span><span class="p">]})</span>
+<span class="go">   month  sale  year</span>
+<span class="go">0  1      55    2012</span>
+<span class="go">1  4      40    2014</span>
+<span class="go">2  7      84    2013</span>
+<span class="go">3  10     31    2014</span>
+</pre></div>
+</div>
+<p>Set the index to become the ‘month’ column:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;month&#39;</span><span class="p">)</span>
+<span class="go">       sale  year</span>
+<span class="go">month</span>
+<span class="go">1      55    2012</span>
+<span class="go">4      40    2014</span>
+<span class="go">7      84    2013</span>
+<span class="go">10     31    2014</span>
+</pre></div>
+</div>
+<p>Create a multi-index using columns ‘year’ and ‘month’:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;year&#39;</span><span class="p">,</span> <span class="s1">&#39;month&#39;</span><span class="p">])</span>
+<span class="go">            sale</span>
+<span class="go">year  month</span>
+<span class="go">2012  1     55</span>
+<span class="go">2014  4     40</span>
+<span class="go">2013  7     84</span>
+<span class="go">2014  10    31</span>
+</pre></div>
+</div>
+<p>Create a multi-index using a set of values and a column:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="s1">&#39;year&#39;</span><span class="p">])</span>
+<span class="go">         month  sale</span>
+<span class="go">   year</span>
+<span class="go">1  2012  1      55</span>
+<span class="go">2  2014  4      40</span>
+<span class="go">3  2013  7      84</span>
+<span class="go">4  2014  10     31</span>
+</pre></div>
+</div>
+<p>dataframe : DataFrame</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="class">
+<dt id="pyfor.collection.Indexer">
+<em class="property">class </em><code class="descclassname">pyfor.collection.</code><code class="descname">Indexer</code><a class="headerlink" href="#pyfor.collection.Indexer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Internal class used to index a directory of las files.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfor.collection.from_dir">
+<code class="descclassname">pyfor.collection.</code><code class="descname">from_dir</code><span class="sig-paren">(</span><em>las_dir</em>, <em>n_jobs=1</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.from_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a CloudDataFrame from a directory of las files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>las_dir</strong> – The directory of las files.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A CloudDataFrame constructed from the directory of las files.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfor.collection.stitch_clouds">
+<code class="descclassname">pyfor.collection.</code><code class="descname">stitch_clouds</code><span class="sig-paren">(</span><em>collection</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.stitch_clouds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Holder function for some ideas.
+:return:</p>
 </dd></dl>
 
 </div>
@@ -244,7 +369,10 @@ memory until necessary.</p>
 
   
 
-  <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
 
   <script type="text/javascript">
       jQuery(function () {

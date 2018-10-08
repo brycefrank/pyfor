@@ -153,6 +153,8 @@ class Grid:
         Returns a new, normalized Grid object.
         :return:
         """
+        import warnings
+        warnings.warn("Raster.normalize will be removed in 3.1 in favor of standalone filters.", category=DeprecationWarning)
 
         if self.cloud.normalized == True:
             print("It appears this has already been normalized once. Proceeding with normalization but expect \

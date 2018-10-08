@@ -106,7 +106,7 @@ class CloudTestCase(unittest.TestCase):
 
     def test_normalize(self):
         test_cloud = cloud.Cloud(test_las)
-        test_cloud.normalize(0.5)
+        test_cloud.normalize(6)
         self.assertLess(test_cloud.data.max[2], 65)
 
     def test_chm(self):
