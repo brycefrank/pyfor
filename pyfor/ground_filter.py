@@ -1,102 +1,121 @@
 import numpy as np
 import pandas as pd
-from scipy.ndimage.morphology import grey_opening
-from scipy.interpolate import griddata
-
-def window_size(k, b):
-    return(2 * k * b + 1)
-
-def dhmax(elev_array):
-    """
-    Calculates the maximum height difference for an elevation array.
-
-    :param elev_array:
-    :return:
-    """
-    return(np.max(elev_array) - np.min(elev_array))
 
 
-def slope(elev_array, w_k, w_k_1):
-    """
-    Calculates the slope coefficient.
 
-    Returns the slope coefficient s for a given elev_aray and w_k
-    """
-    return(dhmax(elev_array) / ((w_k - w_k_1) / 2))
+class GroundFilter:
+    pass
 
 
-def dht(elev_array, w_k, w_k_1, dh_0, dh_max, c):
-    """"
-    Calculates dh_t.
+class Zhang2003:
+    # TODO arguments to init are messy
+    def __init__(self, array, grid, cell_size, n_windows=5, dh_max=2, dh_0=1, b = 2, interp_method = "nearest"):
+        """
+        Implements Zhang et. al (2003), a progressive morphological ground filter. This returns a matrix of Z values for
+        each grid cell that have been determined to be actual ground cells.
 
-    :param elev_array: A 1D array of elevation values
-    :param w_k: An integer representing the window size
-    :param w_k_1: An integer representing the previous window size
-    """
-    s = slope(elev_array, w_k, w_k_1)
-    s = 1
+        :param array: The array to interpolate on, usually an aggregate of the minimum Z value
+        #TODO fix this to be max window size
+        :param number_of_windows:
+        :param dh_max: The maximum height threshold
+        :param dh_0: The starting null height threshold
+        :param c: The cell size used to construct the array
+        :param grid: The grid object used to construct the array
+        :return: An array corresponding to the filtered points, can be used to construct a DEM via the Raster class
+        """
+        self.array = array
+        self.n_windows = n_windows
+        self.dh_max = dh_max
+        self.dh_0 = dh_0
+        self.b = b
+        self.cell_size = cell_size
+        self.grid = grid
+        self.interp_method = interp_method
 
-    if w_k <= 3:
-        return(dh_0)
-    elif w_k > 3:
-        return(s * (w_k - w_k_1) * c + dh_0)
-    else:
-        return(dh_max)
+    def _window_size(self, k, b):
+        return(2 * k * b + 1)
 
-def zhang(array, number_of_windows, dh_max, dh_0, c, grid, b = 2, interp_method = "nearest"):
-    """
-    Implements Zhang et. al (2003), a progressive morphological ground filter. This returns a matrix of Z values for
-    each grid cell that have been determined to be actual ground cells.
+    def _dhmax(self, elev_array):
+        """
+        Calculates the maximum height difference for an elevation array.
 
-    :param array: The array to interpolate on, usually an aggregate of the minimum Z value
-    #TODO fix this to be max window size
-    :param number_of_windows:
-    :param dh_max: The maximum height threshold
-    :param dh_0: The starting null height threshold
-    :param c: The cell size used to construct the array
-    :param grid: The grid object used to construct the array
-    :return: An array corresponding to the filtered points, can be used to construct a DEM via the Raster class
-    """
+        :param elev_array:
+        :return:
+        """
+        return(np.max(elev_array) - np.min(elev_array))
 
-    w_k_list = [window_size(i, b) for i in range(number_of_windows)]
-    w_k_min = w_k_list[0]
-    A = array
-    m = A.shape[0]
-    n = A.shape[1]
-    flag = np.zeros((m, n))
-    for k, w_k in enumerate(w_k_list):
-        opened = grey_opening(array, (w_k, w_k))
-        if w_k == w_k_min:
-            w_k_1 = 0
+
+    def _slope(self, elev_array, w_k, w_k_1):
+        """
+        Calculates the slope coefficient.
+
+        Returns the slope coefficient s for a given elev_aray and w_k
+        """
+
+        return(self._dhmax(elev_array) / ((w_k - w_k_1) / 2))
+
+
+    def _dht(self, elev_array, w_k, w_k_1, dh_0, dh_max, c):
+        """"
+        Calculates dh_t.
+
+        :param elev_array: A 1D array of elevation values
+        :param w_k: An integer representing the window size
+        :param w_k_1: An integer representing the previous window size
+        """
+        #s = self._slope(elev_array, w_k, w_k_1)
+        s = 1
+
+        if w_k <= 3:
+            return(dh_0)
+        elif w_k > 3:
+            return(s * (w_k - w_k_1) * c + dh_0)
         else:
-            w_k_1 = w_k_list[k - 1]
-        for i in range(0, m):
-            P_i = A[i,:]
-            Z = P_i
-            Z_f = opened[i,:]
-            dh_t = dht(Z, w_k, w_k_1, dh_0, dh_max, c)
-            for j in range(0, n):
-                if Z[j] - Z_f[j] > dh_t:
-                    flag[i, j] = w_k
-            P_i = Z_f
-            A[i,:] = P_i
+            return(dh_max)
 
-    if np.sum(flag) == 0:
-        return(None)
+    def _filter(self):
+        from scipy.ndimage.morphology import grey_opening
+        from scipy.interpolate import griddata
 
-    # Remove interpolated cells
-    empty = grid.empty_cells
-    empty_y, empty_x = empty[:,0], empty[:,1]
-    A[empty_y, empty_x] = np.nan
-    B = np.where(flag != 0, A, np.nan)
+        w_k_list = [self._window_size(i, self.b) for i in range(self.n_windows)]
+        w_k_min = w_k_list[0]
+        A = self.array
+        m = A.shape[0]
+        n = A.shape[1]
+        flag = np.zeros((m, n))
+        for k, w_k in enumerate(w_k_list):
+            opened = grey_opening(self.array, (w_k, w_k))
+            if w_k == w_k_min:
+                w_k_1 = 0
+            else:
+                w_k_1 = w_k_list[k - 1]
+            for i in range(0, m):
+                P_i = A[i,:]
+                Z = P_i
+                Z_f = opened[i,:]
+                dh_t = self._dht(Z, w_k, w_k_1, self.dh_0, self.dh_max, self.cell_size)
+                for j in range(0, n):
+                    if Z[j] - Z_f[j] > dh_t:
+                        flag[i, j] = w_k
+                P_i = Z_f
+                A[i,:] = P_i
 
-    # Interpolate on our newly found ground cells
-    X, Y = np.mgrid[0:grid.m, 0:grid.n]
-    C = np.where(np.isfinite(B) == True)
-    vals = B[C[0], C[1]]
-    dem_array = griddata(np.stack((C[0], C[1]), axis = 1), vals, (X, Y), method=interp_method)
+        if np.sum(flag) == 0:
+            return(None)
 
-    return(dem_array)
+        # Remove interpolated cells
+        empty = self.grid.empty_cells
+        empty_y, empty_x = empty[:,0], empty[:,1]
+        A[empty_y, empty_x] = np.nan
+        B = np.where(flag != 0, A, np.nan)
+
+        # Interpolate on our newly found ground cells
+        X, Y = np.mgrid[0:self.grid.m, 0:self.grid.n]
+        C = np.where(np.isfinite(B) == True)
+        vals = B[C[0], C[1]]
+        dem_array = griddata(np.stack((C[0], C[1]), axis = 1), vals, (X, Y), method=self.interp_method)
+
+        return(dem_array)
 
 class KrausPfeifer1998:
     """
@@ -105,7 +124,7 @@ class KrausPfeifer1998:
     This filter is used in FUSION software, and the same default values for the parameters are used in this implementation.
     """
 
-    def __init__(self, cloud, cell_size, a=1, b=4, g=-2, w=2.5, iterations=5, cpu_optimize=False):
+    def __init__(self, cloud, cell_size, a=1, b=4, g=-2, w=2.5, iterations=5, tolerance = 0, cpu_optimize=False):
         """
         :param cloud: The input `Cloud` object.
         :param cell_size: The cell size of the intermediate surface used in filtering in the same units as the input
@@ -126,6 +145,9 @@ class KrausPfeifer1998:
         self.iterations = iterations
         self.cpu_optimize = cpu_optimize
 
+        if tolerance == 0:
+            self.tolerance = self.g + self.w
+
     def _compute_weights(self, v_i):
         """
         Computes the weights (p_i) for the residuals (v_i).
@@ -135,7 +157,8 @@ class KrausPfeifer1998:
         """
         p_i = np.empty(v_i.shape)
         p_i[v_i <= self.g] = 1
-        p_i[np.logical_and(v_i > self.g, v_i <= self.g+self.w)] = 1 / (1 + (self.a * (v_i[np.logical_and(v_i > self.g, v_i <= self.g+self.w)] - self.g)**self.b))
+        middle = np.logical_and(v_i > self.g, v_i <= self.g+self.w)
+        p_i[middle] = 1 / (1 + (self.a * (v_i[middle] - self.g)**self.b))
         p_i[v_i > self.g+self.w] = 0
         return p_i
 
