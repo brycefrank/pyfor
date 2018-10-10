@@ -244,7 +244,7 @@ class Raster:
         """
         plot.iplot3d_surface(self.array, colorscale)
 
-    def local_maxima(self, min_distance=2, threshold_abs=2, multi_top=False, as_coordinates=False):
+    def local_maxima(self, min_distance=2, threshold_abs=2, as_coordinates=False):
         """
         Returns a new Raster object with tops detected using a local maxima filtering method. See
         skimage.feature.peak_local_maxima for more information on the filter.
@@ -260,13 +260,9 @@ class Raster:
         tops = peak_local_max(np.flipud(self.array), indices=False, min_distance=min_distance, threshold_abs=threshold_abs)
         tops = label(tops)[0]
 
-        if multi_top == False:
-            top_binary = np.flipud(corner_peaks(tops, indices=False).astype(np.float64))
-            tops_raster = Raster(top_binary, self.grid)
-            return(tops_raster)
-        else:
-            tops_raster = Raster(np.flipud(tops), self.grid)
-            return(tops_raster)
+        # TODO Had to take out corner filter to remove duplicate tops.
+        tops_raster = DetectedTops(tops, self.grid, self)
+        return(tops_raster)
 
 
     def watershed_seg(self, min_distance=2, threshold_abs=2, classify=False, plot = False):
@@ -338,12 +334,52 @@ class Raster:
 
 class DetectedTops(Raster):
     """
-    This class is for visualization of detected tops with a raster object.
+    This class is for visualization of detected tops with a raster object. Generally created internally via
+    Raster.local_maxima
     """
-    pass
+
+    def __init__(self, array, grid, chm):
+        super().__init__(array, grid)
+        self.chm = chm
+
+    def plot(self):
+        """
+        Plots the detected tops against the original input raster.
+        # https://matplotlib.org/gallery/images_contours_and_fields/image_transparency_blend.html
+        """
+
+        fig, ax = plt.subplots()
+        caz = ax.matshow(np.flipud(self.chm.array))
+        fig.colorbar(caz)
+
+
+        # TODO I might not need to repeat this code from raster
+        fig.gca().invert_yaxis()
+        ax.xaxis.tick_bottom()
+        ax.set_xticks(np.linspace(0, self.grid.n, 3))
+        ax.set_yticks(np.linspace(0, self.grid.m, 3))
+
+        x_ticks, y_ticks = np.rint(np.linspace(self.grid.cloud.data.min[0], self.grid.cloud.data.max[0], 3)), \
+                           np.rint(np.linspace(self.grid.cloud.data.min[1], self.grid.cloud.data.max[1], 3))
+
+        ax.set_xticklabels(x_ticks)
+        ax.set_yticklabels(y_ticks)
+
+        container = np.zeros((self.grid.m, self.grid.n, 4))
+        tops_binary = (self.array > 0).astype(np.int)
+        container[:, :, 0][tops_binary >0] = 1
+        container[:, :, 3][tops_binary >0] = 1
+        ax.imshow(container)
+
 
 class CrownSegments(Raster):
     """
     This class is for visualization of detected crown segments with a raster object.
     """
-    pass
+
+    def __init__(self, array, grid, chm):
+        super().__init__(array, grid)
+        self.chm = chm
+
+    def plot(self):
+        pass

@@ -65,9 +65,8 @@ If you see no errors, you are ready to process!
 Below is a list of features, complete and otherwise.
 
 - [X] Ground filter
-- [X] Normalization
-- [X] Rasterization
-	- [X] Raster input and output
+    - [X] Kraus and Pfeifer (1998)
+    - [X] Zhang et al. (2003)
 - [X] Interactive 2d & 3d plotting via Jupyter
 	- [X] Point cloud plotting
 	- [X] Raster plotting
@@ -80,8 +79,8 @@ Below is a list of features, complete and otherwise.
 	- [ ] Pit free algorithm (Chen et al. 2017)
 - [X] Clipping point clouds
 - [X] Batch processing
-	- [ ] Multiprocessor support
-	- [ ] Cluster support
+	- [X] Multiprocessor support
+	- [X] Cluster support
 - [X] Voxelization methods
 
 ## Collaboration & Requests

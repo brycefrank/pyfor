@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -163,16 +162,50 @@
 <span id="pyfor-rasterizer-module"></span><h1>pyfor.rasterizer module<a class="headerlink" href="#module-pyfor.rasterizer" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="pyfor.rasterizer.CrownSegments">
-<em class="property">class </em><code class="descclassname">pyfor.rasterizer.</code><code class="descname">CrownSegments</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.CrownSegments" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pyfor.rasterizer.</code><code class="descname">CrownSegments</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em>, <em>chm</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.CrownSegments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyfor.rasterizer.Raster" title="pyfor.rasterizer.Raster"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyfor.rasterizer.Raster</span></code></a></p>
 <p>This class is for visualization of detected crown segments with a raster object.</p>
+<dl class="method">
+<dt id="pyfor.rasterizer.CrownSegments.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em>, <em>chm</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.CrownSegments.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.CrownSegments.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.CrownSegments.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default plotting method for the Raster object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>block</strong> – An optional parameter, mostly for debugging purposes.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
 <dt id="pyfor.rasterizer.DetectedTops">
-<em class="property">class </em><code class="descclassname">pyfor.rasterizer.</code><code class="descname">DetectedTops</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.DetectedTops" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pyfor.rasterizer.</code><code class="descname">DetectedTops</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em>, <em>chm</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.DetectedTops" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyfor.rasterizer.Raster" title="pyfor.rasterizer.Raster"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyfor.rasterizer.Raster</span></code></a></p>
-<p>This class is for visualization of detected tops with a raster object.</p>
+<p>This class is for visualization of detected tops with a raster object. Generally created internally via
+Raster.local_maxima</p>
+<dl class="method">
+<dt id="pyfor.rasterizer.DetectedTops.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em>, <em>chm</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.DetectedTops.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.DetectedTops.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.DetectedTops.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the detected tops against the original input raster.
+# <a class="reference external" href="https://matplotlib.org/gallery/images_contours_and_fields/image_transparency_blend.html">https://matplotlib.org/gallery/images_contours_and_fields/image_transparency_blend.html</a></p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -321,7 +354,7 @@
 
 <dl class="method">
 <dt id="pyfor.rasterizer.Raster.local_maxima">
-<code class="descname">local_maxima</code><span class="sig-paren">(</span><em>min_distance=2</em>, <em>threshold_abs=2</em>, <em>multi_top=False</em>, <em>as_coordinates=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.local_maxima" title="Permalink to this definition">¶</a></dt>
+<code class="descname">local_maxima</code><span class="sig-paren">(</span><em>min_distance=2</em>, <em>threshold_abs=2</em>, <em>as_coordinates=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.local_maxima" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a new Raster object with tops detected using a local maxima filtering method. See
 skimage.feature.peak_local_maxima for more information on the filter.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -466,13 +499,11 @@ This function modifies the raster array <strong>in place</strong>.</p>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {

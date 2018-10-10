@@ -9,7 +9,7 @@ class GroundFilter:
 
 class Zhang2003:
     # TODO arguments to init are messy
-    def __init__(self, array, grid, cell_size, n_windows=5, dh_max=2, dh_0=1, b = 2, interp_method = "nearest"):
+    def __init__(self, cloud, cell_size, n_windows=5, dh_max=2, dh_0=1, b = 2, interp_method = "nearest"):
         """
         Implements Zhang et. al (2003), a progressive morphological ground filter. This returns a matrix of Z values for
         each grid cell that have been determined to be actual ground cells.
@@ -23,14 +23,16 @@ class Zhang2003:
         :param grid: The grid object used to construct the array
         :return: An array corresponding to the filtered points, can be used to construct a DEM via the Raster class
         """
-        self.array = array
+        self.cloud = cloud
         self.n_windows = n_windows
         self.dh_max = dh_max
         self.dh_0 = dh_0
         self.b = b
         self.cell_size = cell_size
-        self.grid = grid
         self.interp_method = interp_method
+
+        self.grid = self.cloud.grid(self.cell_size)
+        self.array = self.grid.raster(np.min, "z").array
 
     def _window_size(self, k, b):
         return(2 * k * b + 1)
@@ -74,8 +76,8 @@ class Zhang2003:
             return(dh_max)
 
     def _filter(self):
+        # TODO add option for intermediate surface filtering and return intermediate surfaces
         from scipy.ndimage.morphology import grey_opening
-        from scipy.interpolate import griddata
 
         w_k_list = [self._window_size(i, self.b) for i in range(self.n_windows)]
         w_k_min = w_k_list[0]
@@ -108,6 +110,12 @@ class Zhang2003:
         empty_y, empty_x = empty[:,0], empty[:,1]
         A[empty_y, empty_x] = np.nan
         B = np.where(flag != 0, A, np.nan)
+        return B
+
+    def bem(self):
+        from scipy.interpolate import griddata
+        from pyfor.rasterizer import Raster
+        B = self._filter()
 
         # Interpolate on our newly found ground cells
         X, Y = np.mgrid[0:self.grid.m, 0:self.grid.n]
@@ -115,7 +123,7 @@ class Zhang2003:
         vals = B[C[0], C[1]]
         dem_array = griddata(np.stack((C[0], C[1]), axis = 1), vals, (X, Y), method=self.interp_method)
 
-        return(dem_array)
+        return(Raster(dem_array, self.grid))
 
 class KrausPfeifer1998:
     """
@@ -124,11 +132,11 @@ class KrausPfeifer1998:
     This filter is used in FUSION software, and the same default values for the parameters are used in this implementation.
     """
 
-    def __init__(self, cloud, cell_size, a=1, b=4, g=-2, w=2.5, iterations=5, tolerance = 0, cpu_optimize=False):
+    def __init__(self, cloud, cell_size, a=1, b=4, g=-2, w=2.5, iterations=5, tolerance=0, cpu_optimize=True):
         """
         :param cloud: The input `Cloud` object.
         :param cell_size: The cell size of the intermediate surface used in filtering in the same units as the input
-        cloud. Values from 1 to 6 are used for best performance.
+        cloud. Values from 1 to 40 are common, depending on the units in which the original point cloud is projected.
         :param a: A steepness parameter for the interpolating function.
         :param b: A steepness parameter for the interpolating function.
         :param g: The distance from the surface under which all points are given a weight of 1.
@@ -167,7 +175,8 @@ class KrausPfeifer1998:
         Runs the actual ground filter. Generally used as an internal function that is called by user functions
         (.bem, .classify, .ground_points).
         """
-        # TODO a bit memory intensive, the slowest part is finding the points in the original DF that are ground
+        np.seterr(divide='ignore', invalid='ignore')
+
         # TODO probably some opportunity for numba optimization, but working well enough for now
         grid = self.cloud.grid(self.cell_size)
         self.cloud.data.points['bins_z'] = self.cloud.data.points.groupby(['bins_x', 'bins_y']).cumcount()
@@ -178,10 +187,6 @@ class KrausPfeifer1998:
         p_i = np.zeros((grid.m, grid.n, depth+1))
         p_i[~np.isnan(z)] = 1
 
-        if self.cpu_optimize == True:
-            ix = np.zeros((grid.m, grid.n, depth + 1))
-            ix[self.cloud.data.points['bins_y'], self.cloud.data.points['bins_x'], self.cloud.data.points['bins_z']] = self.cloud.data.points.index.values
-
         for i in range(self.iterations):
             surface = np.nansum(z * p_i, axis=2) / np.sum(p_i, axis = 2)
             surface = surface.reshape(grid.m,grid.n,1)
@@ -191,14 +196,20 @@ class KrausPfeifer1998:
         del p_i
         del surface
 
-        if self.cpu_optimize == True:
+        if self.cpu_optimize:
+            ix = np.zeros((grid.m, grid.n, depth + 1))
+            ix[self.cloud.data.points['bins_y'], self.cloud.data.points['bins_x'],
+               self.cloud.data.points['bins_z']] = self.cloud.data.points.index.values
             ground_bins = (final_resid <= self.g + self.w).nonzero()
-            return(self.cloud.data.points.iloc[ix[ground_bins]])
+            self.cloud.data.points = self.cloud.data.points.reset_index()
+            return self.cloud.data.points.loc[ix[ground_bins]]
         else:
             ground_bins = (final_resid <= self.g+self.w).nonzero()
             bin_indexer = list(zip(ground_bins[0], ground_bins[1], ground_bins[2]))
             self.cloud.data.points = self.cloud.data.points.set_index(['bins_y', 'bins_x', 'bins_z'])
+            self.cloud.data.points = self.cloud.data.points.reset_index()
             return self.cloud.data.points.loc[bin_indexer].reset_index()
+
 
     @property
     def ground_points(self):
