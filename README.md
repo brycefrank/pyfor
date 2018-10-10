@@ -23,6 +23,7 @@ Release Status: 0.3.0 is an adolescent LiDAR data processing package adequate fo
 
 - [Introduction](https://github.com/brycefrank/pyfor/blob/master/samples/Introduction.ipynb)
 - [File Input and Plotting](https://github.com/brycefrank/pyfor/blob/master/samples/ImportsExports.ipynb)
+- [Normalization](https://github.com/brycefrank/pyfor/blob/master/samples/Normalization.ipynb)
 - [Ground Filters, Bare Earth Models and Normalization](https://github.com/brycefrank/pyfor/blob/master/samples/Ground Filters%2C Bare Earth Models%2C and Normalization.ipynb)
 - [Canopy Height Models](https://github.com/brycefrank/pyfor/blob/master/samples/CanopyHeightModel.ipynb)
 - [Clipping](https://github.com/brycefrank/pyfor/blob/master/samples/Clipping.ipynb)
