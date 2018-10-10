@@ -15,7 +15,7 @@ pyfor is supported in part by the [AWS Cloud Credits for Research program](https
 
 Current Release: 0.3.0
 
-Release Date: []
+Release Date: October 10, 2018
 
 Release Status: 0.3.0 is an adolescent LiDAR data processing package adequate for single tile processing and large acqusitions. Routine processing functions are available, and many features are being added.
 
@@ -23,7 +23,7 @@ Release Status: 0.3.0 is an adolescent LiDAR data processing package adequate fo
 
 - [Introduction](https://github.com/brycefrank/pyfor/blob/master/samples/Introduction.ipynb)
 - [File Input and Plotting](https://github.com/brycefrank/pyfor/blob/master/samples/ImportsExports.ipynb)
-- [Normalization](https://github.com/brycefrank/pyfor/blob/master/samples/Normalization.ipynb)
+- [Ground Filters, Bare Earth Models and Normalization](https://github.com/brycefrank/pyfor/blob/master/samples/Ground Filters%2C Bare Earth Models%2C and Normalization.ipynb)
 - [Canopy Height Models](https://github.com/brycefrank/pyfor/blob/master/samples/CanopyHeightModel.ipynb)
 - [Clipping](https://github.com/brycefrank/pyfor/blob/master/samples/Clipping.ipynb)
 - [Watershed Segmentation](https://github.com/brycefrank/pyfor/blob/master/samples/WatershedSegmentation.ipynb)
