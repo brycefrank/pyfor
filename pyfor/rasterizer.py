@@ -4,7 +4,7 @@ import pandas as pd
 from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
 from pyfor import gisexport
-from pyfor import filter
+from pyfor import ground_filter
 from pyfor import plot
 
 class Grid:
@@ -16,29 +16,29 @@ class Grid:
     :param cell_size: The size of the cell for sorting in the units of the input cloud object.
     :return: Returns a dataframe with sorted x and y with associated bins in a new columns
     """
-    def __init__(self, cloud, cell_size, voxelize = "False"):
+    def __init__(self, cloud, cell_size):
         self.cloud = cloud
-        # TODO deprecate self.las, inconsistent with hierarchy
-        self.las = self.cloud.las
         self.cell_size = cell_size
 
-        min_x, max_x = self.las.min[0], self.las.max[0]
-        min_y, max_y = self.las.min[1], self.las.max[1]
+        min_x, max_x = self.cloud.data.min[0], self.cloud.data.max[0]
+        min_y, max_y = self.cloud.data.min[1], self.cloud.data.max[1]
 
         self.m = int(np.floor((max_y - min_y) / cell_size))
         self.n = int(np.floor((max_x - min_x) / cell_size))
 
         # Create bins
-        bins_x = np.searchsorted(np.linspace(min_x, max_x, self.n), self.las.points["x"])
-        bins_y = np.searchsorted(np.linspace(min_y, max_y, self.m), self.las.points["y"])
+        bins_x = np.searchsorted(np.linspace(min_x, max_x, self.n), self.cloud.data.points["x"])
+        bins_y = np.searchsorted(np.linspace(min_y, max_y, self.m), self.cloud.data.points["y"])
 
-        self.data = self.las.points
-        self.data["bins_x"] = bins_x
-        self.data["bins_y"] = bins_y
+        self.cloud.data.points["bins_x"] = bins_x
+        self.cloud.data.points["bins_y"] = bins_y
 
-        self.cells = self.data.groupby(['bins_x', 'bins_y'])
+        self.cells = self.cloud.data.points.groupby(['bins_x', 'bins_y'])
 
-    def raster(self, func, dim):
+    def _update(self):
+        self.__init__(self.cloud, self.cell_size)
+
+    def raster(self, func, dim, **kwargs):
         """
         Generates an m x n matrix with values as calculated for each cell in func. This is a raw array without \
         missing cells interpolated. See self.interpolate for interpolation methods.
@@ -51,8 +51,9 @@ class Grid:
         :return: A 2D numpy array where the value of each cell is the result of the passed function.
         """
 
-        array = self.cells.agg({dim: func}).reset_index().pivot('bins_y', 'bins_x', dim)
-        array = np.asarray(array)
+        bin_summary = self.cells.agg({dim: func}, **kwargs).reset_index()
+        array = np.full((self.m, self.n), np.nan)
+        array[bin_summary["bins_y"], bin_summary["bins_x"]] = bin_summary[dim]
         return Raster(array, self)
 
     def boolean_summary(self, func, dim):
@@ -66,7 +67,7 @@ class Grid:
         :param dim: The dimension of the point cloud as a string (x, y or z)
         """
 
-        mask = self.data.groupby(['bins_x', 'bins_y'])[dim].transform(func) == self.data[dim]
+        mask = self.cloud.data.groupby(['bins_x', 'bins_y'])[dim].transform(func) == self.cloud.data[dim]
         return mask
 
     @property
@@ -131,7 +132,7 @@ class Grid:
             metrics = [tup[1] for tup in list(aggregate)]
             return pd.DataFrame({'dim': dims, 'metric': metrics, 'raster': rasters}).set_index(['dim', 'metric'])
 
-    def ground_filter(self, num_windows, dh_max, dh_0, interp_method = "nearest"):
+    def ground_filter(self, num_windows, dh_max, dh_0, b=2, interp_method = "nearest"):
         """
         Wrapper call for filter.zhang with convenient defaults.
 
@@ -141,30 +142,30 @@ class Grid:
         """
         # TODO Add functionality for classifying points as ground
         # Get the interpolated DEM array.
-        dem_array = filter.zhang(self.interpolate("min", "z").array, num_windows,
-                                 dh_max, dh_0, self.cell_size, self, interp_method = interp_method)
+        dem_array = ground_filter.zhang(self.interpolate("min", "z").array, num_windows,
+                                        dh_max, dh_0, self.cell_size, self, interp_method = interp_method)
         dem = Raster(dem_array, self)
 
         return dem
 
-    def normalize(self, num_windows, dh_max, dh_0, interp_method="nearest"):
+    def normalize(self, num_windows, dh_max, dh_0, b=2, interp_method="nearest"):
         """
         Returns a new, normalized Grid object.
         :return:
         """
+        import warnings
+        warnings.warn("Raster.normalize will be removed in 3.1 in favor of standalone filters.", category=DeprecationWarning)
 
         if self.cloud.normalized == True:
             print("It appears this has already been normalized once. Proceeding with normalization but expect \
             strange results.")
 
         # Retrieve the DEM
-        dem = self.ground_filter(num_windows, dh_max, dh_0, interp_method)
+        dem = self.ground_filter(num_windows, dh_max, dh_0, b, interp_method)
 
         # Organize the array into a dataframe and merge
         df = pd.DataFrame(dem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
-        #df = pd.merge(self.data, df)
-
-        df = self.data.reset_index().merge(df, how = "left").set_index('index')
+        df = self.cloud.data.points.reset_index().merge(df, how = "left").set_index('index')
         df['z'] = df['z'] - df['val']
 
         # Initialize new grid object
@@ -184,7 +185,7 @@ class Raster:
     def _affine(self):
         """Constructs the affine transformation, used for plotting and exporting polygons and rasters."""
         from rasterio.transform import from_origin
-        affine = from_origin(self.grid.las.min[0], self.grid.las.max[1], self.grid.cell_size, self.grid.cell_size)
+        affine = from_origin(self.grid.cloud.data.min[0], self.grid.cloud.data.max[1], self.grid.cell_size, self.grid.cell_size)
         return affine
 
     @property
@@ -209,22 +210,6 @@ class Raster:
 
         return out_image[0].data
 
-    def _project_indices(self, indices):
-        """
-        Converts indices of an array (for example, those indices that describe the location of a local maxima) to the
-        same space as the input cloud object. Assumes the array has already been flipped upside down.
-
-        :param indices: The indices to project, an Nx2 matrix of indices where the first column are the rows (Y) and
-        the second column is the columns (X)
-        :return:
-        """
-
-        seed_xy = indices[:,1] + (self._affine[2] / self._affine[0]), \
-                  indices[:,0] + (self._affine[5] - (self.grid.las.max[1] - self.grid.las.min[1]) /
-                                  abs(self._affine[4]))
-        seed_xy = np.stack(seed_xy, axis = 1)
-        return(seed_xy)
-
     def plot(self, cmap = "viridis", block = False, return_plot = False):
         """
         Default plotting method for the Raster object.
@@ -241,8 +226,8 @@ class Raster:
         ax.set_xticks(np.linspace(0, self.grid.n, 3))
         ax.set_yticks(np.linspace(0, self.grid.m, 3))
 
-        x_ticks, y_ticks = np.rint(np.linspace(self.grid.las.min[0], self.grid.las.max[0], 3)), \
-                           np.rint(np.linspace(self.grid.las.min[1], self.grid.las.max[1], 3))
+        x_ticks, y_ticks = np.rint(np.linspace(self.grid.cloud.data.min[0], self.grid.cloud.data.max[0], 3)), \
+                           np.rint(np.linspace(self.grid.cloud.data.min[1], self.grid.cloud.data.max[1], 3))
 
         ax.set_xticklabels(x_ticks)
         ax.set_yticklabels(y_ticks)
@@ -259,7 +244,7 @@ class Raster:
         """
         plot.iplot3d_surface(self.array, colorscale)
 
-    def local_maxima(self, min_distance=2, threshold_abs=2, multi_top = False, as_coordinates = False):
+    def local_maxima(self, min_distance=2, threshold_abs=2, as_coordinates=False):
         """
         Returns a new Raster object with tops detected using a local maxima filtering method. See
         skimage.feature.peak_local_maxima for more information on the filter.
@@ -275,13 +260,9 @@ class Raster:
         tops = peak_local_max(np.flipud(self.array), indices=False, min_distance=min_distance, threshold_abs=threshold_abs)
         tops = label(tops)[0]
 
-        if multi_top == False:
-            top_binary = np.flipud(corner_peaks(tops, indices=False).astype(np.float64))
-            tops_raster = Raster(top_binary, self.grid)
-            return(tops_raster)
-        else:
-            tops_raster = Raster(np.flipud(tops), self.grid)
-            return(tops_raster)
+        # TODO Had to take out corner filter to remove duplicate tops.
+        tops_raster = DetectedTops(tops, self.grid, self)
+        return(tops_raster)
 
 
     def watershed_seg(self, min_distance=2, threshold_abs=2, classify=False, plot = False):
@@ -307,13 +288,12 @@ class Raster:
         labels = watershed(-watershed_array, tops, mask=watershed_array)
 
         if classify == True:
-            xy = self.grid.data[["bins_x", "bins_y"]].values
+            xy = self.grid.cloud.data.points[["bins_x", "bins_y"]].values
             tree_id = labels[xy[:, 1], xy[:, 0]]
 
             # Update the CloudData and Grid objects
-            self.grid.las.points["user_data"] = tree_id
-            self.grid.data = self.grid.las.points
-            self.grid.cells = self.grid.data.groupby(['bins_x', 'bins_y'])
+            self.grid.cloud.data.points["user_data"] = tree_id
+            self.grid.cells = self.grid.cloud.data.points.groupby(['bins_x', 'bins_y'])
 
         if plot == False:
             affine = self._affine
@@ -348,5 +328,58 @@ class Raster:
         :param path: The path to write to.
         """
 
-        gisexport.array_to_raster(self.array, self.cell_size, self.grid.las.min[0], self.grid.las.max[1],
+        gisexport.array_to_raster(self.array, self.cell_size, self.grid.cloud.data.min[0], self.grid.cloud.data.max[1],
                                       self.grid.cloud.crs, path)
+
+
+class DetectedTops(Raster):
+    """
+    This class is for visualization of detected tops with a raster object. Generally created internally via
+    Raster.local_maxima
+    """
+
+    def __init__(self, array, grid, chm):
+        super().__init__(array, grid)
+        self.chm = chm
+
+    def plot(self):
+        """
+        Plots the detected tops against the original input raster.
+        # https://matplotlib.org/gallery/images_contours_and_fields/image_transparency_blend.html
+        """
+
+        fig, ax = plt.subplots()
+        caz = ax.matshow(np.flipud(self.chm.array))
+        fig.colorbar(caz)
+
+
+        # TODO I might not need to repeat this code from raster
+        fig.gca().invert_yaxis()
+        ax.xaxis.tick_bottom()
+        ax.set_xticks(np.linspace(0, self.grid.n, 3))
+        ax.set_yticks(np.linspace(0, self.grid.m, 3))
+
+        x_ticks, y_ticks = np.rint(np.linspace(self.grid.cloud.data.min[0], self.grid.cloud.data.max[0], 3)), \
+                           np.rint(np.linspace(self.grid.cloud.data.min[1], self.grid.cloud.data.max[1], 3))
+
+        ax.set_xticklabels(x_ticks)
+        ax.set_yticklabels(y_ticks)
+
+        container = np.zeros((self.grid.m, self.grid.n, 4))
+        tops_binary = (self.array > 0).astype(np.int)
+        container[:, :, 0][tops_binary >0] = 1
+        container[:, :, 3][tops_binary >0] = 1
+        ax.imshow(container)
+
+
+class CrownSegments(Raster):
+    """
+    This class is for visualization of detected crown segments with a raster object.
+    """
+
+    def __init__(self, array, grid, chm):
+        super().__init__(array, grid)
+        self.chm = chm
+
+    def plot(self):
+        pass

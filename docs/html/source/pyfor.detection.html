@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyfor.detection module &mdash; pyfor 0.2.2 documentation</title>
+  <title>pyfor.detection module &mdash; pyfor 0.2.3 documentation</title>
   
 
   
@@ -89,6 +89,8 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">pyfor.detection module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.filter.html">pyfor.filter module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.gisexport.html">pyfor.gisexport module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.ground_filter.html">pyfor.ground_filter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.parser.html">pyfor.parser module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.plot.html">pyfor.plot module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.rasterizer.html">pyfor.rasterizer module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.voxelizer.html">pyfor.voxelizer module</a></li>
@@ -160,12 +162,12 @@
 <span id="pyfor-detection-module"></span><h1>pyfor.detection module<a class="headerlink" href="#module-pyfor.detection" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="pyfor.detection.LayerStacking">
-<em class="property">class </em><code class="descclassname">pyfor.detection.</code><code class="descname">LayerStacking</code><span class="sig-paren">(</span><em>cloud</em>, <em>n_jobs=1</em>, <em>chm_resolution=1</em>, <em>buffer_distance=0.5</em>, <em>first_pass_min_dist=3</em>, <em>first_pass_threshold_abs=3</em>, <em>veg_layers=(0</em>, <em>1</em>, <em>2)</em>, <em>percentiles=(70</em>, <em>80</em>, <em>90</em>, <em>100)</em>, <em>weights=(2</em>, <em>3</em>, <em>4</em>, <em>4)</em>, <em>overlap_kernel_size=3</em>, <em>scnd_pass_min_dist=3</em>, <em>scnd_pass_threshold_abs=3</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.detection.LayerStacking" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pyfor.detection.</code><code class="descname">LayerStacking</code><span class="sig-paren">(</span><em>cloud</em>, <em>n_jobs=1</em>, <em>chm_resolution=1</em>, <em>buffer_distance=0.5</em>, <em>first_pass_min_dist=3</em>, <em>first_pass_threshold_abs=3</em>, <em>veg_layers=(0</em>, <em>1</em>, <em>2)</em>, <em>percentiles=(70</em>, <em>80</em>, <em>90</em>, <em>100)</em>, <em>weights=(2</em>, <em>3</em>, <em>4</em>, <em>4)</em>, <em>overlap_kernel_size=3</em>, <em>scnd_pass_min_dist=3</em>, <em>scnd_pass_threshold_abs=3</em>, <em>remove_veg=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.detection.LayerStacking" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>An implementation of Ayrey et al. (2017) layer stacking algorithm.</p>
 <dl class="method">
 <dt id="pyfor.detection.LayerStacking.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>cloud</em>, <em>n_jobs=1</em>, <em>chm_resolution=1</em>, <em>buffer_distance=0.5</em>, <em>first_pass_min_dist=3</em>, <em>first_pass_threshold_abs=3</em>, <em>veg_layers=(0</em>, <em>1</em>, <em>2)</em>, <em>percentiles=(70</em>, <em>80</em>, <em>90</em>, <em>100)</em>, <em>weights=(2</em>, <em>3</em>, <em>4</em>, <em>4)</em>, <em>overlap_kernel_size=3</em>, <em>scnd_pass_min_dist=3</em>, <em>scnd_pass_threshold_abs=3</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.detection.LayerStacking.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>cloud</em>, <em>n_jobs=1</em>, <em>chm_resolution=1</em>, <em>buffer_distance=0.5</em>, <em>first_pass_min_dist=3</em>, <em>first_pass_threshold_abs=3</em>, <em>veg_layers=(0</em>, <em>1</em>, <em>2)</em>, <em>percentiles=(70</em>, <em>80</em>, <em>90</em>, <em>100)</em>, <em>weights=(2</em>, <em>3</em>, <em>4</em>, <em>4)</em>, <em>overlap_kernel_size=3</em>, <em>scnd_pass_min_dist=3</em>, <em>scnd_pass_threshold_abs=3</em>, <em>remove_veg=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.detection.LayerStacking.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -257,7 +259,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.2.2',
+            VERSION:'0.2.3',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
@@ -268,6 +270,7 @@
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

@@ -13,19 +13,13 @@ pyfor is supported in part by the [AWS Cloud Credits for Research program](https
 
 ## Release Status
 
-Current Release: 0.2.2
+Current Release: 0.3.0
 
-Release Date: August 5, 2018
+Release Date: []
 
-This release is adequate for processing single tiles and serves as the foundation for future updates. There is a dedicated changelog [here](CHANGELOG.md)
-
-A minor update rolling release branch is located on [0.2.3](http://github.com/brycefrank/pyfor/tree/0.2.3). 0.2.3 will only improve on single tile functionality (tree detection, bug fixes, etc). Please check the changelog there before submitting issues.
-
-An upcoming release, [0.3.0](http://github.com/brycefrank/pyfor/tree/0.3.0),  will focus on processing large acquisitions, and is slated for release on this branch later this month (August 2018).
+Release Status: 0.3.0 is an adolescent LiDAR data processing package adequate for single tile processing and large acqusitions. Routine processing functions are available, and many features are being added.
 
 ## Samples
-
-These samples are a work in progress, but demonstrate some of the package capabilities.
 
 - [Introduction](https://github.com/brycefrank/pyfor/blob/master/samples/Introduction.ipynb)
 - [File Input and Plotting](https://github.com/brycefrank/pyfor/blob/master/samples/ImportsExports.ipynb)
@@ -34,10 +28,11 @@ These samples are a work in progress, but demonstrate some of the package capabi
 - [Clipping](https://github.com/brycefrank/pyfor/blob/master/samples/Clipping.ipynb)
 - [Watershed Segmentation](https://github.com/brycefrank/pyfor/blob/master/samples/WatershedSegmentation.ipynb)
 - [Grid Metrics](https://github.com/brycefrank/pyfor/blob/master/samples/GridMetrics.ipynb)
+- [Collections](https://github.com/brycefrank/pyfor/blob/master/samples/Collections.ipynb)
 
 ## Installation
 
-For installation I highly recommend looking into setting up [miniconda](https://conda.io/miniconda.html) for your system before beginning. pyfor depends on many packages that are otherwise tricky and difficult to install (especially gdal and its bindings), and conda provides a quick and easy way to manage many different Python environments on your system simultaneously.
+[miniconda](https://conda.io/miniconda.html) or Anaconda is required for your system before beginning. pyfor depends on many packages that are otherwise tricky and difficult to install (especially gdal and its bindings), and conda provides a quick and easy way to manage many different Python environments on your system simultaneously.
 
 The following bash commands will install this branch of pyfor. It requires installation of miniconda (see above). This will install all of the prerequisites in that environment, named `pyfor_env`. pyfor depends on a lot of heavy libraries, so expect construction of the environment to take a little time.
 
@@ -63,20 +58,15 @@ import pyfor
 
 If you see no errors, you are ready to process!
 
-## Getting Started
-
-An early collection of samples is located [here](https://github.com/brycefrank/pyfor/tree/master/samples). These demonstrate some basic tasks.
-
-A standalone documentation is located [here](http://brycefrank.com/pyfor). This provides specific documentation for each class and function.
+**A Note on IDEs:** One of the draws of pyfor is its 3D and 2D plotting methods. These work best in Jupyter notebooks but also work well in PyCharm interactive consoles (version 2018.1 or greater).
 
 ## Features
 
 Below is a list of features, complete and otherwise.
 
 - [X] Ground filter
-- [X] Normalization
-- [X] Rasterization
-	- [X] Raster input and output
+    - [X] Kraus and Pfeifer (1998)
+    - [X] Zhang et al. (2003)
 - [X] Interactive 2d & 3d plotting via Jupyter
 	- [X] Point cloud plotting
 	- [X] Raster plotting
@@ -88,16 +78,10 @@ Below is a list of features, complete and otherwise.
 	- [X] Median pit filter
 	- [ ] Pit free algorithm (Chen et al. 2017)
 - [X] Clipping point clouds
-- [ ] Batch processing
-	- [ ] Multiprocessor support
-	- [ ] Cluster support
+- [X] Batch processing
+	- [X] Multiprocessor support
+	- [X] Cluster support
 - [X] Voxelization methods
-
-## Goals
-
-- Maintain a purely Python code base
-- Maintain compatibility between operating systems via conda
-- Support processing for distributed systems and multicore processors
 
 ## Collaboration & Requests
 

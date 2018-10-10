@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyfor.gisexport module &mdash; pyfor 0.2.2 documentation</title>
+  <title>pyfor.gisexport module &mdash; pyfor 0.2.3 documentation</title>
   
 
   
@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pyfor.plot module" href="pyfor.plot.html" />
+    <link rel="next" title="pyfor.ground_filter module" href="pyfor.ground_filter.html" />
     <link rel="prev" title="pyfor.filter module" href="pyfor.filter.html" /> 
 
   
@@ -89,6 +89,8 @@
 <li class="toctree-l1"><a class="reference internal" href="pyfor.detection.html">pyfor.detection module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.filter.html">pyfor.filter module</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">pyfor.gisexport module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.ground_filter.html">pyfor.ground_filter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.parser.html">pyfor.parser module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.plot.html">pyfor.plot module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.rasterizer.html">pyfor.rasterizer module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.voxelizer.html">pyfor.voxelizer module</a></li>
@@ -202,9 +204,34 @@
 </dd></dl>
 
 <dl class="function">
+<dt id="pyfor.gisexport.get_las_crs">
+<code class="descclassname">pyfor.gisexport.</code><code class="descname">get_las_crs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.gisexport.get_las_crs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempts to retrive CRS information from an input <cite>laspy.file.File</cite> object.
+:return:</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="pyfor.gisexport.polygons_to_raster">
 <code class="descclassname">pyfor.gisexport.</code><code class="descname">polygons_to_raster</code><span class="sig-paren">(</span><em>polygons</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.gisexport.polygons_to_raster" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="function">
+<dt id="pyfor.gisexport.project_indices">
+<code class="descclassname">pyfor.gisexport.</code><code class="descname">project_indices</code><span class="sig-paren">(</span><em>indices</em>, <em>raster</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.gisexport.project_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts indices of an array (for example, those indices that describe the location of a local maxima) to the
+same space as the input cloud object. Assumes the array has already been flipped upside down.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>indices</strong> – The indices to project, an Nx2 matrix of indices where the first column are the rows (Y) and</td>
+</tr>
+</tbody>
+</table>
+<p>the second column is the columns (X)
+:param raster: An object of type pyfor.rasterizer.Raster
+:return:</p>
+</dd></dl>
 
 </div>
 
@@ -216,7 +243,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="pyfor.plot.html" class="btn btn-neutral float-right" title="pyfor.plot module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="pyfor.ground_filter.html" class="btn btn-neutral float-right" title="pyfor.ground_filter module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="pyfor.filter.html" class="btn btn-neutral" title="pyfor.filter module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -250,7 +277,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.2.2',
+            VERSION:'0.2.3',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
@@ -261,6 +288,7 @@
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

@@ -8,20 +8,20 @@ class VoxelGrid:
         self.cloud = cloud
         self.cell_size = cell_size
 
-        min_x, max_x = self.cloud.las.min[0], self.cloud.las.max[0]
-        min_y, max_y = self.cloud.las.min[1], self.cloud.las.max[1]
-        min_z, max_z = self.cloud.las.min[2], self.cloud.las.max[2]
+        min_x, max_x = self.cloud.data.min[0], self.cloud.data.max[0]
+        min_y, max_y = self.cloud.data.min[1], self.cloud.data.max[1]
+        min_z, max_z = self.cloud.data.min[2], self.cloud.data.max[2]
 
         self.m = int(np.floor((max_y - min_y) / cell_size))
         self.n = int(np.floor((max_x - min_x) / cell_size))
         self.p = int(np.floor((max_z - min_z) / cell_size))
 
         # Create bins
-        bins_x = np.searchsorted(np.linspace(min_x, max_x, self.n), self.cloud.las.points["x"])
-        bins_y = np.searchsorted(np.linspace(min_y, max_y, self.m), self.cloud.las.points["y"])
-        bins_z = np.searchsorted(np.linspace(min_z, max_z, self.p), self.cloud.las.points["z"])
+        bins_x = np.searchsorted(np.linspace(min_x, max_x, self.n), self.cloud.data.points["x"])
+        bins_y = np.searchsorted(np.linspace(min_y, max_y, self.m), self.cloud.data.points["y"])
+        bins_z = np.searchsorted(np.linspace(min_z, max_z, self.p), self.cloud.data.points["z"])
 
-        self.data = self.cloud.las.points
+        self.data = self.cloud.data.points
         self.data["bins_x"] = bins_x
         self.data["bins_y"] = bins_y
         self.data["bins_z"] = bins_z

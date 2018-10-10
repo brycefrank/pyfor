@@ -1,3 +1,65 @@
+# 0.3.0
+
+Updates between September 5, 2018 and October 10th, 2018
+
+## Collection
+
+1. Added 'CloudDataFrame', an inherited class from GeoDataFrame used to manage large LiDAR acquisitions.
+    - Ability to do geopositional indexing of LAS tiles. Much of this class is internal and used to
+
+## Samples
+1. Added `Collections` sample
+2. Adjusted normalization/bem/etc sample with new updates.
+
+## Windows Compatibility
+1. Addressed issues with plotting on Windows 10 - an up-to-date version of PyCharm should work well.
+
+## Cloud
+1. Added support for `.ply` files
+2. Changed default normalization algorithm to `ground_filter.KrausPfeifer1998` while I debug and restructure `ground_filter.zhang`
+3. Made `CloudData` a base class for the new `LASDAta` and `PLYData` classes.
+
+## Rasterizer
+1. Changed `Grid.raster` to allow for keyword arguments for passed functions.
+2. Added `DeprecationWarning` to `rasterizer.Grid.normalize`, will be replaced with standalone ground filters in 3.1.
+3. Added `DetectedTops` object, used for visualizing detected tops from CHM.
+
+## Filter
+1. Moved `filter` to `ground_filter`
+
+## Ground_Filter
+1. Restructued filters into their own Classes, each with `.bem`, `.classify()` and `.normalize`. Fits better with the structure of the package.
+2. Added Kraus and Pfeifer (1998) ground filter after having some issues with `zhang`. This filter is a much simpler ground filter but provides reasonable results.
+
+## environment.yml
+1. Enforcing `rasterio > 1.0` requirement which thereby requires use of `conda-forge` channel.
+2. Added `plyfile` requirement (see above)
+
+# 0.2.3
+
+Updates between August 5, 2018 and September 5, 2018. These updates are minor improvements
+to set up for 0.3.0 release.
+
+## Documentation
+
+1. Moved documentation from ReadTheDocs to brycefrank.com/pyfor
+2. Updated documentation main page and internal structure
+
+## Testing Suite
+
+1. Fixed broken clip polygons
+
+## Samples
+
+1. Fixed clip sample (from above)
+2. Added LayerStacking sample
+
+## Detection
+1. Several improvements to `detection.LayerStacking`
+
+## GISExport
+1. Added a project indices function, mostly for internal use.
+
 # 0.2.2
 
 Updates between May 9, 2018 and August 5, 2018.
