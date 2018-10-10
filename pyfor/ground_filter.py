@@ -105,7 +105,7 @@ class KrausPfeifer1998:
     This filter is used in FUSION software, and the same default values for the parameters are used in this implementation.
     """
 
-    def __init__(self, cloud, cell_size, a=1, b=4, g=-2, w=2.5, iterations=5):
+    def __init__(self, cloud, cell_size, a=1, b=4, g=-2, w=2.5, iterations=5, cpu_optimize=False):
         """
         :param cloud: The input `Cloud` object.
         :param cell_size: The cell size of the intermediate surface used in filtering in the same units as the input
@@ -115,6 +115,7 @@ class KrausPfeifer1998:
         :param g: The distance from the surface under which all points are given a weight of 1.
         :param w: The window width from g up considered for weighting.
         :param iterations: The number of iterations, i.e. the number of surfaces constructed.
+        :param cpu_optimize: If set to True more memory is used but performance is significantly increased
         """
         self.cloud = cloud
         self.cell_size = cell_size
@@ -123,6 +124,7 @@ class KrausPfeifer1998:
         self.g = g
         self.w = w
         self.iterations = iterations
+        self.cpu_optimize = cpu_optimize
 
     def _compute_weights(self, v_i):
         """
@@ -142,31 +144,38 @@ class KrausPfeifer1998:
         Runs the actual ground filter. Generally used as an internal function that is called by user functions
         (.bem, .classify, .ground_points).
         """
-
-        import pandas as pd
-        import inspect
+        # TODO a bit memory intensive, the slowest part is finding the points in the original DF that are ground
+        # TODO probably some opportunity for numba optimization, but working well enough for now
         grid = self.cloud.grid(self.cell_size)
-        surface = grid.raster(np.mean, "z")
+        self.cloud.data.points['bins_z'] = self.cloud.data.points.groupby(['bins_x', 'bins_y']).cumcount()
+        depth = np.max(self.cloud.data.points['bins_z'])
+        z = np.zeros((grid.m, grid.n, depth + 1))
+        z[:] = np.nan
+        z[self.cloud.data.points['bins_y'], self.cloud.data.points['bins_x'], self.cloud.data.points['bins_z']] = self.cloud.data.points['z']
+        p_i = np.zeros((grid.m, grid.n, depth+1))
+        p_i[~np.isnan(z)] = 1
+
+        if self.cpu_optimize == True:
+            ix = np.zeros((grid.m, grid.n, depth + 1))
+            ix[self.cloud.data.points['bins_y'], self.cloud.data.points['bins_x'], self.cloud.data.points['bins_z']] = self.cloud.data.points.index.values
+
         for i in range(self.iterations):
-            # Find the values of surface above/below points
-            df = pd.DataFrame(surface.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
+            surface = np.nansum(z * p_i, axis=2) / np.sum(p_i, axis = 2)
+            surface = surface.reshape(grid.m,grid.n,1)
+            p_i= self._compute_weights(z - surface)
+        final_resid = z - surface
 
-            # Append the values of surface above/below each point
-            surface_vec = self.cloud.data.points.reset_index().merge(df, how = "left").set_index('index')['val']
+        del p_i
+        del surface
 
-            # Compute the residuals and plot
-            self.cloud.data.points['v_i'] = self.cloud.data.points['z'] - surface_vec
-            self.cloud.data.points['p_i'] = self._compute_weights(self.cloud.data.points['v_i'])
-            #print(self.cloud.data.points['z'].iloc[0], self.cloud.data.points['v_i'].iloc[0], self.cloud.data.points['p_i'][0])
-
-            # Weight the original z values and construct new surface
-            weighted_cells = grid.cells.apply(lambda cell: np.average(cell['z'], weights = cell['p_i'])).reset_index()
-            array = np.full((grid.m, grid.n), np.nan)
-            array[weighted_cells["bins_y"], weighted_cells["bins_x"]] = weighted_cells[0]
-            surface.array = array
-
-        ground = self.cloud.data.points[self.cloud.data.points['v_i'] <= self.g + self.w]
-        return ground
+        if self.cpu_optimize == True:
+            ground_bins = (final_resid <= self.g + self.w).nonzero()
+            return(self.cloud.data.points.iloc[ix[ground_bins]])
+        else:
+            ground_bins = (final_resid <= self.g+self.w).nonzero()
+            bin_indexer = list(zip(ground_bins[0], ground_bins[1], ground_bins[2]))
+            self.cloud.data.points = self.cloud.data.points.set_index(['bins_y', 'bins_x', 'bins_z'])
+            return self.cloud.data.points.loc[bin_indexer].reset_index()
 
     @property
     def ground_points(self):
@@ -184,7 +193,7 @@ class KrausPfeifer1998:
         :return: A `Raster` object that represents the bare earth model.
         """
         ground_cloud = self.ground_points
-        return ground_cloud.grid(cell_size).raster(np.min, "z")
+        return ground_cloud.grid(cell_size).interpolate(np.min, "z")
 
 
     def classify(self, ground_int=2):
@@ -211,5 +220,5 @@ class KrausPfeifer1998:
         """
         bem = self.bem(cell_size)
         df = pd.DataFrame(bem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
-        df = self.cloud.data.points.reset_index().merge(df, how = "left").set_index('index')
+        df = self.cloud.data.points.reset_index().merge(df, how="left").set_index('index')
         self.cloud.data.points['z'] = df['z'] - df['val']
