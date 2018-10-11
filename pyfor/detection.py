@@ -9,7 +9,7 @@ import geopandas as gpd
 from rasterio.io import MemoryFile
 from rasterio import features
 
-class LayerStacking:
+class Ayrey2017:
     # TODO Make inherent from a generic tree detection class
     """
     An implementation of Ayrey et al. (2017) layer stacking algorithm.

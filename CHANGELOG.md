@@ -1,3 +1,13 @@
+# 0.3.1
+
+Updates between October 11th, 2018 and []
+
+## Detection
+1. Refactored `LayerStacking` to `Ayrey2017` to cohere more with the citation format.
+
+## Documentation
+1. Updated docstrings with 0.3.0 changes.
+
 # 0.3.0
 
 Updates between September 5, 2018 and October 10th, 2018
