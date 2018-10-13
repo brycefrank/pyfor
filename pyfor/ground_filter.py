@@ -11,7 +11,7 @@ class Zhang2003:
     implementation interacts only with a raster, so the output resolution will be dictated by the `cell_size` argument
     (see below for details).
     """
-    def __init__(self, cloud, cell_size, n_windows=5, dh_max=2, dh_0=1, b = 2, interp_method="nearest"):
+    def __init__(self, cloud, cell_size, n_windows=5, dh_max=2, dh_0=1, b=2, interp_method="nearest"):
         """
         :param n_windows: The number of windows to construct for filtering.
         :param dh_max: The maximum height threshold.

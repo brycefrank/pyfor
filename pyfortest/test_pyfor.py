@@ -9,6 +9,7 @@ import os
 import matplotlib.figure
 import numpy as np
 import geopandas as gpd
+import plyfile
 
 """
 Many of these tests currently just run the function. If anyone has any more rigorous ideas, please feel free to \
@@ -20,27 +21,43 @@ test_las = os.path.join(data_dir, 'test.las')
 test_shp = os.path.join(data_dir, 'clip.shp')
 proj4str = "+proj=utm +zone=10 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
 
+test_points = {
+    "x": [0, 1],
+    "y": [0, 1],
+    "z": [0, 1],
+    "intensity": [0, 1],
+    "classification": [0, 1],
+    "flag_byte": [0, 1],
+    "scan_angle_rank": [0, 1],
+    "user_data": [0, 1],
+    "pt_src_id": [0, 1],
+    "return_num": [0,1]
+}
+
+class PLYDataTestCase(unittest.TestCase):
+    def setUp(self):
+        self.test_points = pd.DataFrame.from_dict(test_points).astype(np.float)
+        self.test_header = 0
+        self.test_ply_data = cloud.PLYData(self.test_points, self.test_header)
+
+    def test_init(self):
+        self.assertEqual(type(self.test_ply_data), cloud.PLYData)
+
+    def test_data_length(self):
+        self.assertEqual(len(self.test_ply_data.points), 2)
+
+    #def test_write(self):
+    #    self.test_ply_data.write(os.path.join(data_dir, "temp_test_write.ply"))
+    #    read = plyfile.PlyData.read('temp_test_write.ply')
+    #    read.close()
+    #    os.remove(os.path.join(data_dir, "temp_test_write.ply"))
+
 class LASDataTestCase(unittest.TestCase):
     def setUp(self):
-        self.test_points = {
-            "x": [0, 1],
-            "y": [0, 1],
-            "z": [0, 1],
-            "intensity": [0, 1],
-            "classification": [0, 1],
-            "flag_byte": [0, 1],
-            "scan_angle_rank": [0, 1],
-            "user_data": [0, 1],
-            "pt_src_id": [0, 1],
-            "return_num": [0,1]
-        }
-
+        self.test_points = pd.DataFrame.from_dict(test_points)
         self.test_header = laspy.file.File(test_las).header
-
-        self.test_points = pd.DataFrame.from_dict(self.test_points)
         self.column = [0,1]
         self.test_cloud_data = cloud.LASData(self.test_points, self.test_header)
-
 
     def test_init(self):
         self.assertEqual(type(self.test_cloud_data), cloud.LASData)
@@ -48,16 +65,12 @@ class LASDataTestCase(unittest.TestCase):
     def test_data_length(self):
         self.assertEqual(len(self.test_cloud_data.points), 2)
 
-
     def test_write(self):
         self.test_cloud_data.write(os.path.join(data_dir, "temp_test_write.las"))
         read = laspy.file.File(os.path.join(data_dir, "temp_test_write.las"))
         self.assertEqual(type(read), laspy.file.File)
         read.close()
-
         os.remove(os.path.join(data_dir, "temp_test_write.las"))
-
-    # TODO tear down
 
 class CloudTestCase(unittest.TestCase):
 
@@ -98,13 +111,6 @@ class CloudTestCase(unittest.TestCase):
     def test_plot3d(self):
         self.test_cloud.plot3d()
 
-    # TODO fix for 0.3.0
-    #def test_ground_filter_returns_raster(self):
-    #    ground = self.test_cloud.grid(0.5).ground_filter(3, 2, 1)
-    #    self.assertEqual(type(ground), rasterizer.Raster)
-    #    # A very stringent test, ok to reduce:
-    #    self.assertNotEqual(np.any(ground), 0)
-
     def test_normalize(self):
         test_cloud = cloud.Cloud(test_las)
         test_cloud.normalize(6)
@@ -118,7 +124,6 @@ class CloudTestCase(unittest.TestCase):
 
     def test_convex_hull(self):
         self.test_cloud.convex_hull
-
 
 
 class GridTestCase(unittest.TestCase):
@@ -245,3 +250,22 @@ class VoxelGridTestCase(unittest.TestCase):
 
     def test_voxel_raster(self):
         self.test_voxel_grid.voxel_raster("count", "z")
+
+class KrausPfeifer1998(unittest.TestCase):
+    def setUp(self):
+        self.test_cloud = cloud.Cloud(test_las)
+        self.test_kp_filter = ground_filter.KrausPfeifer1998(self.test_cloud, 3)
+
+    def test_filter(self):
+        self.test_kp_filter._filter()
+
+class Zhang2003TestCase(unittest.TestCase):
+    def setUp(self):
+        self.test_cloud = cloud.Cloud(test_las)
+        self.test_zhang_filter = ground_filter.Zhang2003(self.test_cloud, 3)
+
+    def test_filter(self):
+        self.test_zhang_filter._filter()
+
+    def test_bem(self):
+        self.test_zhang_filter.bem()
