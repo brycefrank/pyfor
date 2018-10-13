@@ -1,7 +1,6 @@
 import os
 import laspy
 import pandas as pd
-from joblib import Parallel, delayed
 import pyfor
 import geopandas as gpd
 
@@ -54,7 +53,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
         :param column: The column to apply on, will be the first argument to func
         :param buffer_distance: The distance to buffer and aggregate each tile.
         """
-
+        from joblib import Parallel, delayed
         if buffer_distance > 0:
             self.buffer(buffer_distance)
             for i, geom in enumerate(self["bounding_box"]):

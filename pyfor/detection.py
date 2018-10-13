@@ -1,13 +1,6 @@
 import pyfor
 import numpy as np
-from sklearn.cluster import DBSCAN
-from sklearn.cluster import KMeans
-from skimage.feature import corner_peaks
-import matplotlib.pyplot as plt
-from shapely.geometry import asMultiPoint
 import geopandas as gpd
-from rasterio.io import MemoryFile
-from rasterio import features
 
 class Ayrey2017:
     # TODO Make inherent from a generic tree detection class
@@ -39,7 +32,7 @@ class Ayrey2017:
 
         # Meta Information
         self.cloud = cloud
-        self.points = self.cloud.las.points
+        self.points = self.cloud.data.points
         self.chm = self.cloud.chm(chm_resolution, interp_method= "nearest", pit_filter= "median")
 
         # Algorithm parameters
@@ -56,7 +49,7 @@ class Ayrey2017:
         self.remove_veg = remove_veg
 
         # Bin the layers in the cloud from 0.5 to the maximum height
-        layer_bins = np.searchsorted(np.arange(0.5, self.cloud.las.max[2] + 1), self.points['z'])
+        layer_bins = np.searchsorted(np.arange(0.5, self.cloud.data.max[2] + 1), self.points['z'])
         self.points['bins_z'] = layer_bins
         self.n_layers = len(np.unique(layer_bins))
 
@@ -109,6 +102,7 @@ class Ayrey2017:
         :param points:
         :return:
         """
+        from sklearn.cluster import DBSCAN
         layer_xy = self.points.loc[self.points['bins_z'] == layer_index]
         db = DBSCAN(eps=0.3, min_samples=10).fit(layer_xy)
         non_veg_inds = layer_xy.index.values[np.where(db.labels_ == -1)]
@@ -136,6 +130,7 @@ class Ayrey2017:
         :param layer_index:
         :return:
         """
+        from sklearn.cluster import KMeans
         print("Clustering layer {}".format(layer_index + 1))
         layer = self._get_layer(layer_index)
         clusters = KMeans(n_clusters=self._top_coordinates.shape[0], init = self._top_coordinates, n_jobs=self.n_jobs,
@@ -157,6 +152,7 @@ class Ayrey2017:
         Buffers all points not removed after _remove_veg (or all points of self.remove_veg is set to False)
         :return:
         """
+        from shapely.geometry import asMultiPoint
         # Subset to only complete layers
         multi_points = self.points[self.points['bins_z'].isin(self._complete_layers)]
         keep_bins_z = multi_points["bins_z"].values
@@ -221,6 +217,8 @@ class Ayrey2017:
         :param value:
         :return:
         """
+        from rasterio.io import MemoryFile
+        from rasterio import features
         transform = self.chm._affine
 
         # TODO may be re-usable for other features. Consider moving to gisexport

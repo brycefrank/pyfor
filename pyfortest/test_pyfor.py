@@ -243,7 +243,6 @@ class GISExportTestCase(unittest.TestCase):
     def test_array_to_polygon(self):
         array = np.random.randint(1, 5, size=(99, 99)).astype(np.int32)
         gisexport.array_to_polygons(array, self.test_raster._affine)
-
 class VoxelGridTestCase(unittest.TestCase):
     def setUp(self):
         self.test_voxel_grid = voxelizer.VoxelGrid(cloud.Cloud(test_las), cell_size=2)
@@ -269,3 +268,12 @@ class Zhang2003TestCase(unittest.TestCase):
 
     def test_bem(self):
         self.test_zhang_filter.bem()
+
+class Ayrey2017TestCase(unittest.TestCase):
+    def setUp(self):
+        self.test_cloud = cloud.Cloud(test_las)
+
+    # TODO poor performance, consider testing individual functions only
+    #def test_detect(self):
+    #    self.test_ayrey = detection.Ayrey2017(self.test_cloud, remove_veg=False)
+    #    self.test_ayrey.detect()

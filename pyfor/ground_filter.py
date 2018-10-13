@@ -127,7 +127,7 @@ class KrausPfeifer1998:
     This filter is used in FUSION software, and the same default values for the parameters are used in this implementation.
     """
 
-    def __init__(self, cloud, cell_size, a=1, b=4, g=-2, w=2.5, iterations=5, tolerance=0, cpu_optimize=True):
+    def __init__(self, cloud, cell_size, a=1, b=4, g=-2, w=2.5, iterations=5, tolerance=0):
         """
         :param cloud: The input `Cloud` object.
         :param cell_size: The cell size of the intermediate surface used in filtering in the same units as the input
@@ -137,7 +137,6 @@ class KrausPfeifer1998:
         :param g: The distance from the surface under which all points are given a weight of 1.
         :param w: The window width from g up considered for weighting.
         :param iterations: The number of iterations, i.e. the number of surfaces constructed.
-        :param cpu_optimize: If set to True more memory is used but performance is significantly increased
         """
         self.cloud = cloud
         self.cell_size = cell_size
@@ -146,7 +145,6 @@ class KrausPfeifer1998:
         self.g = g
         self.w = w
         self.iterations = iterations
-        self.cpu_optimize = cpu_optimize
 
         if tolerance == 0:
             self.tolerance = self.g + self.w
@@ -191,19 +189,12 @@ class KrausPfeifer1998:
         del p_i
         del surface
 
-        if self.cpu_optimize:
-            ix = np.zeros((grid.m, grid.n, depth + 1))
-            ix[self.cloud.data.points['bins_y'], self.cloud.data.points['bins_x'],
-               self.cloud.data.points['bins_z']] = self.cloud.data.points.index.values
-            ground_bins = (final_resid <= self.g + self.w).nonzero()
-            self.cloud.data.points = self.cloud.data.points.reset_index()
-            return self.cloud.data.points.loc[ix[ground_bins]]
-        else:
-            ground_bins = (final_resid <= self.g+self.w).nonzero()
-            bin_indexer = list(zip(ground_bins[0], ground_bins[1], ground_bins[2]))
-            self.cloud.data.points = self.cloud.data.points.set_index(['bins_y', 'bins_x', 'bins_z'])
-            self.cloud.data.points = self.cloud.data.points.reset_index()
-            return self.cloud.data.points.loc[bin_indexer].reset_index()
+        ix = np.zeros((grid.m, grid.n, depth + 1))
+        ix[self.cloud.data.points['bins_y'], self.cloud.data.points['bins_x'],
+           self.cloud.data.points['bins_z']] = self.cloud.data.points.index.values
+        ground_bins = (final_resid <= self.g + self.w).nonzero()
+        self.cloud.data.points = self.cloud.data.points.reset_index()
+        return self.cloud.data.points.loc[ix[ground_bins]]
 
 
     @property
