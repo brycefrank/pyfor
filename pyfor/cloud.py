@@ -83,13 +83,17 @@ class Cloud:
             elif self.extension == '.ply':
                 ply = plyfile.PlyData.read(path)
                 ply_points = ply.elements[0].data
-                points = pd.DataFrame({"x": ply_points["x"], "y": ply_points["y"], "z": ply_points["z"],
-                                       "red": ply_points["red"], "green": ply_points["green"], "blue": ply_points["blue"]})
+                points = pd.DataFrame({"x": ply_points["x"], "y": ply_points["y"], "z": ply_points["z"]})
 
-                # ply headers are very basic, this is set here for compatibility with modifications to the header downstream (for now)
-                # TODO handle ply headers
+                try:
+                    points['red'] = ply_points['red']
+                    points['green'] = ply_points['green']
+                    points['blue'] = ply_points['blue']
+                except ValueError:
+                    pass
+
                 header = None
-                self.data = PLYData(points , header)
+                self.data = PLYData(points, header)
 
         elif type(path) == CloudData:
             self.data = path

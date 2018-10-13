@@ -132,22 +132,6 @@ class Grid:
             metrics = [tup[1] for tup in list(aggregate)]
             return pd.DataFrame({'dim': dims, 'metric': metrics, 'raster': rasters}).set_index(['dim', 'metric'])
 
-    def ground_filter(self, num_windows, dh_max, dh_0, b=2, interp_method = "nearest"):
-        """
-        Wrapper call for filter.zhang with convenient defaults.
-
-        Returns a Raster object corresponding to the filtered ground DEM of this particular grid.
-        :param type:
-        :return:
-        """
-        # TODO Add functionality for classifying points as ground
-        # Get the interpolated DEM array.
-        dem_array = ground_filter.zhang(self.interpolate("min", "z").array, num_windows,
-                                        dh_max, dh_0, self.cell_size, self, interp_method = interp_method)
-        dem = Raster(dem_array, self)
-
-        return dem
-
     def normalize(self, num_windows, dh_max, dh_0, b=2, interp_method="nearest"):
         """
         Returns a new, normalized Grid object.

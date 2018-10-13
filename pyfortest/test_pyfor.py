@@ -46,11 +46,9 @@ class PLYDataTestCase(unittest.TestCase):
     def test_data_length(self):
         self.assertEqual(len(self.test_ply_data.points), 2)
 
-    #def test_write(self):
-    #    self.test_ply_data.write(os.path.join(data_dir, "temp_test_write.ply"))
-    #    read = plyfile.PlyData.read('temp_test_write.ply')
-    #    read.close()
-    #    os.remove(os.path.join(data_dir, "temp_test_write.ply"))
+    def test_write(self):
+        self.test_ply_data.write(os.path.join(data_dir, "temp_test_write.ply"))
+        read = plyfile.PlyData.read(os.path.join(data_dir, 'temp_test_write.ply'))
 
 class LASDataTestCase(unittest.TestCase):
     def setUp(self):
@@ -80,6 +78,13 @@ class CloudTestCase(unittest.TestCase):
     def test_las_load(self):
         """Tests if a .las file succesfully loads when cloud.Cloud is called"""
         self.assertEqual(type(self.test_cloud), cloud.Cloud)
+
+    def test_ply_load(self):
+        cloud.Cloud(os.path.join(data_dir, "temp_test_write.ply"))
+
+    def test_cloud_summary(self):
+        print(self.test_cloud)
+
 
     def test_grid_creation(self):
         """Tests if the grid is successfully created."""
@@ -124,6 +129,15 @@ class CloudTestCase(unittest.TestCase):
 
     def test_convex_hull(self):
         self.test_cloud.convex_hull
+
+    def test_append(self):
+        n_points = len(self.test_cloud.data.points)
+        self.test_cloud.data._append(self.test_cloud.data)
+        self.assertGreater(len(self.test_cloud.data.points), n_points)
+
+    def test_write(self):
+        self.test_cloud.write(os.path.join(data_dir, 'test_write.las'))
+        os.remove(os.path.join(data_dir, 'test_write.las'))
 
 
 class GridTestCase(unittest.TestCase):
@@ -219,6 +233,10 @@ class GISExportTestCase(unittest.TestCase):
         self.test_grid = cloud.Cloud(test_las).grid(1)
         self.test_raster = self.test_grid.raster("max", "z")
 
+    def test_project_indices(self):
+        test_indices = np.array([[0,0], [1,1]])
+        gisexport.project_indices(test_indices, self.test_raster)
+
     def test_pcs_exists(self):
         print(os.path.realpath(__file__))
         pcs_path = os.path.join('..', 'pyfor', 'pcs.csv', os.path.dirname(os.path.realpath(__file__)))
@@ -243,6 +261,8 @@ class GISExportTestCase(unittest.TestCase):
     def test_array_to_polygon(self):
         array = np.random.randint(1, 5, size=(99, 99)).astype(np.int32)
         gisexport.array_to_polygons(array, self.test_raster._affine)
+        gisexport.array_to_polygons(array)
+
 class VoxelGridTestCase(unittest.TestCase):
     def setUp(self):
         self.test_voxel_grid = voxelizer.VoxelGrid(cloud.Cloud(test_las), cell_size=2)
