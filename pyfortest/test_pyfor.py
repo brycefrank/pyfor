@@ -227,6 +227,23 @@ class RasterTestCase(unittest.TestCase):
         self.test_raster.crs = None
         self.test_raster.write("./thing.tif")
 
+def test_func(las_path):
+    cloud.Cloud(las_path)
+
+class CollectionTestCase(unittest.TestCase):
+    def setUp(self):
+        self.test_col = collection.from_dir(os.path.join(data_dir, 'mock_collection'))
+
+    def test_par_apply(self):
+        self.test_col.par_apply(test_func)
+        self.test_col.par_apply(test_func, buffer_distance=2)
+
+
+
+
+
+
+
 
 
 class GISExportTestCase(unittest.TestCase):

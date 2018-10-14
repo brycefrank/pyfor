@@ -23,14 +23,14 @@ Release Status: 0.3.0 is an adolescent LiDAR data processing package adequate fo
 
 ## Samples
 
-- [Introduction](https://github.com/brycefrank/pyfor/blob/master/samples/Introduction.ipynb)
-- [File Input and Plotting](https://github.com/brycefrank/pyfor/blob/master/samples/ImportsExports.ipynb)
-- [Normalization](https://github.com/brycefrank/pyfor/blob/master/samples/Normalization.ipynb)
-- [Canopy Height Models](https://github.com/brycefrank/pyfor/blob/master/samples/CanopyHeightModel.ipynb)
-- [Clipping](https://github.com/brycefrank/pyfor/blob/master/samples/Clipping.ipynb)
-- [Watershed Segmentation](https://github.com/brycefrank/pyfor/blob/master/samples/WatershedSegmentation.ipynb)
-- [Grid Metrics](https://github.com/brycefrank/pyfor/blob/master/samples/GridMetrics.ipynb)
-- [Collections](https://github.com/brycefrank/pyfor/blob/master/samples/Collections.ipynb)
+- [Introduction](https://github.com/brycefrank/pyfor_manual/tree/master/notebooks/1-Introduction.ipynb)
+- [File Input and Plotting](https://github.com/brycefrank/pyfor_manual/tree/master/notebooks/2-ImportsExports.ipynb)
+- [Canopy Height Models](https://github.com/brycefrank/pyfor_manual/tree/master/notebooks/3-CanopyHeightModel.ipynb)
+- [Clipping](https://github.com/brycefrank/pyfor_manual/tree/master/notebooks/4-Clipping.ipynb)
+- [Normalization](https://github.com/brycefrank/pyfor_manual/tree/master/notebooks/5-Normalization.ipynb)
+- [Grid Metrics](https://github.com/brycefrank/pyfor_manual/tree/master/notebooks/6-GridMetrics.ipynb)
+- [Collections](https://github.com/brycefrank/pyfor_manual/tree/master/notebooks/7-Collections.ipynb)
+- [Watershed Segmentation](https://github.com/brycefrank/pyfor_manual/tree/master/notebooks/8-WatershedSegmentation.ipynb)
 
 ## Installation
 
