@@ -1,7 +1,6 @@
 import os
 import laspy
 import pandas as pd
-from joblib import Parallel, delayed
 import pyfor
 import geopandas as gpd
 
@@ -22,7 +21,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
             self.set_geometry("bounding_box", inplace=True)
 
     @classmethod
-    def from_dir(cls, las_dir, n_jobs = 1, get_bounding_boxes = True):
+    def from_dir(cls, las_dir, n_jobs=1, get_bounding_boxes = True):
         """
         Wrapped function for producing a CloudDataFrame from a directory of las files.
         :param las_dir:
@@ -50,13 +49,14 @@ class CloudDataFrame(gpd.GeoDataFrame):
         via joblib Parallel and delayed.
 
         :param func: The user defined function, must accept a single argument, the path of the las file.
-        :param n_jobs: The nlumber of threads to spawn, default of 1.
+        :param n_jobs: The number of threads to spawn, default of 1.
         :param column: The column to apply on, will be the first argument to func
         :param buffer_distance: The distance to buffer and aggregate each tile.
+        :param *args: Further arguments to `func`
         """
-
+        from joblib import Parallel, delayed
         if buffer_distance > 0:
-            self.buffer(buffer_distance)
+            self._buffer(buffer_distance)
             for i, geom in enumerate(self["bounding_box"]):
                 intersecting = self._get_intersecting(i)
 
@@ -65,7 +65,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
                 parent_cloud = pyfor.cloud.Cloud(self["las_path"].iloc[i])
                 for path in intersecting["las_path"]:
                     adjacent_cloud = pyfor.cloud.Cloud(path)
-                    parent_cloud.las._append(adjacent_cloud.las)
+                    parent_cloud.data._append(adjacent_cloud.data)
 
         output = Parallel(n_jobs=self.n_threads)(delayed(func)(plot_path, *args) for plot_path in self[column])
         return output
