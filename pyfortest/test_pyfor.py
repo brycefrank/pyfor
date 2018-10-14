@@ -238,14 +238,6 @@ class CollectionTestCase(unittest.TestCase):
         self.test_col.par_apply(test_func)
         self.test_col.par_apply(test_func, buffer_distance=2)
 
-
-
-
-
-
-
-
-
 class GISExportTestCase(unittest.TestCase):
     def setUp(self):
         self.test_grid = cloud.Cloud(test_las).grid(1)

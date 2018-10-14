@@ -2,7 +2,7 @@
   <img src="docs/tile.png" width="400">
 </p>
 
-[Road Map](https://github.com/brycefrank/pyfor/projects/12) | [Samples](https://github.com/brycefrank/pyfor/tree/master/samples) | [Changelog](https://github.com/brycefrank/pyfor/blob/master/CHANGELOG.md)
+[Road Map](https://github.com/brycefrank/pyfor/projects/12) | [Samples](https://github.com/brycefrank/pyfor_manual/tree/master/notebooks) | [Changelog](https://github.com/brycefrank/pyfor/blob/master/CHANGELOG.md)
 
 [![Documentation Status](https://readthedocs.org/projects/pyfor/badge/?version=latest)](http://brycefrank.com/pyfor)[![Build Status](https://travis-ci.org/brycefrank/pyfor.svg?branch=master)](https://travis-ci.org/brycefrank/pyfor)[![Coverage Status](https://coveralls.io/repos/github/brycefrank/pyfor/badge.svg?branch=master)](https://coveralls.io/github/brycefrank/pyfor?branch=master)
 
