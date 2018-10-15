@@ -36,6 +36,7 @@ class Grid:
         self.cells = self.cloud.data.points.groupby(['bins_x', 'bins_y'])
 
     def _update(self):
+        self.cloud.data._update()
         self.__init__(self.cloud, self.cell_size)
 
     def raster(self, func, dim, **kwargs):

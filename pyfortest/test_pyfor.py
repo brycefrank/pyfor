@@ -157,6 +157,7 @@ class GridTestCase(unittest.TestCase):
     def test_cell_size(self):
         self.assertEqual(self.test_grid.cell_size, 1)
 
+
     def test_empty_cells(self):
         empty = self.test_grid.empty_cells
         # Check that there are the correct number
@@ -181,6 +182,18 @@ class GridTestCase(unittest.TestCase):
 
         self.test_grid.metrics(test_metrics_dict)
         self.test_grid.metrics(test_metrics_dict, as_raster=True)
+
+    def test_update(self):
+        """
+        Change a few points from parent cloud, update and check if different
+        :return:
+        """
+        pre = self.test_grid.m
+        self.test_grid.cloud.data.points = self.test_grid.cloud.data.points.iloc[1:50]
+        print(self.test_grid.cloud.data.points)
+        self.test_grid._update()
+        post =  self.test_grid.m
+        print(pre, post)
 
     def tearDown(self):
         del self.test_grid.cloud.data.header
