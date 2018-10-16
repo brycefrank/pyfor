@@ -253,6 +253,8 @@ class KrausPfeifer1998:
         :param cell_size: The cell_size for the intermediate BEM. Values from 1 to 6 are common.
         """
         bem = self.bem(cell_size)
+        # Rebin the cloud to the new cell size
+        self.cloud.grid(cell_size)
         df = pd.DataFrame(bem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
         df = self.cloud.data.points.reset_index().merge(df, how="left").set_index('index')
         self.cloud.data.points['z'] = df['z'] - df['val']
