@@ -255,6 +255,7 @@ class KrausPfeifer1998:
         bem = self.bem(cell_size)
         # Rebin the cloud to the new cell size
         self.cloud.grid(cell_size)
+        self.cloud.data._update()
         df = pd.DataFrame(bem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
         df = self.cloud.data.points.reset_index().merge(df, how="left").set_index('index')
         self.cloud.data.points['z'] = df['z'] - df['val']

@@ -101,8 +101,10 @@ class Grid:
         values = cell_values[dim].values
 
         # https://stackoverflow.com/questions/12864445/numpy-meshgrid-points
+        # TODO assumes a raster occupies a square/rectangular space. Is it possible to not assume this and increase performance?
         X, Y = np.mgrid[1:self.n+1, 1:self.m+1]
 
+        # TODO generally a slow approach
         interp_grid = griddata(points, values, (X, Y), method=interp_method).T
 
         return Raster(interp_grid, self)
