@@ -16,16 +16,13 @@ class CloudData:
     def __init__(self, points, header):
         self.header = header
         self.points = points
-        self.x = self.points["x"]
-        self.y = self.points["y"]
-        self.z = self.points["z"]
-        self.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
-        self.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
+        self.min = [np.min(self.points["x"]), np.min(self.points["y"]), np.min(self.points["z"])]
+        self.max = [np.max(self.points["x"]), np.max(self.points["y"]), np.max(self.points["z"])]
         self.count = np.alen(self.points)
 
     def _update(self):
-        self.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
-        self.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
+        self.min = [np.min(self.points["x"]), np.min(self.points["y"]), np.min(self.points["z"])]
+        self.max = [np.max(self.points["x"]), np.max(self.points["y"]), np.max(self.points["z"])]
         self.count = np.alen(self.points)
 
     def _append(self, other):
@@ -171,7 +168,7 @@ class Cloud:
         :return: If return_plot == True, returns matplotlib plt object. Not yet implemented.
         """
 
-        rasterizer.Grid(self, cell_size).raster("max", "z").plot(cmap, block = block, return_plot = return_plot)
+        rasterizer.Grid(self, cell_size).raster("max", "z").plot(cmap, block=block, return_plot=return_plot)
 
     def iplot3d(self, max_points=30000, point_size=0.5, dim="z", colorscale="Viridis"):
         """
@@ -292,7 +289,13 @@ class Cloud:
         """
         condition = (self.data.points[dim] > min) & (self.data.points[dim] < max)
 
-        self.data = CloudData(self.data.points[condition], self.data.header)
+        # TODO this is not maintainable
+        if self.extension == '.las':
+            self.data = LASData(self.data.points[condition], self.data.header)
+        elif self.extension == '.ply':
+            self.data = PLYData(self.data.points[condition], self.data.header)
+        else:
+            self.data = CloudData(self.data.points, self.data.header)
         self.data._update()
 
     def chm(self, cell_size, interp_method=None, pit_filter=None, kernel_size=3):
