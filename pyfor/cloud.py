@@ -60,6 +60,16 @@ class LASData(CloudData):
         writer.pt_src_id = self.points["pt_src_id"]
         writer.close()
 
+def _cloud_init(points, header, extension):
+    """
+    Checks the extension of the cloud object and initialize the correct *Data object.
+    :param cloud:
+    """
+    if extension == '.las':
+        return LASData(points, header)
+    elif extension == '.ply':
+        return PLYData(points, header)
+
 class Cloud:
     """
     The cloud object is the integral unit of pyfor, and is where most of the action takes place. Many of the following \
@@ -69,6 +79,7 @@ class Cloud:
 
         if type(path) == str or type(path) == pathlib.PosixPath:
             self.filepath = path
+            self.name = os.path.splitext(path)[0]
             self.extension = os.path.splitext(path)[1]
 
             if self.extension == '.las':
@@ -95,7 +106,7 @@ class Cloud:
                 header = None
                 self.data = PLYData(points, header)
 
-        elif type(path) == CloudData:
+        elif type(path) == CloudData or  path.__class__.__bases__[0] == CloudData:
             self.data = path
         else:
             print("Object type not supported, please input either a las file path or a CloudData object.")
@@ -276,7 +287,8 @@ class Cloud:
         # Create copy to avoid warnings
         keep_points = self.data.points.iloc[keep].copy()
 
-        new_cloud =  Cloud(CloudData(keep_points, self.data.header))
+        data = _cloud_init(keep_points, self.data.header, self.extension)
+        new_cloud = Cloud(data)
         new_cloud.data._update()
 
         return new_cloud
@@ -291,8 +303,7 @@ class Cloud:
         self.las.points dataframe.
         """
         condition = (self.data.points[dim] > min) & (self.data.points[dim] < max)
-
-        self.data = CloudData(self.data.points[condition], self.data.header)
+        self.data = _cloud_init(self.data.points[condition], self.data.header, self.extension)
         self.data._update()
 
     def chm(self, cell_size, interp_method=None, pit_filter=None, kernel_size=3):
