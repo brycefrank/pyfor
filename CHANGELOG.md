@@ -8,6 +8,9 @@ Updates between October 11th, 2018 and []
 ## Documentation
 1. Updated docstrings with 0.3.0 changes.
 
+## Rasterizer
+1. Removed `Grid.normalize`, a deprecated function
+
 # 0.3.0
 
 Updates between September 5, 2018 and October 10th, 2018

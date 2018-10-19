@@ -1,7 +1,6 @@
 # Functions for rasterizing
 import numpy as np
 import pandas as pd
-from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
 from pyfor import gisexport
 from pyfor import ground_filter
@@ -57,20 +56,6 @@ class Grid:
         array[bin_summary["bins_y"], bin_summary["bins_x"]] = bin_summary[dim]
         return Raster(array, self)
 
-    def boolean_summary(self, func, dim):
-        # TODO Might not be worth its own function...
-        """
-        Calculates a column in self.data that is a boolean of whether or not that point is the point that corresponds \
-        to the function passed. For example, this can be used to create a boolean mask of points that are the minimum \
-        z point in their respective cell.
-
-        :param func: The function to calculate on each group.
-        :param dim: The dimension of the point cloud as a string (x, y or z)
-        """
-
-        mask = self.cloud.data.groupby(['bins_x', 'bins_y'])[dim].transform(func) == self.cloud.data[dim]
-        return mask
-
     @property
     def empty_cells(self):
         """
@@ -95,6 +80,7 @@ class Grid:
 
         :return: An interpolated array.
         """
+        from scipy.interpolate import griddata
         # Get points and values that we already have
         cell_values = self.cells[dim].agg(func).reset_index()
 
@@ -134,33 +120,6 @@ class Grid:
             # Get list of metric names
             metrics = [tup[1] for tup in list(aggregate)]
             return pd.DataFrame({'dim': dims, 'metric': metrics, 'raster': rasters}).set_index(['dim', 'metric'])
-
-    def normalize(self, num_windows, dh_max, dh_0, b=2, interp_method="nearest"):
-        """
-        Returns a new, normalized Grid object.
-        :return:
-        """
-        import warnings
-        warnings.warn("Raster.normalize will be removed in 3.1 in favor of standalone filters.", category=DeprecationWarning)
-
-        if self.cloud.normalized == True:
-            print("It appears this has already been normalized once. Proceeding with normalization but expect \
-            strange results.")
-
-        # Retrieve the DEM
-        dem = self.ground_filter(num_windows, dh_max, dh_0, b, interp_method)
-
-        # Organize the array into a dataframe and merge
-        df = pd.DataFrame(dem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
-        df = self.cloud.data.points.reset_index().merge(df, how="left").set_index('index')
-        df['z'] = df['z'] - df['val']
-
-        # Initialize new grid object
-        ground_grid = Grid(self.cloud, self.cell_size)
-        ground_grid.data = df
-        ground_grid.cells = ground_grid.data.groupby(['bins_x', 'bins_y'])
-
-        return ground_grid
 
 class Raster:
     def __init__(self, array, grid):
