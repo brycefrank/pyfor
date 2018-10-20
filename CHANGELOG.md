@@ -11,6 +11,9 @@ Updates between October 11th, 2018 and []
 ## Rasterizer
 1. Removed `Grid.normalize`, a deprecated function
 
+## Testing Suite
+1. Added many tests to achieve 90% coverage
+
 # 0.3.0
 
 Updates between September 5, 2018 and October 10th, 2018

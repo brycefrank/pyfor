@@ -30,7 +30,7 @@ Release Status: 0.3.0 is an adolescent LiDAR data processing package adequate fo
 - [Normalization](https://github.com/brycefrank/pyfor_manual/tree/master/notebooks/5-Normalization.ipynb)
 - [Grid Metrics](https://github.com/brycefrank/pyfor_manual/tree/master/notebooks/6-GridMetrics.ipynb)
 - [Collections](https://github.com/brycefrank/pyfor_manual/tree/master/notebooks/7-Collections.ipynb)
-- [Watershed Segmentation](https://github.com/brycefrank/pyfor_manual/tree/master/notebooks/8-WatershedSegmentation.ipynb)
+- [Tree Detection and Segmentation](https://github.com/brycefrank/pyfor_manual/tree/master/notebooks/8-DetectionSegmentation.ipynb)
 
 ## Installation
 
