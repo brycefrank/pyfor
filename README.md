@@ -62,6 +62,21 @@ If you see no errors, you are ready to process!
 
 **A Note on IDEs:** One of the draws of pyfor is its 3D and 2D plotting methods. These work best in Jupyter notebooks but also work well in PyCharm interactive consoles (version 2018.1 or greater).
 
+## Updating
+
+I generally update the `master` branch every month or so, indicated in the changelog. If you need to update, the process is simple. Navigate to the folder you cloned `pyfor` in and do the following
+
+```bash
+# For Linux / macOS:
+source activate pyfor_env
+
+# For Windows:
+activate pyfor_env
+
+git pull
+pip install . --upgrade
+```
+
 ## Features
 
 Below is a list of features, complete and otherwise.
