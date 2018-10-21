@@ -351,5 +351,29 @@ class Ayrey2017TestCase(unittest.TestCase):
     def test_get_non_veg_indices(self):
         self.test_filter._get_non_veg_indices(1)
 
+    def test_remove_veg(self):
+        self.test_filter._remove_veg()
+
+    def test_cluster_layer(self):
+        self.test_filter._cluster_layer(1)
+
+    def test_buffer_cluster_layers(self):
+        self.test_filter._buffer_cluster_layers()
+
+    def test_layer_inds_between_pct(self):
+        self.test_filter._layer_inds_between_pct(70, 80)
+
+    def test_construct_layer_weights(self):
+        self.test_filter._construct_layer_weights()
+
+    def test_get_overlap_map(self):
+        self.test_filter.get_overlap_map()
+
+    def test_detect(self):
+        self.test_filter.detect()
+
+
+
+
 
 

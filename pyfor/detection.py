@@ -1,6 +1,7 @@
 import pyfor
 import numpy as np
 import geopandas as gpd
+from functools import lru_cache
 
 class Ayrey2017:
     # TODO Make inherent from a generic tree detection class
@@ -94,6 +95,7 @@ class Ayrey2017:
 
         return self.points.loc[self.points['bins_z'] == layer_index]
 
+    @lru_cache(maxsize=1)
     def _get_non_veg_indices(self, layer_index):
         """
         Retrieves the non-vegetation indices. These are the points that are kept for further analysis. Used as a
@@ -104,9 +106,12 @@ class Ayrey2017:
         """
         from sklearn.cluster import DBSCAN
         layer_xy = self.points.loc[self.points['bins_z'] == layer_index]
-        db = DBSCAN(eps=0.3, min_samples=10).fit(layer_xy)
-        non_veg_inds = layer_xy.index.values[np.where(db.labels_ == -1)]
-        return(non_veg_inds)
+        if len(layer_xy) > 0 :
+            db = DBSCAN(eps=0.3, min_samples=10).fit(layer_xy)
+            non_veg_inds = layer_xy.index.values[np.where(db.labels_ == -1)]
+            return(non_veg_inds)
+        else:
+            return None
 
     def _remove_veg(self):
         """
@@ -117,7 +122,7 @@ class Ayrey2017:
         :return: The indices to keep.
         """
 
-        non_veg_indices = [self._get_non_veg_indices(veg_layer) for veg_layer in self.veg_layers]
+        non_veg_indices = [self._get_non_veg_indices(veg_layer) for veg_layer in self.veg_layers if self._get_non_veg_indices(veg_layer) is not None]
         non_veg_indices = np.concatenate(non_veg_indices).ravel()
         other_layer_indices = self.points.index.values[np.where(self.points['bins_z'] > self.veg_layers[-1])]
         keep_indices = np.concatenate([non_veg_indices, other_layer_indices])
