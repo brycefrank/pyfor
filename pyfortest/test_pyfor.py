@@ -109,11 +109,13 @@ class CloudTestCase(unittest.TestCase):
         poly = gpd.read_file(test_shp)['geometry'][0]
         self.test_cloud_las.clip(poly)
 
-    def test_plot_return(self):
-        # FIXME broken on travis-ci
-        #plot = self.test_cloud.plot(return_plot=True)
-        #self.assertEqual(type(plot), matplotlib.figure.Figure)
-        pass
+    # FIXME will be deprecated in 0.3.2
+    def test_discrete_cmap(self):
+        self.test_cloud_las._discrete_cmap(10)
+
+    # FIXME will be deprecated in 0.3.2
+    def test_set_discrete_color(self):
+        self.test_cloud_las._set_discrete_color(10, self.test_cloud_las.data.points['x'])
 
     def test_plot(self):
         import matplotlib.pyplot as plt
@@ -122,6 +124,7 @@ class CloudTestCase(unittest.TestCase):
 
     def test_plot3d(self):
         self.test_cloud_las.plot3d()
+        self.test_cloud_las.plot3d(dim='user_data')
 
     def test_normalize(self):
         test_cloud = cloud.Cloud(test_las)
@@ -255,6 +258,13 @@ class DetectedTopsTestCase(unittest.TestCase):
 
     def test_plot(self):
         self.test_detect.plot()
+
+class CrownSegmentsTestCase(unittest.TestCase):
+    def setUp(self):
+        self.test_segs = cloud.Cloud(test_las).chm(1, interp_method='nearest').watershed_seg()
+
+    def test_plot(self):
+        self.test_segs.plot()
 
 
 def test_func(las_path):
