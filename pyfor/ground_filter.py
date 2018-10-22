@@ -8,8 +8,7 @@ class Zhang2003:
     """
     Implements Zhang et. al (2003), a progressive morphological ground filter. This filter uses an opening operation
     combined with progressively larger filtering windows to remove features that are 'too steep'. This particular
-    implementation interacts only with a raster, so the output resolution will be dictated by the `cell_size` argument
-    (see below for details).
+    implementation interacts only with a raster, so the output resolution will be dictated by the `cell_size` argument.
     """
     def __init__(self, cloud, cell_size, n_windows=5, dh_max=2, dh_0=1, b=2, interp_method="nearest"):
         """
