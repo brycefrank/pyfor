@@ -1,27 +1,22 @@
 import numpy as np
 import pandas as pd
 
-
-
 class GroundFilter:
     pass
 
-
 class Zhang2003:
-    # TODO arguments to init are messy
-    def __init__(self, cloud, cell_size, n_windows=5, dh_max=2, dh_0=1, b = 2, interp_method = "nearest"):
+    """
+    Implements Zhang et. al (2003), a progressive morphological ground filter. This filter uses an opening operation
+    combined with progressively larger filtering windows to remove features that are 'too steep'. This particular
+    implementation interacts only with a raster, so the output resolution will be dictated by the `cell_size` argument.
+    """
+    def __init__(self, cloud, cell_size, n_windows=5, dh_max=2, dh_0=1, b=2, interp_method="nearest"):
         """
-        Implements Zhang et. al (2003), a progressive morphological ground filter. This returns a matrix of Z values for
-        each grid cell that have been determined to be actual ground cells.
-
-        :param array: The array to interpolate on, usually an aggregate of the minimum Z value
-        #TODO fix this to be max window size
-        :param number_of_windows:
-        :param dh_max: The maximum height threshold
-        :param dh_0: The starting null height threshold
-        :param c: The cell size used to construct the array
-        :param grid: The grid object used to construct the array
-        :return: An array corresponding to the filtered points, can be used to construct a DEM via the Raster class
+        :param n_windows: The number of windows to construct for filtering.
+        :param dh_max: The maximum height threshold.
+        :param dh_0: The starting null height threshold.
+        :param cell_size: The cell_size used to construct the array for filtering, also the output size of the BEM.
+        :param interp_method: The interpolation method used to fill nan values in the final BEM.
         """
         self.cloud = cloud
         self.n_windows = n_windows
@@ -76,7 +71,6 @@ class Zhang2003:
             return(dh_max)
 
     def _filter(self):
-        # TODO add option for intermediate surface filtering and return intermediate surfaces
         from scipy.ndimage.morphology import grey_opening
 
         w_k_list = [self._window_size(i, self.b) for i in range(self.n_windows)]
@@ -132,7 +126,7 @@ class KrausPfeifer1998:
     This filter is used in FUSION software, and the same default values for the parameters are used in this implementation.
     """
 
-    def __init__(self, cloud, cell_size, a=1, b=4, g=-2, w=2.5, iterations=5, tolerance=0, cpu_optimize=True):
+    def __init__(self, cloud, cell_size, a=1, b=4, g=-2, w=2.5, iterations=5, tolerance=0):
         """
         :param cloud: The input `Cloud` object.
         :param cell_size: The cell size of the intermediate surface used in filtering in the same units as the input
@@ -142,7 +136,6 @@ class KrausPfeifer1998:
         :param g: The distance from the surface under which all points are given a weight of 1.
         :param w: The window width from g up considered for weighting.
         :param iterations: The number of iterations, i.e. the number of surfaces constructed.
-        :param cpu_optimize: If set to True more memory is used but performance is significantly increased
         """
         self.cloud = cloud
         self.cell_size = cell_size
@@ -151,7 +144,6 @@ class KrausPfeifer1998:
         self.g = g
         self.w = w
         self.iterations = iterations
-        self.cpu_optimize = cpu_optimize
 
         if tolerance == 0:
             self.tolerance = self.g + self.w
@@ -196,19 +188,12 @@ class KrausPfeifer1998:
         del p_i
         del surface
 
-        if self.cpu_optimize:
-            ix = np.zeros((grid.m, grid.n, depth + 1))
-            ix[self.cloud.data.points['bins_y'], self.cloud.data.points['bins_x'],
-               self.cloud.data.points['bins_z']] = self.cloud.data.points.index.values
-            ground_bins = (final_resid <= self.g + self.w).nonzero()
-            self.cloud.data.points = self.cloud.data.points.reset_index()
-            return self.cloud.data.points.loc[ix[ground_bins]]
-        else:
-            ground_bins = (final_resid <= self.g+self.w).nonzero()
-            bin_indexer = list(zip(ground_bins[0], ground_bins[1], ground_bins[2]))
-            self.cloud.data.points = self.cloud.data.points.set_index(['bins_y', 'bins_x', 'bins_z'])
-            self.cloud.data.points = self.cloud.data.points.reset_index()
-            return self.cloud.data.points.loc[bin_indexer].reset_index()
+        ix = np.zeros((grid.m, grid.n, depth + 1))
+        ix[self.cloud.data.points['bins_y'], self.cloud.data.points['bins_x'],
+           self.cloud.data.points['bins_z']] = self.cloud.data.points.index.values
+        ground_bins = (final_resid <= self.g + self.w).nonzero()
+        self.cloud.data.points = self.cloud.data.points.reset_index()
+        return self.cloud.data.points.loc[ix[ground_bins]]
 
 
     @property
@@ -224,6 +209,9 @@ class KrausPfeifer1998:
     def bem(self, cell_size):
         """
         Retrieve the bare earth model (BEM).
+
+        :param cell_size: The cell size of the BEM, this is independent of the cell size used in the intermediate \
+        surfaces.
         :return: A `Raster` object that represents the bare earth model.
         """
         ground_cloud = self.ground_points

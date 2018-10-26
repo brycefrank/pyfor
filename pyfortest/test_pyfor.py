@@ -9,6 +9,8 @@ import os
 import matplotlib.figure
 import numpy as np
 import geopandas as gpd
+import plyfile
+import matplotlib.pyplot as plt
 
 """
 Many of these tests currently just run the function. If anyone has any more rigorous ideas, please feel free to \
@@ -17,61 +19,85 @@ implement.
 
 data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_las = os.path.join(data_dir, 'test.las')
+test_ply = os.path.join(data_dir, 'test.ply')
 test_shp = os.path.join(data_dir, 'clip.shp')
 proj4str = "+proj=utm +zone=10 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
 
-class LASDataTestCase(unittest.TestCase):
+test_points = {
+    "x": [0, 1],
+    "y": [0, 1],
+    "z": [0, 1],
+    "intensity": [0, 1],
+    "classification": [0, 1],
+    "flag_byte": [0, 1],
+    "scan_angle_rank": [0, 1],
+    "user_data": [0, 1],
+    "pt_src_id": [0, 1],
+    "return_num": [0,1]
+}
+
+class PLYDataTestCase(unittest.TestCase):
     def setUp(self):
-        self.test_points = {
-            "x": [0, 1],
-            "y": [0, 1],
-            "z": [0, 1],
-            "intensity": [0, 1],
-            "classification": [0, 1],
-            "flag_byte": [0, 1],
-            "scan_angle_rank": [0, 1],
-            "user_data": [0, 1],
-            "pt_src_id": [0, 1],
-            "return_num": [0,1]
-        }
-
-        self.test_header = laspy.file.File(test_las).header
-
-        self.test_points = pd.DataFrame.from_dict(self.test_points)
-        self.column = [0,1]
-        self.test_cloud_data = cloud.LASData(self.test_points, self.test_header)
-
+        self.test_points = pd.DataFrame.from_dict(test_points).astype(np.float)
+        self.test_header = 0
+        self.test_ply_data = cloud.PLYData(self.test_points, self.test_header)
 
     def test_init(self):
-        self.assertEqual(type(self.test_cloud_data), cloud.LASData)
+        self.assertEqual(type(self.test_ply_data), cloud.PLYData)
 
     def test_data_length(self):
-        self.assertEqual(len(self.test_cloud_data.points), 2)
-
+        self.assertEqual(len(self.test_ply_data.points), 2)
 
     def test_write(self):
-        self.test_cloud_data.write(os.path.join(data_dir, "temp_test_write.las"))
+        self.test_ply_data.write(os.path.join(data_dir, "temp_test_write.ply"))
+        plyfile.PlyData.read(os.path.join(data_dir, 'temp_test_write.ply'))
+
+class LASDataTestCase(unittest.TestCase):
+    def setUp(self):
+        self.test_points = pd.DataFrame.from_dict(test_points)
+        self.test_header = laspy.file.File(test_las).header
+        self.column = [0,1]
+        self.test_las_data = cloud.LASData(self.test_points, self.test_header)
+        self.test_ply_data = cloud.PLYData(self.test_points, self.test_header)
+
+    def test_init(self):
+        self.assertEqual(type(self.test_las_data), cloud.LASData)
+        self.assertEqual(type(self.test_ply_data), cloud.PLYData)
+
+    def test_data_length(self):
+        self.assertEqual(len(self.test_las_data.points), 2)
+
+    def test_write(self):
+        self.test_las_data.write(os.path.join(data_dir, "temp_test_write.las"))
         read = laspy.file.File(os.path.join(data_dir, "temp_test_write.las"))
         self.assertEqual(type(read), laspy.file.File)
         read.close()
-
         os.remove(os.path.join(data_dir, "temp_test_write.las"))
-
-    # TODO tear down
 
 class CloudTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.test_cloud = cloud.Cloud(test_las)
+        self.test_cloud_las = cloud.Cloud(test_las)
+        self.test_cloud_ply = cloud.Cloud(test_ply)
 
     def test_las_load(self):
         """Tests if a .las file succesfully loads when cloud.Cloud is called"""
-        self.assertEqual(type(self.test_cloud), cloud.Cloud)
+        self.assertEqual(type(self.test_cloud_las), cloud.Cloud)
+
+    def test_ply_load(self):
+        cloud.Cloud(os.path.join(data_dir, "test.ply"))
+
+    def test_not_supported(self):
+        cloud.Cloud(os.path.join(data_dir, "clip.shp"))
+
+    def test_cloud_summary(self):
+        print(self.test_cloud_las)
+        print(self.test_cloud_ply)
 
     def test_grid_creation(self):
         """Tests if the grid is successfully created."""
         # Does the call to grid return the proper type
-        self.assertEqual(type(self.test_cloud.grid(1)), rasterizer.Grid)
+        self.assertEqual(type(self.test_cloud_las.grid(1)), rasterizer.Grid)
 
     def test_filter_z(self):
         self.test_filter = cloud.Cloud(test_las)
@@ -82,28 +108,23 @@ class CloudTestCase(unittest.TestCase):
 
     def test_clip_polygon(self):
         poly = gpd.read_file(test_shp)['geometry'][0]
-        self.test_cloud.clip(poly)
+        self.test_cloud_las.clip(poly)
 
-    def test_plot_return(self):
-        # FIXME broken on travis-ci
-        #plot = self.test_cloud.plot(return_plot=True)
-        #self.assertEqual(type(plot), matplotlib.figure.Figure)
-        pass
+    # FIXME will be deprecated in 0.3.2
+    def test_discrete_cmap(self):
+        self.test_cloud_las._discrete_cmap(10)
+
+    # FIXME will be deprecated in 0.3.2
+    def test_set_discrete_color(self):
+        self.test_cloud_las._set_discrete_color(10, self.test_cloud_las.data.points['x'])
 
     def test_plot(self):
-        import matplotlib.pyplot as plt
-        self.test_cloud.plot()
+        self.test_cloud_las.plot()
         plt.close()
 
     def test_plot3d(self):
-        self.test_cloud.plot3d()
-
-    # TODO fix for 0.3.0
-    #def test_ground_filter_returns_raster(self):
-    #    ground = self.test_cloud.grid(0.5).ground_filter(3, 2, 1)
-    #    self.assertEqual(type(ground), rasterizer.Raster)
-    #    # A very stringent test, ok to reduce:
-    #    self.assertNotEqual(np.any(ground), 0)
+        self.test_cloud_las.plot3d()
+        self.test_cloud_las.plot3d(dim='user_data')
 
     def test_normalize(self):
         test_cloud = cloud.Cloud(test_las)
@@ -111,14 +132,22 @@ class CloudTestCase(unittest.TestCase):
         self.assertLess(test_cloud.data.max[2], 65)
 
     def test_chm(self):
-        self.test_cloud.chm(0.5, interp_method="nearest", pit_filter= "median")
+        self.test_cloud_las.chm(0.5, interp_method="nearest", pit_filter="median")
 
     def test_chm_without_interpolation_method(self):
-        self.assertEqual(type(self.test_cloud.chm(0.5, interp_method=None)), rasterizer.Raster)
+        self.assertEqual(type(self.test_cloud_las.chm(0.5, interp_method=None)), rasterizer.Raster)
 
     def test_convex_hull(self):
-        self.test_cloud.convex_hull
+        self.test_cloud_las.convex_hull
 
+    def test_append(self):
+        n_points = len(self.test_cloud_las.data.points)
+        self.test_cloud_las.data._append(self.test_cloud_las.data)
+        self.assertGreater(len(self.test_cloud_las.data.points), n_points)
+
+    def test_write(self):
+        self.test_cloud_las.write(os.path.join(data_dir, 'test_write.las'))
+        os.remove(os.path.join(data_dir, 'test_write.las'))
 
 
 class GridTestCase(unittest.TestCase):
@@ -136,6 +165,7 @@ class GridTestCase(unittest.TestCase):
 
     def test_cell_size(self):
         self.assertEqual(self.test_grid.cell_size, 1)
+
 
     def test_empty_cells(self):
         empty = self.test_grid.empty_cells
@@ -161,6 +191,18 @@ class GridTestCase(unittest.TestCase):
 
         self.test_grid.metrics(test_metrics_dict)
         self.test_grid.metrics(test_metrics_dict, as_raster=True)
+
+    def test_update(self):
+        """
+        Change a few points from parent cloud, update and check if different
+        :return:
+        """
+        pre = self.test_grid.m
+        self.test_grid.cloud.data.points = self.test_grid.cloud.data.points.iloc[1:50]
+        print(self.test_grid.cloud.data.points)
+        self.test_grid._update()
+        post =  self.test_grid.m
+        print(pre, post)
 
     def tearDown(self):
         del self.test_grid.cloud.data.header
@@ -199,6 +241,9 @@ class RasterTestCase(unittest.TestCase):
         self.test_raster.plot()
         self.test_raster.plot(return_plot=True)
 
+    def test_local_maxima(self):
+        self.test_raster.local_maxima()
+
     def test_write_with_crs(self):
         self.test_raster.write("./thing.tif")
         os.remove("./thing.tif")
@@ -207,12 +252,43 @@ class RasterTestCase(unittest.TestCase):
         self.test_raster.crs = None
         self.test_raster.write("./thing.tif")
 
+class DetectedTopsTestCase(unittest.TestCase):
+    def setUp(self):
+        self.test_detect = cloud.Cloud(test_las).chm(1, interp_method='nearest').local_maxima()
 
+    def test_plot(self):
+        self.test_detect.plot()
+        plt.close()
+
+class CrownSegmentsTestCase(unittest.TestCase):
+    def setUp(self):
+        self.test_segs = cloud.Cloud(test_las).chm(1, interp_method='nearest').watershed_seg()
+
+    # TODO Broken on travis
+    #def test_plot(self):
+    #    self.test_segs.plot()
+    #    plt.close()
+
+
+def test_func(las_path):
+    cloud.Cloud(las_path)
+
+class CollectionTestCase(unittest.TestCase):
+    def setUp(self):
+        self.test_col = collection.from_dir(os.path.join(data_dir, 'mock_collection'))
+
+    def test_par_apply(self):
+        self.test_col.par_apply(test_func)
+        self.test_col.par_apply(test_func, buffer_distance=2)
 
 class GISExportTestCase(unittest.TestCase):
     def setUp(self):
         self.test_grid = cloud.Cloud(test_las).grid(1)
         self.test_raster = self.test_grid.raster("max", "z")
+
+    def test_project_indices(self):
+        test_indices = np.array([[0,0], [1,1]])
+        gisexport.project_indices(test_indices, self.test_raster)
 
     def test_pcs_exists(self):
         print(os.path.realpath(__file__))
@@ -238,6 +314,7 @@ class GISExportTestCase(unittest.TestCase):
     def test_array_to_polygon(self):
         array = np.random.randint(1, 5, size=(99, 99)).astype(np.int32)
         gisexport.array_to_polygons(array, self.test_raster._affine)
+        gisexport.array_to_polygons(array)
 
 class VoxelGridTestCase(unittest.TestCase):
     def setUp(self):
@@ -245,3 +322,71 @@ class VoxelGridTestCase(unittest.TestCase):
 
     def test_voxel_raster(self):
         self.test_voxel_grid.voxel_raster("count", "z")
+
+class KrausPfeifer1998(unittest.TestCase):
+    def setUp(self):
+        self.test_cloud = cloud.Cloud(test_las)
+        self.test_kp_filter = ground_filter.KrausPfeifer1998(self.test_cloud, 3)
+
+    def test_filter(self):
+        self.test_kp_filter._filter()
+
+class Zhang2003TestCase(unittest.TestCase):
+    def setUp(self):
+        self.test_cloud = cloud.Cloud(test_las)
+        self.test_zhang_filter = ground_filter.Zhang2003(self.test_cloud, 3)
+
+    def test_filter(self):
+        self.test_zhang_filter._filter()
+
+    def test_bem(self):
+        self.test_zhang_filter.bem()
+
+class Ayrey2017TestCase(unittest.TestCase):
+    def setUp(self):
+        self.test_cloud = cloud.Cloud(test_las)
+        self.test_cloud.normalize(10)
+
+        # Shrink down to a very tiny, sparse cloud for testing individual functions
+        self.test_cloud.filter(min=405000, max=405000+15, dim="x")
+        self.test_cloud.filter(min=3276300, max=3276300+15, dim="y")
+        self.test_filter = detection.Ayrey2017(self.test_cloud)
+
+    def test_top_coordinates(self):
+        self.assertEqual(self.test_filter._top_coordinates.shape[1], 2)
+
+    def test_complete_layers(self):
+        self.test_filter._complete_layers
+
+    def test_get_layer(self):
+        self.test_filter._get_layer(1)
+
+    def test_get_non_veg_indices(self):
+        self.test_filter._get_non_veg_indices(1)
+
+    def test_remove_veg(self):
+        self.test_filter._remove_veg()
+
+    def test_cluster_layer(self):
+        self.test_filter._cluster_layer(1)
+
+    def test_buffer_cluster_layers(self):
+        self.test_filter._buffer_cluster_layers()
+
+    def test_layer_inds_between_pct(self):
+        self.test_filter._layer_inds_between_pct(70, 80)
+
+    def test_construct_layer_weights(self):
+        self.test_filter._construct_layer_weights()
+
+    def test_get_overlap_map(self):
+        self.test_filter.get_overlap_map()
+
+    def test_detect(self):
+        self.test_filter.detect()
+
+
+
+
+
+
