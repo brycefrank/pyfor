@@ -252,6 +252,10 @@ class Raster:
         :param path: The path to write to.
         """
 
+        if not self.grid.cloud.crs:
+            from warnings import warn
+            warn('No coordinate reference system defined. Please set the .crs attribute of the Cloud object.', UserWarning)
+
         gisexport.array_to_raster(self.array, self.cell_size, self.grid.cloud.data.min[0], self.grid.cloud.data.max[1],
                                       self.grid.cloud.crs, path)
 

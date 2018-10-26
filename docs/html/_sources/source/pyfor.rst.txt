@@ -12,7 +12,6 @@ Submodules
    pyfor.detection
    pyfor.gisexport
    pyfor.ground_filter
-   pyfor.parser
    pyfor.plot
    pyfor.rasterizer
    pyfor.voxelizer

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyfor.ground_filter module &mdash; pyfor 0.2.3 documentation</title>
+  <title>pyfor.ground_filter module &mdash; pyfor 0.3.1 documentation</title>
   
 
   
@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -59,7 +58,7 @@
             
             
               <div class="version">
-                0.2
+                0.3
               </div>
             
           
@@ -168,14 +167,14 @@
 
 <dl class="class">
 <dt id="pyfor.ground_filter.KrausPfeifer1998">
-<em class="property">class </em><code class="descclassname">pyfor.ground_filter.</code><code class="descname">KrausPfeifer1998</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em>, <em>a=1</em>, <em>b=4</em>, <em>g=-2</em>, <em>w=2.5</em>, <em>iterations=5</em>, <em>tolerance=0</em>, <em>cpu_optimize=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.KrausPfeifer1998" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pyfor.ground_filter.</code><code class="descname">KrausPfeifer1998</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em>, <em>a=1</em>, <em>b=4</em>, <em>g=-2</em>, <em>w=2.5</em>, <em>iterations=5</em>, <em>tolerance=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.KrausPfeifer1998" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Holds functions and data for implementing Kraus and Pfeifer (1998) ground filter. The Kraus and Pfeifer ground filter
 is a simple filter that uses interpolation of errors and an iteratively constructed surface to filter ground points.
 This filter is used in FUSION software, and the same default values for the parameters are used in this implementation.</p>
 <dl class="method">
 <dt id="pyfor.ground_filter.KrausPfeifer1998.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em>, <em>a=1</em>, <em>b=4</em>, <em>g=-2</em>, <em>w=2.5</em>, <em>iterations=5</em>, <em>tolerance=0</em>, <em>cpu_optimize=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.KrausPfeifer1998.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em>, <em>a=1</em>, <em>b=4</em>, <em>g=-2</em>, <em>w=2.5</em>, <em>iterations=5</em>, <em>tolerance=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.KrausPfeifer1998.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -193,15 +192,23 @@ This filter is used in FUSION software, and the same default values for the para
 :param b: A steepness parameter for the interpolating function.
 :param g: The distance from the surface under which all points are given a weight of 1.
 :param w: The window width from g up considered for weighting.
-:param iterations: The number of iterations, i.e. the number of surfaces constructed.
-:param cpu_optimize: If set to True more memory is used but performance is significantly increased</p>
+:param iterations: The number of iterations, i.e. the number of surfaces constructed.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyfor.ground_filter.KrausPfeifer1998.bem">
 <code class="descname">bem</code><span class="sig-paren">(</span><em>cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.KrausPfeifer1998.bem" title="Permalink to this definition">¶</a></dt>
-<dd><p>Retrieve the bare earth model (BEM).
-:return: A <cite>Raster</cite> object that represents the bare earth model.</p>
+<dd><p>Retrieve the bare earth model (BEM).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cell_size</strong> – The cell size of the BEM, this is independent of the cell size used in the intermediate         surfaces.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A <cite>Raster</cite> object that represents the bare earth model.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -248,26 +255,27 @@ performs the adjustment of the input <cite>Cloud</cite> object <strong>in place<
 <dt id="pyfor.ground_filter.Zhang2003">
 <em class="property">class </em><code class="descclassname">pyfor.ground_filter.</code><code class="descname">Zhang2003</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em>, <em>n_windows=5</em>, <em>dh_max=2</em>, <em>dh_0=1</em>, <em>b=2</em>, <em>interp_method='nearest'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.Zhang2003" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Implements Zhang et. al (2003), a progressive morphological ground filter. This filter uses an opening operation
+combined with progressively larger filtering windows to remove features that are ‘too steep’. This particular
+implementation interacts only with a raster, so the output resolution will be dictated by the <cite>cell_size</cite> argument.</p>
 <dl class="method">
 <dt id="pyfor.ground_filter.Zhang2003.__init__">
 <code class="descname">__init__</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em>, <em>n_windows=5</em>, <em>dh_max=2</em>, <em>dh_0=1</em>, <em>b=2</em>, <em>interp_method='nearest'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.Zhang2003.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Implements Zhang et. al (2003), a progressive morphological ground filter. This returns a matrix of Z values for
-each grid cell that have been determined to be actual ground cells.</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>array</strong> – The array to interpolate on, usually an aggregate of the minimum Z value</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>n_windows</strong> – The number of windows to construct for filtering.</li>
+<li><strong>dh_max</strong> – The maximum height threshold.</li>
+<li><strong>dh_0</strong> – The starting null height threshold.</li>
+<li><strong>cell_size</strong> – The cell_size used to construct the array for filtering, also the output size of the BEM.</li>
+<li><strong>interp_method</strong> – The interpolation method used to fill nan values in the final BEM.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
-<p>#TODO fix this to be max window size
-:param number_of_windows:
-:param dh_max: The maximum height threshold
-:param dh_0: The starting null height threshold
-:param c: The cell size used to construct the array
-:param grid: The grid object used to construct the array
-:return: An array corresponding to the filtered points, can be used to construct a DEM via the Raster class</p>
 </dd></dl>
 
 <dl class="method">
@@ -321,7 +329,7 @@ each grid cell that have been determined to be actual ground cells.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.2.3',
+            VERSION:'0.3.1',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
@@ -332,13 +340,11 @@ each grid cell that have been determined to be actual ground cells.</p>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {
