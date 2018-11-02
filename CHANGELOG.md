@@ -1,6 +1,24 @@
+# 0.3.2
+
+Updates between October 25th, 2018 and []
+
+
+## Cloud
+1. Fixed a bug with the `name` attribute that returned the entire directory instead of just the filename (without extension)
+
+## CloudData
+1. Added a check for empty dataframe before writing to file.
+
+## Collection
+1. Added `bounding_box` attribute that retrieves the bounding box of the entire collection, used in retiling.
+2. Added `retile` function to split large acquisitions into smaller tile sizes.
+
+
+
+
 # 0.3.1
 
-Updates between October 11th, 2018 and []
+Updates between October 11th, 2018 and October 25th, 2018
 
 ## Detection
 1. Refactored `LayerStacking` to `Ayrey2017` to cohere more with the citation format.

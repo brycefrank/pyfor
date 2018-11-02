@@ -1,6 +1,6 @@
 import os
 import laspy
-import pandas as pd
+import numpy as np
 import pyfor
 import geopandas as gpd
 
@@ -130,6 +130,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
         cdf.set_geometry("bounding_box", inplace=True)
         return cdf
 
+
     def clip(self):
         """
         Clips the CloudDataFrame with the supplied geometries.
@@ -138,10 +139,50 @@ class CloudDataFrame(gpd.GeoDataFrame):
         pass
 
 
-    def plot(self, *args):
+    def plot(self, **kwargs):
         """Plots the bounding boxes of the Cloud objects"""
-        plot = super(CloudDataFrame, self).plot(*args)
+        plot = super(CloudDataFrame, self).plot(**kwargs)
         plot.figure.show()
+
+    @property
+    def bounding_box(self):
+        """Retrieves the bounding box for the entire collection."""
+        minx, miny, maxx, maxy = [i.bounds[0] for i in self['bounding_box']], [i.bounds[1] for i in self['bounding_box']], \
+                                 [i.bounds[2] for i in self['bounding_box']], [i.bounds[3] for i in self['bounding_box']]
+        col_bbox = np.min(minx), np.min(miny), np.max(maxx), np.max(maxy)
+        return col_bbox
+
+    def retile(self, width, height, dir):
+        """
+        Retiles the collection and writes the new tiles to the directory defined in `dir`.
+
+        :param width: The width of the new tiles.
+        :param height: The height of the new tiles
+        :param dir: The directory to write the new tiles.
+        """
+        # TODO Handle "edge" smaller tiles that straddle more than one larger tile
+        from shapely.geometry import MultiLineString
+        from shapely.ops import polygonize
+
+        colbbox = self.bounding_box
+        x = np.arange(colbbox[0], colbbox[2], width)
+        y = np.arange(colbbox[1], colbbox[3], height)
+
+        hlines = [((x1, yi), (x2, yi)) for x1, x2 in zip(x[:-1], x[1:]) for yi in y]
+        vlines = [((xi, y1), (xi, y2)) for y1, y2 in zip(y[:-1], y[1:]) for xi in x]
+
+        grids = gpd.GeoSeries(polygonize(MultiLineString(hlines + vlines)))
+
+        # Iterate through each larger tile and find the intersecting smaller tiles
+        # TODO better way for this?
+        for index, row in self.iterrows():
+            # Find the set of smaller tiles that intersect with the larger
+            # Load the larger cell into memory
+            larger_cell = pyfor.cloud.Cloud(row['las_path'])
+            for i, smaller_cell in enumerate(grids[grids.intersects(row['bounding_box'])]):
+                pc = larger_cell.clip(smaller_cell)
+                pc.write(os.path.join(dir, '{}_{}{}'.format(larger_cell.name, i, larger_cell.extension)))
+
 
 
 def from_dir(las_dir, n_jobs=1):

@@ -35,27 +35,33 @@ class CloudData:
 
 class PLYData(CloudData):
     def write(self, path):
-        #coordinate_array = self.points[["x", "y", "z"]].values.T
-        #vertex_array = list(zip(coordinate_array[0],coordinate_array[1], coordinate_array[2]))
-        #vertex_array = np.array(vertex_array, dtype=[('x', 'f4'), ('y', 'f4'), ('z', 'f4')])
-        vertex_array = self.points.to_records(index=False)
-        elements = plyfile.PlyElement.describe(vertex_array, 'vertex')
-        plyfile.PlyData([elements]).write(path)
+        if len(self.points) > 0:
+            #coordinate_array = self.points[["x", "y", "z"]].values.T
+            #vertex_array = list(zip(coordinate_array[0],coordinate_array[1], coordinate_array[2]))
+            #vertex_array = np.array(vertex_array, dtype=[('x', 'f4'), ('y', 'f4'), ('z', 'f4')])
+            vertex_array = self.points.to_records(index=False)
+            elements = plyfile.PlyElement.describe(vertex_array, 'vertex')
+            plyfile.PlyData([elements]).write(path)
+        else:
+            print('No data to write.')
 
 class LASData(CloudData):
     def write(self, path):
-        writer = laspy.file.File(path, header = self.header, mode = "w")
-        writer.x = self.points["x"]
-        writer.y = self.points["y"]
-        writer.z = self.points["z"]
-        writer.return_num = self.points["return_num"]
-        writer.intesity = self.points["intensity"]
-        writer.classification = self.points["classification"]
-        writer.flag_byte = self.points["flag_byte"]
-        writer.scan_angle_rank = self.points["scan_angle_rank"]
-        writer.user_data = self.points["user_data"]
-        writer.pt_src_id = self.points["pt_src_id"]
-        writer.close()
+        if len(self. points) > 0:
+            writer = laspy.file.File(path, header = self.header, mode = "w")
+            writer.x = self.points["x"]
+            writer.y = self.points["y"]
+            writer.z = self.points["z"]
+            writer.return_num = self.points["return_num"]
+            writer.intesity = self.points["intensity"]
+            writer.classification = self.points["classification"]
+            writer.flag_byte = self.points["flag_byte"]
+            writer.scan_angle_rank = self.points["scan_angle_rank"]
+            writer.user_data = self.points["user_data"]
+            writer.pt_src_id = self.points["pt_src_id"]
+            writer.close()
+        else:
+            print('No data to write.')
 
 def _cloud_init(points, header, extension):
     """
@@ -76,7 +82,7 @@ class Cloud:
 
         if type(path) == str or type(path) == pathlib.PosixPath:
             self.filepath = path
-            self.name = os.path.splitext(path)[0]
+            self.name = os.path.splitext(os.path.split(path)[1])[0]
             self.extension = os.path.splitext(path)[1]
 
             if self.extension == '.las':
