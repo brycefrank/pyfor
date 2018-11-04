@@ -2,7 +2,7 @@ from setuptools import setup, find_packages, Extension
 
 setup(
     name='pyfor',
-    version='0.3.1',
+    version='0.3.2',
     author='Bryce Frank',
     author_email='bfrank70@gmail.com',
     packages=['pyfor', 'pyfortest'],
