@@ -277,6 +277,20 @@ class Cloud:
         filter = KrausPfeifer1998(self, cell_size, **kwargs)
         filter.normalize(cell_size)
 
+    def subtract(self, path):
+        """
+        Normalize using a pre-computed raster file, i.e. "subtract" the heights from the input raster.
+
+        :param path: The path to the raster file.
+        :return:
+        """
+
+        # Bins self.data.points with underlying
+        imported_grid = rasterizer.ImportedGrid(path, self)
+        df = pd.DataFrame(np.flipud(imported_grid.in_raster.read(1))).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
+        df = self.data.points.reset_index().merge(df, how="left").set_index('index')
+        self.data.points['z'] = df['z'] - df['val']
+
     def clip(self, poly):
         """
         Clips the point cloud to the provided shapely polygon using a ray casting algorithm.
