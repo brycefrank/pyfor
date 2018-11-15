@@ -71,7 +71,7 @@ class Cloud:
             self.filepath = path
             self.extension = os.path.splitext(path)[1]
 
-            if self.extension == '.las':
+            if self.extension == '.las' or '.laz':
                 las = laspy.file.File(path)
                 points = pd.DataFrame({"x": las.x, "y": las.y, "z": las.z, "intensity": las.intensity, "return_num": las.return_num, "classification": las.classification,
                                        "flag_byte":las.flag_byte, "scan_angle_rank":las.scan_angle_rank, "user_data": las.user_data,
@@ -91,10 +91,13 @@ class Cloud:
                 header = None
                 self.data = PLYData(points , header)
 
+            else:
+                raise ValueError('File extension not supported, please input either a las, laz, ply or CloudData object.')
+
         elif type(path) == CloudData:
             self.data = path
         else:
-            print("Object type not supported, please input either a las file path or a CloudData object.")
+            raise ValueError("Object type not supported, please input either a file path with a supported extension or a CloudData object.")
 
         # We're not sure if this is true or false yet
         self.normalized = None

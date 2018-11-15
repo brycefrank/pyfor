@@ -17,6 +17,7 @@ implement.
 
 data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_las = os.path.join(data_dir, 'test.las')
+test_laz = os.path.join(data_dir, 'test.laz')
 test_shp = os.path.join(data_dir, 'clip.shp')
 proj4str = "+proj=utm +zone=10 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
 
@@ -66,7 +67,11 @@ class CloudTestCase(unittest.TestCase):
 
     def test_las_load(self):
         """Tests if a .las file succesfully loads when cloud.Cloud is called"""
-        self.assertEqual(type(self.test_cloud), cloud.Cloud)
+        self.assertGreater(len(self.test_cloud.data.points), 0)
+
+    def test_laz_load(self):
+        self.test_laz = cloud.Cloud(test_laz)
+        self.assertGreater(len(self.test_laz.data.points), 0)
 
     def test_grid_creation(self):
         """Tests if the grid is successfully created."""
