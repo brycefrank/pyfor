@@ -20,7 +20,7 @@ dependencies:
   - libkml
   - geopandas
   - joblib
-  - laszip
+  - lastools
   - pip:
       - laspy
       - sphinx_rtd_theme
