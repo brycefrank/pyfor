@@ -71,7 +71,7 @@ class Cloud:
             self.filepath = path
             self.extension = os.path.splitext(path)[1]
 
-            if self.extension == '.las' or '.laz':
+            if self.extension == '.las' or self.extension == '.laz':
                 las = laspy.file.File(path)
                 points = pd.DataFrame({"x": las.x, "y": las.y, "z": las.z, "intensity": las.intensity, "return_num": las.return_num, "classification": las.classification,
                                        "flag_byte":las.flag_byte, "scan_angle_rank":las.scan_angle_rank, "user_data": las.user_data,
@@ -83,8 +83,7 @@ class Cloud:
             elif self.extension == '.ply':
                 ply = plyfile.PlyData.read(path)
                 ply_points = ply.elements[0].data
-                points = pd.DataFrame({"x": ply_points["x"], "y": ply_points["y"], "z": ply_points["z"],
-                                       "red": ply_points["red"], "green": ply_points["green"], "blue": ply_points["blue"]})
+                points = pd.DataFrame({"x": ply_points["x"], "y": ply_points["y"], "z": ply_points["z"]})
 
                 # ply headers are very basic, this is set here for compatibility with modifications to the header downstream (for now)
                 # TODO handle ply headers
@@ -115,7 +114,7 @@ class Cloud:
         filesize = getsize(self.filepath)
 
         # TODO: Incorporate this in CloudData somehow, messy!
-        if self.extension == '.las':
+        if self.extension == '.las' or self.extension == '.laz':
             las_version = self.data.header.version
             out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}\nLas Version: {}
             

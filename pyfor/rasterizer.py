@@ -1,7 +1,6 @@
 # Functions for rasterizing
 import numpy as np
 import pandas as pd
-from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
 from pyfor import gisexport
 from pyfor import ground_filter
@@ -36,6 +35,7 @@ class Grid:
         self.cells = self.cloud.data.points.groupby(['bins_x', 'bins_y'])
 
     def _update(self):
+        self.cloud.data._update()
         self.__init__(self.cloud, self.cell_size)
 
     def raster(self, func, dim, **kwargs):
@@ -55,20 +55,6 @@ class Grid:
         array = np.full((self.m, self.n), np.nan)
         array[bin_summary["bins_y"], bin_summary["bins_x"]] = bin_summary[dim]
         return Raster(array, self)
-
-    def boolean_summary(self, func, dim):
-        # TODO Might not be worth its own function...
-        """
-        Calculates a column in self.data that is a boolean of whether or not that point is the point that corresponds \
-        to the function passed. For example, this can be used to create a boolean mask of points that are the minimum \
-        z point in their respective cell.
-
-        :param func: The function to calculate on each group.
-        :param dim: The dimension of the point cloud as a string (x, y or z)
-        """
-
-        mask = self.cloud.data.groupby(['bins_x', 'bins_y'])[dim].transform(func) == self.cloud.data[dim]
-        return mask
 
     @property
     def empty_cells(self):
@@ -94,6 +80,7 @@ class Grid:
 
         :return: An interpolated array.
         """
+        from scipy.interpolate import griddata
         # Get points and values that we already have
         cell_values = self.cells[dim].agg(func).reset_index()
 
@@ -101,8 +88,10 @@ class Grid:
         values = cell_values[dim].values
 
         # https://stackoverflow.com/questions/12864445/numpy-meshgrid-points
+        # TODO assumes a raster occupies a square/rectangular space. Is it possible to not assume this and increase performance?
         X, Y = np.mgrid[1:self.n+1, 1:self.m+1]
 
+        # TODO generally a slow approach
         interp_grid = griddata(points, values, (X, Y), method=interp_method).T
 
         return Raster(interp_grid, self)
@@ -131,49 +120,6 @@ class Grid:
             # Get list of metric names
             metrics = [tup[1] for tup in list(aggregate)]
             return pd.DataFrame({'dim': dims, 'metric': metrics, 'raster': rasters}).set_index(['dim', 'metric'])
-
-    def ground_filter(self, num_windows, dh_max, dh_0, b=2, interp_method = "nearest"):
-        """
-        Wrapper call for filter.zhang with convenient defaults.
-
-        Returns a Raster object corresponding to the filtered ground DEM of this particular grid.
-        :param type:
-        :return:
-        """
-        # TODO Add functionality for classifying points as ground
-        # Get the interpolated DEM array.
-        dem_array = ground_filter.zhang(self.interpolate("min", "z").array, num_windows,
-                                        dh_max, dh_0, self.cell_size, self, interp_method = interp_method)
-        dem = Raster(dem_array, self)
-
-        return dem
-
-    def normalize(self, num_windows, dh_max, dh_0, b=2, interp_method="nearest"):
-        """
-        Returns a new, normalized Grid object.
-        :return:
-        """
-        import warnings
-        warnings.warn("Raster.normalize will be removed in 3.1 in favor of standalone filters.", category=DeprecationWarning)
-
-        if self.cloud.normalized == True:
-            print("It appears this has already been normalized once. Proceeding with normalization but expect \
-            strange results.")
-
-        # Retrieve the DEM
-        dem = self.ground_filter(num_windows, dh_max, dh_0, b, interp_method)
-
-        # Organize the array into a dataframe and merge
-        df = pd.DataFrame(dem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
-        df = self.cloud.data.points.reset_index().merge(df, how = "left").set_index('index')
-        df['z'] = df['z'] - df['val']
-
-        # Initialize new grid object
-        ground_grid = Grid(self.cloud, self.cell_size)
-        ground_grid.data = df
-        ground_grid.cells = ground_grid.data.groupby(['bins_x', 'bins_y'])
-
-        return ground_grid
 
 class Raster:
     def __init__(self, array, grid):
@@ -265,50 +211,28 @@ class Raster:
         return(tops_raster)
 
 
-    def watershed_seg(self, min_distance=2, threshold_abs=2, classify=False, plot = False):
+    def watershed_seg(self, min_distance=2, threshold_abs=2, classify=False):
         """
         Returns the watershed segmentation of the Raster as a geopandas dataframe.
 
         :param min_distance: The minimum distance between local height maxima in the same units as the input point \
         cloud.
         :param threshold_abs: The minimum threshold needed to be called a peak in peak_local_max.
-        :param classify: If true, sets the user data of the original point cloud data to the segment ID. The \
+        :param classify: If true, sets the `user_data` of the original point cloud data to the segment ID. The \
         segment ID is an arbitrary identification number generated by the labels function. This can be useful for \
         plotting point clouds where each segment color is unique.
-        :param plot: If plot is set to true then the segmentation will be plotted over the raster object..
         :return: A geopandas data frame, each record is a crown segment.
         """
-        from skimage.morphology import watershed
 
-        # TODO At some point, when more tree detection methods are implemented, the plotting version of this function
-        # TODO can be relegated to another class. In the mean time this will function.
+        return CrownSegments(self.array, self.grid, min_distance=min_distance, threshold_abs=threshold_abs)
 
-        watershed_array = np.flipud(self.array)
-        tops = self.local_maxima(min_distance=min_distance, threshold_abs=threshold_abs).array
-        labels = watershed(-watershed_array, tops, mask=watershed_array)
+        #if classify == True:
+        #    xy = self.grid.cloud.data.points[["bins_x", "bins_y"]].values
+        #    tree_id = labels[xy[:, 1], xy[:, 0]]
 
-        if classify == True:
-            xy = self.grid.cloud.data.points[["bins_x", "bins_y"]].values
-            tree_id = labels[xy[:, 1], xy[:, 0]]
-
-            # Update the CloudData and Grid objects
-            self.grid.cloud.data.points["user_data"] = tree_id
-            self.grid.cells = self.grid.cloud.data.points.groupby(['bins_x', 'bins_y'])
-
-        if plot == False:
-            affine = self._affine
-            tops = gisexport.array_to_polygons(labels, affine)
-            return(tops)
-        else:
-            affine = None
-            tops = gisexport.array_to_polygons(labels, affine)
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
-            ax.imshow(watershed_array)
-            tops.plot(ax = ax, edgecolor="black", alpha=0.3)
-            plt.xlim((0, self.array.shape[1]))
-            plt.ylim((0, self.array.shape[0]))
-            ax.invert_yaxis()
+        #    # Update the CloudData and Grid objects
+        #    self.grid.cloud.data.points["user_data"] = tree_id
+        #   self.grid.cells = self.grid.cloud.data.points.groupby(['bins_x', 'bins_y'])
 
     def pit_filter(self, kernel_size):
         """
@@ -327,6 +251,10 @@ class Raster:
         
         :param path: The path to write to.
         """
+
+        if not self.grid.cloud.crs:
+            from warnings import warn
+            warn('No coordinate reference system defined. Please set the .crs attribute of the Cloud object.', UserWarning)
 
         gisexport.array_to_raster(self.array, self.cell_size, self.grid.cloud.data.min[0], self.grid.cloud.data.max[1],
                                       self.grid.cloud.crs, path)
@@ -377,9 +305,25 @@ class CrownSegments(Raster):
     This class is for visualization of detected crown segments with a raster object.
     """
 
-    def __init__(self, array, grid, chm):
+    def __init__(self, array, grid, min_distance, threshold_abs):
+        from skimage.morphology import watershed
         super().__init__(array, grid)
-        self.chm = chm
+        watershed_array = np.flipud(self.array)
+        tops = self.local_maxima(min_distance=min_distance, threshold_abs=threshold_abs).array
+        labels = watershed(-watershed_array, tops, mask=watershed_array)
+        self.segments = gisexport.array_to_polygons(labels, affine=None)
 
     def plot(self):
-        pass
+        from matplotlib.collections import PatchCollection
+        from descartes.patch import PolygonPatch
+
+        geoms = self.segments['geometry'].translate(xoff=-0.5, yoff=-0.5).values
+
+        fig, ax = plt.subplots()
+        ax.imshow(np.flipud(self.array))
+        ax.add_collection(PatchCollection([PolygonPatch(poly) for poly in geoms], facecolors=(1,0,0,0), edgecolors='#e8e8e8'))
+        plt.xlim((0, self.array.shape[1]))
+        plt.ylim((0, self.array.shape[0]))
+        ax.invert_yaxis()
+        plt.show()
+

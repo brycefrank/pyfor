@@ -20,20 +20,21 @@ implement.
 data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_las = os.path.join(data_dir, 'test.las')
 test_ply = os.path.join(data_dir, 'test.ply')
+test_laz = os.path.join(data_dir, 'test.laz')
 test_shp = os.path.join(data_dir, 'clip.shp')
 proj4str = "+proj=utm +zone=10 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
 
 test_points = {
-    "x": [0, 1],
-    "y": [0, 1],
-    "z": [0, 1],
-    "intensity": [0, 1],
-    "classification": [0, 1],
-    "flag_byte": [0, 1],
-    "scan_angle_rank": [0, 1],
-    "user_data": [0, 1],
-    "pt_src_id": [0, 1],
-    "return_num": [0,1]
+    "x": [0, 1, 2],
+    "y": [0, 1, 2],
+    "z": [0, 1, 2],
+    "intensity": [0, 1, 2],
+    "classification": [0, 1, 2],
+    "flag_byte": [0, 1, 2],
+    "scan_angle_rank": [0, 1, 2],
+    "user_data": [0, 1, 2],
+    "pt_src_id": [0, 1, 2],
+    "return_num": [0, 1 ,2]
 }
 
 class PLYDataTestCase(unittest.TestCase):
@@ -46,7 +47,7 @@ class PLYDataTestCase(unittest.TestCase):
         self.assertEqual(type(self.test_ply_data), cloud.PLYData)
 
     def test_data_length(self):
-        self.assertEqual(len(self.test_ply_data.points), 2)
+        self.assertEqual(len(self.test_ply_data.points), len(test_points['z']))
 
     def test_write(self):
         self.test_ply_data.write(os.path.join(data_dir, "temp_test_write.ply"))
@@ -65,7 +66,7 @@ class LASDataTestCase(unittest.TestCase):
         self.assertEqual(type(self.test_ply_data), cloud.PLYData)
 
     def test_data_length(self):
-        self.assertEqual(len(self.test_las_data.points), 2)
+        self.assertEqual(len(self.test_las_data.points), len(test_points['z']))
 
     def test_write(self):
         self.test_las_data.write(os.path.join(data_dir, "temp_test_write.las"))
@@ -75,9 +76,9 @@ class LASDataTestCase(unittest.TestCase):
         os.remove(os.path.join(data_dir, "temp_test_write.las"))
 
 class CloudTestCase(unittest.TestCase):
-
     def setUp(self):
         self.test_cloud_las = cloud.Cloud(test_las)
+        self.test_cloud_laz = cloud.Cloud(test_laz)
         self.test_cloud_ply = cloud.Cloud(test_ply)
 
     def test_las_load(self):
@@ -87,8 +88,14 @@ class CloudTestCase(unittest.TestCase):
     def test_ply_load(self):
         cloud.Cloud(os.path.join(data_dir, "test.ply"))
 
+    def test_print_summary(self):
+        print(self.test_cloud_las)
+        print(self.test_cloud_laz)
+        print(self.test_cloud_ply)
+
     def test_not_supported(self):
-        cloud.Cloud(os.path.join(data_dir, "clip.shp"))
+        with self.assertRaises(ValueError):
+            cloud.Cloud(os.path.join(data_dir, "clip.shp"))
 
     def test_cloud_summary(self):
         print(self.test_cloud_las)
@@ -342,7 +349,7 @@ class Zhang2003TestCase(unittest.TestCase):
     def test_bem(self):
         self.test_zhang_filter.bem()
 
-class Ayrey2017TestCase(unittest.TestCase):
+class LayerStackingTestCase(unittest.TestCase):
     def setUp(self):
         self.test_cloud = cloud.Cloud(test_las)
         self.test_cloud.normalize(10)

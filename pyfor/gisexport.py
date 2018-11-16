@@ -25,7 +25,7 @@ def project_indices(indices, raster):
     """
 
     seed_xy = indices[:,1] + (raster._affine[2] / raster._affine[0]), \
-              indices[:,0] + (raster._affine[5] - (raster.grid.las.max[1] - raster.grid.las.min[1]) /
+              indices[:,0] + (raster._affine[5] - (raster.grid.cloud.data.max[1] - raster.grid.cloud.data.min[1]) /
                               abs(raster._affine[4]))
     seed_xy = np.stack(seed_xy, axis = 1)
     return(seed_xy)
