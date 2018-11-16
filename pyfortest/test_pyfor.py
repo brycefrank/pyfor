@@ -18,6 +18,7 @@ implement.
 data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_las = os.path.join(data_dir, 'test.las')
 test_laz = os.path.join(data_dir, 'test.laz')
+test_ply = os.path.join(data_dir, 'test.ply')
 test_shp = os.path.join(data_dir, 'clip.shp')
 proj4str = "+proj=utm +zone=10 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
 
@@ -60,19 +61,14 @@ class LASDataTestCase(unittest.TestCase):
 
     # TODO tear down
 
-class CloudTestCase(unittest.TestCase):
 
+class CloudTestCase(unittest.TestCase):
     def setUp(self):
+        # This is the las test case as well
         self.test_cloud = cloud.Cloud(test_las)
 
-    def test_las_load(self):
-        """Tests if a .las file succesfully loads when cloud.Cloud is called"""
-        self.assertGreater(len(self.test_cloud.data.points), 0)
-
-    def test_laz_load(self):
-        self.test_laz = cloud.Cloud(test_laz)
-        self.assertGreater(len(self.test_laz.data.points), 0)
-        print(self.test_laz)
+    def test_print_summary(self):
+        print(self.test_cloud)
 
     def test_grid_creation(self):
         """Tests if the grid is successfully created."""
@@ -124,6 +120,14 @@ class CloudTestCase(unittest.TestCase):
 
     def test_convex_hull(self):
         self.test_cloud.convex_hull
+
+class PLYCloudTestCase(CloudTestCase):
+    def setUp(self):
+        self.test_cloud = cloud.Cloud(test_ply)
+
+class LAZCloudTestCase(CloudTestCase):
+    def setUp(self):
+        self.test_cloud = cloud.Cloud(test_las)
 
 
 
