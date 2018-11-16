@@ -72,6 +72,7 @@ class CloudTestCase(unittest.TestCase):
     def test_laz_load(self):
         self.test_laz = cloud.Cloud(test_laz)
         self.assertGreater(len(self.test_laz.data.points), 0)
+        print(self.test_laz)
 
     def test_grid_creation(self):
         """Tests if the grid is successfully created."""
