@@ -176,10 +176,14 @@ class GridTestCase(unittest.TestCase):
 
 
     def test_empty_cells(self):
+        np.set_printoptions(threshold=np.nan)
         empty = self.test_grid.empty_cells
         # Check that there are the correct number
-        self.assertEqual(empty.shape, (693, 2))
-        # TODO Check at least one off-diagonal coordinate is non empty ([0 9] for example)
+        self.assertEqual(empty.shape, (687, 2))
+
+        # Check the 18th empty is the same as expected
+        np.testing.assert_array_equal(empty[18,:], np.array([3, 56]))
+
 
     def test_raster(self):
         raster = self.test_grid.raster("max", "z")
@@ -207,10 +211,8 @@ class GridTestCase(unittest.TestCase):
         """
         pre = self.test_grid.m
         self.test_grid.cloud.data.points = self.test_grid.cloud.data.points.iloc[1:50]
-        print(self.test_grid.cloud.data.points)
         self.test_grid._update()
-        post =  self.test_grid.m
-        print(pre, post)
+        post = self.test_grid.m
 
     def tearDown(self):
         del self.test_grid.cloud.data.header
@@ -244,7 +246,7 @@ class RasterTestCase(unittest.TestCase):
         Tests if the index [0,0] refers to the top left corner of the image. That is, if I were to plot the raster
         using plt.imshow it would appear to the user as a correctly oriented image.
         """
-        self.assertEqual(self.test_raster.array[0,1], 45.11)
+        self.assertEqual(self.test_raster.array[0,0], 45.11)
 
     def test_convex_hull_mask(self):
         self.test_raster._convex_hull_mask
@@ -257,7 +259,7 @@ class RasterTestCase(unittest.TestCase):
         self.test_raster.local_maxima()
 
     def test_local_maxima_oriented_correctly(self):
-        self.assertEqual(self.test_raster.local_maxima().array[6,5], 14)
+        self.assertEqual(self.test_raster.local_maxima().array[15,3], 39)
 
     def test_write_with_crs(self):
         self.test_raster.write("./temp_tif.tif")
@@ -270,7 +272,7 @@ class RasterTestCase(unittest.TestCase):
     def test_array_write_oriented_correctly(self):
         with rasterio.open('./temp_tif.tif') as src:
             array = src.read(1)
-            self.assertEqual(array[0, 1], 45.11)
+            self.assertEqual(array[0, 0], 45.11)
         os.remove('./temp_tif.tif')
 
 
@@ -370,8 +372,8 @@ class LayerStackingTestCase(unittest.TestCase):
         self.test_cloud.normalize(10)
 
         # Shrink down to a very tiny, sparse cloud for testing individual functions
-        self.test_cloud.filter(min=405000, max=405000+15, dim="x")
-        self.test_cloud.filter(min=3276300, max=3276300+15, dim="y")
+        self.test_cloud.filter(min=405000, max=405000+25, dim="x")
+        self.test_cloud.filter(min=3276300, max=3276300+25, dim="y")
         self.test_filter = detection.Ayrey2017(self.test_cloud)
 
     def test_top_coordinates(self):

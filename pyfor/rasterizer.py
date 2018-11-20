@@ -16,6 +16,8 @@ class Grid:
     :return: Returns a dataframe with sorted x and y with associated bins in a new columns
     """
     def __init__(self, cloud, cell_size):
+        import warnings
+        # TODO remove in 0.3.2
         self.cloud = cloud
         self.cell_size = cell_size
 
@@ -26,12 +28,17 @@ class Grid:
         self.n = int(np.floor((max_x - min_x) / cell_size))
 
         # Create bins
-        bins_x = np.searchsorted(np.linspace(min_x, max_x, self.n), self.cloud.data.points["x"])
-        bins_y = np.searchsorted(np.linspace(min_y, max_y, self.m), self.cloud.data.points["y"])
+        x_edges = np.linspace(min_x, max_x, self.n)
+        y_edges = np.linspace(min_y, max_y, self.m)
+
+        warnings.warn('This behavior has changed from < 0.3.1, points are now binned from the top left of the point '
+                      'cloud instead of the bottom right to cohere with arrays produced later.', UserWarning)
+
+        bins_x = np.searchsorted(x_edges,   self.cloud.data.points['x'], side='right') - 1
+        bins_y = np.searchsorted(-y_edges, -self.cloud.data.points['y'], side='right', sorter=(-y_edges).argsort())-1
 
         self.cloud.data.points["bins_x"] = bins_x
         self.cloud.data.points["bins_y"] = bins_y
-
         self.cells = self.cloud.data.points.groupby(['bins_x', 'bins_y'])
 
     def _update(self):
@@ -50,15 +57,10 @@ class Grid:
         options
         :return: A 2D numpy array where the value of each cell is the result of the passed function.
         """
-        # TODO remove in 0.3.2
-        import warnings
 
         bin_summary = self.cells.agg({dim: func}, **kwargs).reset_index()
         array = np.full((self.m, self.n), np.nan)
         array[bin_summary["bins_y"], bin_summary["bins_x"]] = bin_summary[dim]
-        array = np.flipud(array)
-        warnings.warn('This behavior has changed from < 0.3.1, the index [0,0] of Raster.array now refers to the top'
-                      ' left of the CHM in real space, rather than the bottom left.', UserWarning)
         return Raster(array, self)
 
     @property
@@ -172,10 +174,9 @@ class Raster:
         ax = fig.add_subplot(111)
         caz = ax.matshow(self.array)
         fig.colorbar(caz)
-        fig.gca().invert_yaxis()
         ax.xaxis.tick_bottom()
         ax.set_xticks(np.linspace(0, self.grid.n, 3))
-        ax.set_yticks(np.linspace(0, self.grid.m, 3))
+        ax.set_yticks(np.flip(np.linspace(0, self.grid.m, 3)))
 
         x_ticks, y_ticks = np.rint(np.linspace(self.grid.cloud.data.min[0], self.grid.cloud.data.max[0], 3)), \
                            np.rint(np.linspace(self.grid.cloud.data.min[1], self.grid.cloud.data.max[1], 3))
@@ -208,7 +209,7 @@ class Raster:
         """
         from skimage.feature import peak_local_max, corner_peaks
         from scipy.ndimage import label
-        tops = peak_local_max(np.flipud(self.array), indices=False, min_distance=min_distance, threshold_abs=threshold_abs)
+        tops = peak_local_max(self.array, indices=False, min_distance=min_distance, threshold_abs=threshold_abs)
         tops = label(tops)[0]
 
         # TODO Had to take out corner filter to remove duplicate tops.
