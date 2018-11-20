@@ -111,18 +111,24 @@ class Cloud:
         # Format max and min
         min =  [float('{0:.2f}'.format(elem)) for elem in self.data.min]
         max =  [float('{0:.2f}'.format(elem)) for elem in self.data.max]
-        filesize = getsize(self.filepath)
 
         # TODO: Incorporate this in CloudData somehow, messy!
-        if self.extension == '.las' or self.extension == '.laz':
-            las_version = self.data.header.version
-            out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}\nLas Version: {}
-            
-            """.format(self.filepath, filesize, self.data.count, min, max, las_version)
-        elif self.extension == '.ply':
-            out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}""".format(self.filepath, filesize, self.data.count, min, max)
+        if hasattr(self, 'extension'):
+            if self.extension == '.las' or self.extension == '.laz':
+                filesize = getsize(self.filepath)
+                las_version = self.data.header.version
+                out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}\nLas Version: {}
+                
+                """.format(self.filepath, filesize, self.data.count, min, max, las_version)
+            elif self.extension == '.ply':
+                filesize = getsize(self.filepath)
+                out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}""".format(self.filepath, filesize, self.data.count, min, max)
+        else:
+            out = """Number of Points: {}\nMinimum(x y z): {}\nMaximum (x y z): {}""".format(self.data.count, min, max)
 
-        return(out)
+        return out
+
+
 
     def _discrete_cmap(self, n_bin, base_cmap=None):
         """Create an N-bin discrete colormap from the specified input map"""
@@ -268,13 +274,15 @@ class Cloud:
         :param poly: A shapely polygon in the same CRS as the Cloud.
         :return: A new cloud object clipped to the provided polygon.
         """
-        #TODO Implement geopandas for multiple clipping polygons.
 
         keep = clip_funcs.poly_clip(self.data.points, poly)
         # Create copy to avoid warnings
         keep_points = self.data.points.iloc[keep].copy()
 
-        new_cloud =  Cloud(CloudData(keep_points, self.data.header))
+        new_cloud = Cloud(CloudData(keep_points, self.data.header))
+
+        # TODO consider resetting index in update?
+        new_cloud.data.points = new_cloud.data.points.reset_index()
         new_cloud.data._update()
 
         return new_cloud

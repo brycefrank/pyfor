@@ -11,6 +11,7 @@ import numpy as np
 import geopandas as gpd
 import plyfile
 import matplotlib.pyplot as plt
+import rasterio
 
 """
 Many of these tests currently just run the function. If anyone has any more rigorous ideas, please feel free to \
@@ -238,8 +239,12 @@ class RasterTestCase(unittest.TestCase):
     #    self.test_raster.watershed_seg(classify=True)
     #    self.test_raster.watershed_seg(plot=True)
 
-    def test_watershed_seg_out_oriented_correctly(self):
-        pass
+    def test_array_oriented_correctly(self):
+        """
+        Tests if the index [0,0] refers to the top left corner of the image. That is, if I were to plot the raster
+        using plt.imshow it would appear to the user as a correctly oriented image.
+        """
+        self.assertEqual(self.test_raster.array[0,1], 45.11)
 
     def test_convex_hull_mask(self):
         self.test_raster._convex_hull_mask
@@ -251,13 +256,23 @@ class RasterTestCase(unittest.TestCase):
     def test_local_maxima(self):
         self.test_raster.local_maxima()
 
+    def test_local_maxima_oriented_correctly(self):
+        self.assertEqual(self.test_raster.local_maxima().array[6,5], 14)
+
     def test_write_with_crs(self):
-        self.test_raster.write("./thing.tif")
-        os.remove("./thing.tif")
+        self.test_raster.write("./temp_tif.tif")
+        os.remove("./temp_tif.tif")
 
     def test_write_without_crs(self):
         self.test_raster.crs = None
-        self.test_raster.write("./thing.tif")
+        self.test_raster.write("./temp_tif.tif")
+
+    def test_array_write_oriented_correctly(self):
+        with rasterio.open('./temp_tif.tif') as src:
+            array = src.read(1)
+            self.assertEqual(array[0, 1], 45.11)
+        os.remove('./temp_tif.tif')
+
 
 class DetectedTopsTestCase(unittest.TestCase):
     def setUp(self):

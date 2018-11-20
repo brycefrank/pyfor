@@ -257,7 +257,6 @@ class Ayrey2017:
         layers_of_rasters = [self._rasterize(layers_of_polygons.get_group(key), value) for key, value in weights_dict.items()]
 
         array = np.sum(np.dstack(layers_of_rasters), axis = 2)
-        # Flip
         array = np.flipud(array)
         raster = pyfor.rasterizer.Raster(array, self.chm.grid)
 

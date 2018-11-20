@@ -27,6 +27,8 @@ Updates between September 5, 2018 and October 10th, 2018
 ## Filter
 1. Moved `filter` to `ground_filter`
 
+### KrausPfeif
+
 ## Ground_Filter
 1. Restructued filters into their own Classes, each with `.bem`, `.classify()` and `.normalize`. Fits better with the structure of the package.
 2. Added Kraus and Pfeifer (1998) ground filter after having some issues with `zhang`. This filter is a much simpler ground filter but provides reasonable results.

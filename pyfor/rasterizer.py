@@ -50,10 +50,15 @@ class Grid:
         options
         :return: A 2D numpy array where the value of each cell is the result of the passed function.
         """
+        # TODO remove in 0.3.2
+        import warnings
 
         bin_summary = self.cells.agg({dim: func}, **kwargs).reset_index()
         array = np.full((self.m, self.n), np.nan)
         array[bin_summary["bins_y"], bin_summary["bins_x"]] = bin_summary[dim]
+        array = np.flipud(array)
+        warnings.warn('This behavior has changed from < 0.3.1, the index [0,0] of Raster.array now refers to the top'
+                      ' left of the CHM in real space, rather than the bottom left.', UserWarning)
         return Raster(array, self)
 
     @property
@@ -277,7 +282,7 @@ class DetectedTops(Raster):
         """
 
         fig, ax = plt.subplots()
-        caz = ax.matshow(np.flipud(self.chm.array))
+        caz = ax.matshow(self.chm.array)
         fig.colorbar(caz)
 
 
@@ -308,7 +313,7 @@ class CrownSegments(Raster):
     def __init__(self, array, grid, min_distance, threshold_abs):
         from skimage.morphology import watershed
         super().__init__(array, grid)
-        watershed_array = np.flipud(self.array)
+        watershed_array = self.array
         tops = self.local_maxima(min_distance=min_distance, threshold_abs=threshold_abs).array
         labels = watershed(-watershed_array, tops, mask=watershed_array)
         self.segments = gisexport.array_to_polygons(labels, affine=None)
@@ -320,7 +325,7 @@ class CrownSegments(Raster):
         geoms = self.segments['geometry'].translate(xoff=-0.5, yoff=-0.5).values
 
         fig, ax = plt.subplots()
-        ax.imshow(np.flipud(self.array))
+        ax.imshow(self.array)
         ax.add_collection(PatchCollection([PolygonPatch(poly) for poly in geoms], facecolors=(1,0,0,0), edgecolors='#e8e8e8'))
         plt.xlim((0, self.array.shape[1]))
         plt.ylim((0, self.array.shape[0]))
