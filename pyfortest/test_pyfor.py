@@ -263,7 +263,6 @@ class RasterTestCase(unittest.TestCase):
 
     def test_write_with_crs(self):
         self.test_raster.write("./temp_tif.tif")
-        os.remove("./temp_tif.tif")
 
     def test_write_without_crs(self):
         self.test_raster.crs = None
@@ -273,7 +272,6 @@ class RasterTestCase(unittest.TestCase):
         with rasterio.open('./temp_tif.tif') as src:
             array = src.read(1)
             self.assertEqual(array[0, 0], 45.11)
-        os.remove('./temp_tif.tif')
 
 
 class DetectedTopsTestCase(unittest.TestCase):
