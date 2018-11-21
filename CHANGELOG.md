@@ -1,11 +1,26 @@
+# 0.3.1
+
+Updates between October 11th, 2018 and []
+
+## Detection
+1. Refactored `LayerStacking` to `Ayrey2017` to cohere more with the citation format.
+
+## Documentation
+1. Updated docstrings with 0.3.0 changes.
+
+## Rasterizer
+1. Removed `Grid.normalize`, a deprecated function
+2. Added a `UserWarning` in the case of undefined coordinate reference system of the Cloud object when writing a `Raster`
+
+## Testing Suite
+1. Added many tests to achieve 90% coverage
+
 # 0.3.0
 
 Updates between September 5, 2018 and October 10th, 2018
 
 ## Collection
-
 1. Added 'CloudDataFrame', an inherited class from GeoDataFrame used to manage large LiDAR acquisitions.
-    - Ability to do geopositional indexing of LAS tiles. Much of this class is internal and used to
 
 ## Samples
 1. Added `Collections` sample

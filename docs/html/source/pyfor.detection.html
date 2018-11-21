@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyfor.detection module &mdash; pyfor 0.2.3 documentation</title>
+  <title>pyfor.detection module &mdash; pyfor 0.3.1 documentation</title>
   
 
   
@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -59,7 +58,7 @@
             
             
               <div class="version">
-                0.2
+                0.3
               </div>
             
           
@@ -161,13 +160,13 @@
   <div class="section" id="module-pyfor.detection">
 <span id="pyfor-detection-module"></span><h1>pyfor.detection module<a class="headerlink" href="#module-pyfor.detection" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="pyfor.detection.LayerStacking">
-<em class="property">class </em><code class="descclassname">pyfor.detection.</code><code class="descname">LayerStacking</code><span class="sig-paren">(</span><em>cloud</em>, <em>n_jobs=1</em>, <em>chm_resolution=1</em>, <em>buffer_distance=0.5</em>, <em>first_pass_min_dist=3</em>, <em>first_pass_threshold_abs=3</em>, <em>veg_layers=(0</em>, <em>1</em>, <em>2)</em>, <em>percentiles=(70</em>, <em>80</em>, <em>90</em>, <em>100)</em>, <em>weights=(2</em>, <em>3</em>, <em>4</em>, <em>4)</em>, <em>overlap_kernel_size=3</em>, <em>scnd_pass_min_dist=3</em>, <em>scnd_pass_threshold_abs=3</em>, <em>remove_veg=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.detection.LayerStacking" title="Permalink to this definition">¶</a></dt>
+<dt id="pyfor.detection.Ayrey2017">
+<em class="property">class </em><code class="descclassname">pyfor.detection.</code><code class="descname">Ayrey2017</code><span class="sig-paren">(</span><em>cloud</em>, <em>n_jobs=1</em>, <em>chm_resolution=1</em>, <em>buffer_distance=0.5</em>, <em>first_pass_min_dist=3</em>, <em>first_pass_threshold_abs=3</em>, <em>veg_layers=(0</em>, <em>1</em>, <em>2)</em>, <em>percentiles=(70</em>, <em>80</em>, <em>90</em>, <em>100)</em>, <em>weights=(2</em>, <em>3</em>, <em>4</em>, <em>4)</em>, <em>overlap_kernel_size=3</em>, <em>scnd_pass_min_dist=3</em>, <em>scnd_pass_threshold_abs=3</em>, <em>remove_veg=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.detection.Ayrey2017" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>An implementation of Ayrey et al. (2017) layer stacking algorithm.</p>
 <dl class="method">
-<dt id="pyfor.detection.LayerStacking.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>cloud</em>, <em>n_jobs=1</em>, <em>chm_resolution=1</em>, <em>buffer_distance=0.5</em>, <em>first_pass_min_dist=3</em>, <em>first_pass_threshold_abs=3</em>, <em>veg_layers=(0</em>, <em>1</em>, <em>2)</em>, <em>percentiles=(70</em>, <em>80</em>, <em>90</em>, <em>100)</em>, <em>weights=(2</em>, <em>3</em>, <em>4</em>, <em>4)</em>, <em>overlap_kernel_size=3</em>, <em>scnd_pass_min_dist=3</em>, <em>scnd_pass_threshold_abs=3</em>, <em>remove_veg=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.detection.LayerStacking.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="pyfor.detection.Ayrey2017.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>cloud</em>, <em>n_jobs=1</em>, <em>chm_resolution=1</em>, <em>buffer_distance=0.5</em>, <em>first_pass_min_dist=3</em>, <em>first_pass_threshold_abs=3</em>, <em>veg_layers=(0</em>, <em>1</em>, <em>2)</em>, <em>percentiles=(70</em>, <em>80</em>, <em>90</em>, <em>100)</em>, <em>weights=(2</em>, <em>3</em>, <em>4</em>, <em>4)</em>, <em>overlap_kernel_size=3</em>, <em>scnd_pass_min_dist=3</em>, <em>scnd_pass_threshold_abs=3</em>, <em>remove_veg=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.detection.Ayrey2017.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -193,15 +192,15 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="pyfor.detection.LayerStacking.detect">
-<code class="descname">detect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.detection.LayerStacking.detect" title="Permalink to this definition">¶</a></dt>
+<dt id="pyfor.detection.Ayrey2017.detect">
+<code class="descname">detect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.detection.Ayrey2017.detect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Executes the detection algorithm on the input point cloud with set parameters.
 :return:</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyfor.detection.LayerStacking.get_overlap_map">
-<code class="descname">get_overlap_map</code><span class="sig-paren">(</span><em>smoothed=True</em>, <em>kernel_size=3</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.detection.LayerStacking.get_overlap_map" title="Permalink to this definition">¶</a></dt>
+<dt id="pyfor.detection.Ayrey2017.get_overlap_map">
+<code class="descname">get_overlap_map</code><span class="sig-paren">(</span><em>smoothed=True</em>, <em>kernel_size=3</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.detection.Ayrey2017.get_overlap_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Overlaps the rasters generated by the buffered polygons.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -259,7 +258,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.2.3',
+            VERSION:'0.3.1',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
@@ -270,13 +269,11 @@
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {

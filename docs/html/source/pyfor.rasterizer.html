@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyfor.rasterizer module &mdash; pyfor 0.2.3 documentation</title>
+  <title>pyfor.rasterizer module &mdash; pyfor 0.3.1 documentation</title>
   
 
   
@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -59,7 +58,7 @@
             
             
               <div class="version">
-                0.2
+                0.3
               </div>
             
           
@@ -162,12 +161,12 @@
 <span id="pyfor-rasterizer-module"></span><h1>pyfor.rasterizer module<a class="headerlink" href="#module-pyfor.rasterizer" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="pyfor.rasterizer.CrownSegments">
-<em class="property">class </em><code class="descclassname">pyfor.rasterizer.</code><code class="descname">CrownSegments</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em>, <em>chm</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.CrownSegments" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pyfor.rasterizer.</code><code class="descname">CrownSegments</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em>, <em>min_distance</em>, <em>threshold_abs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.CrownSegments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyfor.rasterizer.Raster" title="pyfor.rasterizer.Raster"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyfor.rasterizer.Raster</span></code></a></p>
 <p>This class is for visualization of detected crown segments with a raster object.</p>
 <dl class="method">
 <dt id="pyfor.rasterizer.CrownSegments.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em>, <em>chm</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.CrownSegments.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em>, <em>min_distance</em>, <em>threshold_abs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.CrownSegments.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
 </dd></dl>
 
@@ -234,38 +233,11 @@ Raster.local_maxima</p>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="pyfor.rasterizer.Grid.boolean_summary">
-<code class="descname">boolean_summary</code><span class="sig-paren">(</span><em>func</em>, <em>dim</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.boolean_summary" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates a column in self.data that is a boolean of whether or not that point is the point that corresponds         to the function passed. For example, this can be used to create a boolean mask of points that are the minimum         z point in their respective cell.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>func</strong> – The function to calculate on each group.</li>
-<li><strong>dim</strong> – The dimension of the point cloud as a string (x, y or z)</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 <dl class="attribute">
 <dt id="pyfor.rasterizer.Grid.empty_cells">
 <code class="descname">empty_cells</code><a class="headerlink" href="#pyfor.rasterizer.Grid.empty_cells" title="Permalink to this definition">¶</a></dt>
 <dd><p>Retrieves the cells with no returns in self.data</p>
 <p>return: An N x 2 numpy array where each row cooresponds to the [y x] coordinate of the empty cell.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyfor.rasterizer.Grid.ground_filter">
-<code class="descname">ground_filter</code><span class="sig-paren">(</span><em>num_windows</em>, <em>dh_max</em>, <em>dh_0</em>, <em>b=2</em>, <em>interp_method='nearest'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.ground_filter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrapper call for filter.zhang with convenient defaults.</p>
-<p>Returns a Raster object corresponding to the filtered ground DEM of this particular grid.
-:param type:
-:return:</p>
 </dd></dl>
 
 <dl class="method">
@@ -304,13 +276,6 @@ Raster.local_maxima</p>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyfor.rasterizer.Grid.normalize">
-<code class="descname">normalize</code><span class="sig-paren">(</span><em>num_windows</em>, <em>dh_max</em>, <em>dh_0</em>, <em>b=2</em>, <em>interp_method='nearest'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.normalize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a new, normalized Grid object.
-:return:</p>
 </dd></dl>
 
 <dl class="method">
@@ -407,7 +372,7 @@ This function modifies the raster array <strong>in place</strong>.</p>
 
 <dl class="method">
 <dt id="pyfor.rasterizer.Raster.watershed_seg">
-<code class="descname">watershed_seg</code><span class="sig-paren">(</span><em>min_distance=2</em>, <em>threshold_abs=2</em>, <em>classify=False</em>, <em>plot=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.watershed_seg" title="Permalink to this definition">¶</a></dt>
+<code class="descname">watershed_seg</code><span class="sig-paren">(</span><em>min_distance=2</em>, <em>threshold_abs=2</em>, <em>classify=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.watershed_seg" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the watershed segmentation of the Raster as a geopandas dataframe.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -416,8 +381,7 @@ This function modifies the raster array <strong>in place</strong>.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>min_distance</strong> – The minimum distance between local height maxima in the same units as the input point         cloud.</li>
 <li><strong>threshold_abs</strong> – The minimum threshold needed to be called a peak in peak_local_max.</li>
-<li><strong>classify</strong> – If true, sets the user data of the original point cloud data to the segment ID. The         segment ID is an arbitrary identification number generated by the labels function. This can be useful for         plotting point clouds where each segment color is unique.</li>
-<li><strong>plot</strong> – If plot is set to true then the segmentation will be plotted over the raster object..</li>
+<li><strong>classify</strong> – If true, sets the <cite>user_data</cite> of the original point cloud data to the segment ID. The         segment ID is an arbitrary identification number generated by the labels function. This can be useful for         plotting point clouds where each segment color is unique.</li>
 </ul>
 </td>
 </tr>
@@ -488,7 +452,7 @@ This function modifies the raster array <strong>in place</strong>.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.2.3',
+            VERSION:'0.3.1',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
@@ -499,13 +463,11 @@ This function modifies the raster array <strong>in place</strong>.</p>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {
