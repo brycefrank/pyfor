@@ -16,13 +16,16 @@ class CloudData:
     def __init__(self, points, header):
         self.header = header
         self.points = points
-        self.min = [np.min(self.points["x"]), np.min(self.points["y"]), np.min(self.points["z"])]
-        self.max = [np.max(self.points["x"]), np.max(self.points["y"]), np.max(self.points["z"])]
+        self.x = self.points["x"]
+        self.y = self.points["y"]
+        self.z = self.points["z"]
+        self.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
+        self.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
         self.count = np.alen(self.points)
 
     def _update(self):
-        self.min = [np.min(self.points["x"]), np.min(self.points["y"]), np.min(self.points["z"])]
-        self.max = [np.max(self.points["x"]), np.max(self.points["y"]), np.max(self.points["z"])]
+        self.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
+        self.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
         self.count = np.alen(self.points)
 
     def _append(self, other):
@@ -57,16 +60,6 @@ class LASData(CloudData):
         writer.pt_src_id = self.points["pt_src_id"]
         writer.close()
 
-def _cloud_init(points, header, extension):
-    """
-    Checks the extension of the cloud object and initialize the correct *Data object.
-    :param cloud:
-    """
-    if extension == '.las':
-        return LASData(points, header)
-    elif extension == '.ply':
-        return PLYData(points, header)
-
 class Cloud:
     """
     The cloud object is the integral unit of pyfor, and is where most of the action takes place. Many of the following \
@@ -76,10 +69,9 @@ class Cloud:
 
         if type(path) == str or type(path) == pathlib.PosixPath:
             self.filepath = path
-            self.name = os.path.splitext(path)[0]
             self.extension = os.path.splitext(path)[1]
 
-            if self.extension == '.las':
+            if self.extension == '.las' or self.extension == '.laz':
                 las = laspy.file.File(path)
                 points = pd.DataFrame({"x": las.x, "y": las.y, "z": las.z, "intensity": las.intensity, "return_num": las.return_num, "classification": las.classification,
                                        "flag_byte":las.flag_byte, "scan_angle_rank":las.scan_angle_rank, "user_data": las.user_data,
@@ -93,20 +85,18 @@ class Cloud:
                 ply_points = ply.elements[0].data
                 points = pd.DataFrame({"x": ply_points["x"], "y": ply_points["y"], "z": ply_points["z"]})
 
-                try:
-                    points['red'] = ply_points['red']
-                    points['green'] = ply_points['green']
-                    points['blue'] = ply_points['blue']
-                except ValueError:
-                    pass
-
+                # ply headers are very basic, this is set here for compatibility with modifications to the header downstream (for now)
+                # TODO handle ply headers
                 header = None
-                self.data = PLYData(points, header)
+                self.data = PLYData(points , header)
 
-        elif type(path) == CloudData or  path.__class__.__bases__[0] == CloudData:
+            else:
+                raise ValueError('File extension not supported, please input either a las, laz, ply or CloudData object.')
+
+        elif type(path) == CloudData:
             self.data = path
         else:
-            print("Object type not supported, please input either a las file path or a CloudData object.")
+            raise ValueError("Object type not supported, please input either a file path with a supported extension or a CloudData object.")
 
         # We're not sure if this is true or false yet
         self.normalized = None
@@ -121,18 +111,24 @@ class Cloud:
         # Format max and min
         min =  [float('{0:.2f}'.format(elem)) for elem in self.data.min]
         max =  [float('{0:.2f}'.format(elem)) for elem in self.data.max]
-        filesize = getsize(self.filepath)
 
         # TODO: Incorporate this in CloudData somehow, messy!
-        if self.extension == '.las':
-            las_version = self.data.header.version
-            out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}\nLas Version: {}
-            
-            """.format(self.filepath, filesize, self.data.count, min, max, las_version)
-        elif self.extension == '.ply':
-            out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}""".format(self.filepath, filesize, self.data.count, min, max)
+        if hasattr(self, 'extension'):
+            if self.extension == '.las' or self.extension == '.laz':
+                filesize = getsize(self.filepath)
+                las_version = self.data.header.version
+                out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}\nLas Version: {}
+                
+                """.format(self.filepath, filesize, self.data.count, min, max, las_version)
+            elif self.extension == '.ply':
+                filesize = getsize(self.filepath)
+                out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}""".format(self.filepath, filesize, self.data.count, min, max)
+        else:
+            out = """Number of Points: {}\nMinimum(x y z): {}\nMaximum (x y z): {}""".format(self.data.count, min, max)
 
-        return(out)
+        return out
+
+
 
     def _discrete_cmap(self, n_bin, base_cmap=None):
         """Create an N-bin discrete colormap from the specified input map"""
@@ -179,7 +175,7 @@ class Cloud:
         :return: If return_plot == True, returns matplotlib plt object. Not yet implemented.
         """
 
-        rasterizer.Grid(self, cell_size).raster("max", "z").plot(cmap, block=block, return_plot=return_plot)
+        rasterizer.Grid(self, cell_size).raster("max", "z").plot(cmap, block = block, return_plot = return_plot)
 
     def iplot3d(self, max_points=30000, point_size=0.5, dim="z", colorscale="Viridis"):
         """
@@ -278,14 +274,15 @@ class Cloud:
         :param poly: A shapely polygon in the same CRS as the Cloud.
         :return: A new cloud object clipped to the provided polygon.
         """
-        #TODO Implement geopandas for multiple clipping polygons.
 
         keep = clip_funcs.poly_clip(self.data.points, poly)
         # Create copy to avoid warnings
         keep_points = self.data.points.iloc[keep].copy()
 
-        data = _cloud_init(keep_points, self.data.header, self.extension)
-        new_cloud = Cloud(data)
+        new_cloud = Cloud(CloudData(keep_points, self.data.header))
+
+        # TODO consider resetting index in update?
+        new_cloud.data.points = new_cloud.data.points.reset_index()
         new_cloud.data._update()
 
         return new_cloud
@@ -300,7 +297,8 @@ class Cloud:
         self.las.points dataframe.
         """
         condition = (self.data.points[dim] > min) & (self.data.points[dim] < max)
-        self.data = _cloud_init(self.data.points[condition], self.data.header, self.extension)
+
+        self.data = CloudData(self.data.points[condition], self.data.header)
         self.data._update()
 
     def chm(self, cell_size, interp_method=None, pit_filter=None, kernel_size=3):

@@ -16,6 +16,8 @@ class Grid:
     :return: Returns a dataframe with sorted x and y with associated bins in a new columns
     """
     def __init__(self, cloud, cell_size):
+        import warnings
+        # TODO remove in 0.3.2
         self.cloud = cloud
         self.cell_size = cell_size
 
@@ -26,12 +28,17 @@ class Grid:
         self.n = int(np.floor((max_x - min_x) / cell_size))
 
         # Create bins
-        bins_x = np.searchsorted(np.linspace(min_x, max_x, self.n), self.cloud.data.points["x"])
-        bins_y = np.searchsorted(np.linspace(min_y, max_y, self.m), self.cloud.data.points["y"])
+        x_edges = np.linspace(min_x, max_x, self.n)
+        y_edges = np.linspace(min_y, max_y, self.m)
+
+        warnings.warn('This behavior has changed from < 0.3.1, points are now binned from the top left of the point '
+                      'cloud instead of the bottom right to cohere with arrays produced later.', UserWarning)
+
+        bins_x = np.searchsorted(x_edges,   self.cloud.data.points['x'], side='right') - 1
+        bins_y = np.searchsorted(-y_edges, -self.cloud.data.points['y'], side='right', sorter=(-y_edges).argsort())-1
 
         self.cloud.data.points["bins_x"] = bins_x
         self.cloud.data.points["bins_y"] = bins_y
-
         self.cells = self.cloud.data.points.groupby(['bins_x', 'bins_y'])
 
     def _update(self):
@@ -167,10 +174,9 @@ class Raster:
         ax = fig.add_subplot(111)
         caz = ax.matshow(self.array)
         fig.colorbar(caz)
-        fig.gca().invert_yaxis()
         ax.xaxis.tick_bottom()
         ax.set_xticks(np.linspace(0, self.grid.n, 3))
-        ax.set_yticks(np.linspace(0, self.grid.m, 3))
+        ax.set_yticks(np.flip(np.linspace(0, self.grid.m, 3)))
 
         x_ticks, y_ticks = np.rint(np.linspace(self.grid.cloud.data.min[0], self.grid.cloud.data.max[0], 3)), \
                            np.rint(np.linspace(self.grid.cloud.data.min[1], self.grid.cloud.data.max[1], 3))
@@ -203,7 +209,7 @@ class Raster:
         """
         from skimage.feature import peak_local_max, corner_peaks
         from scipy.ndimage import label
-        tops = peak_local_max(np.flipud(self.array), indices=False, min_distance=min_distance, threshold_abs=threshold_abs)
+        tops = peak_local_max(self.array, indices=False, min_distance=min_distance, threshold_abs=threshold_abs)
         tops = label(tops)[0]
 
         # TODO Had to take out corner filter to remove duplicate tops.
@@ -277,7 +283,7 @@ class DetectedTops(Raster):
         """
 
         fig, ax = plt.subplots()
-        caz = ax.matshow(np.flipud(self.chm.array))
+        caz = ax.matshow(self.chm.array)
         fig.colorbar(caz)
 
 
@@ -308,7 +314,7 @@ class CrownSegments(Raster):
     def __init__(self, array, grid, min_distance, threshold_abs):
         from skimage.morphology import watershed
         super().__init__(array, grid)
-        watershed_array = np.flipud(self.array)
+        watershed_array = self.array
         tops = self.local_maxima(min_distance=min_distance, threshold_abs=threshold_abs).array
         labels = watershed(-watershed_array, tops, mask=watershed_array)
         self.segments = gisexport.array_to_polygons(labels, affine=None)
@@ -320,7 +326,7 @@ class CrownSegments(Raster):
         geoms = self.segments['geometry'].translate(xoff=-0.5, yoff=-0.5).values
 
         fig, ax = plt.subplots()
-        ax.imshow(np.flipud(self.array))
+        ax.imshow(self.array)
         ax.add_collection(PatchCollection([PolygonPatch(poly) for poly in geoms], facecolors=(1,0,0,0), edgecolors='#e8e8e8'))
         plt.xlim((0, self.array.shape[1]))
         plt.ylim((0, self.array.shape[0]))

@@ -17,8 +17,9 @@ class VoxelGrid:
         self.p = int(np.floor((max_z - min_z) / cell_size))
 
         # Create bins
+        y_edges = np.linspace(min_y, max_y, self.m)
         bins_x = np.searchsorted(np.linspace(min_x, max_x, self.n), self.cloud.data.points["x"])
-        bins_y = np.searchsorted(np.linspace(min_y, max_y, self.m), self.cloud.data.points["y"])
+        bins_y = np.searchsorted(-y_edges, -self.cloud.data.points['y'], side='right', sorter=(-y_edges).argsort())-1
         bins_z = np.searchsorted(np.linspace(min_z, max_z, self.p), self.cloud.data.points["z"])
 
         self.data = self.cloud.data.points

@@ -192,7 +192,6 @@ class KrausPfeifer1998:
         ix[self.cloud.data.points['bins_y'], self.cloud.data.points['bins_x'],
            self.cloud.data.points['bins_z']] = self.cloud.data.points.index.values
         ground_bins = (final_resid <= self.g + self.w).nonzero()
-        self.cloud.data.points = self.cloud.data.points.reset_index()
         return self.cloud.data.points.loc[ix[ground_bins]]
 
 
