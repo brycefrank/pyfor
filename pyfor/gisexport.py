@@ -41,12 +41,9 @@ def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
     :param path: The output bath of the GeoTIFF
     """
     # First flip the array
-    array = np.flipud(array)
-
     transform = rasterio.transform.from_origin(x_min, y_max, pixel_size, pixel_size)
     out_dataset = rasterio.open(path, 'w', driver='GTiff', height=array.shape[0], width = array.shape[1], count=1,
                                 dtype=str(array.dtype),crs=wkt, transform=transform)
-
     out_dataset.write(array, 1)
     out_dataset.close()
 
