@@ -2,19 +2,16 @@
 
 Updates between October 25th, 2018 and []
 
-
 ## Cloud
 1. Fixed a bug with the `name` attribute that returned the entire directory instead of just the filename (without extension)
+2. Added `.subtract` function, this allows a user to provide their own (properly referenced) DEM for use in normalizing the parent cloud object.
 
 ## CloudData
 1. Added a check for empty dataframe before writing to file.
 
 ## Collection
 1. Added `bounding_box` attribute that retrieves the bounding box of the entire collection, used in retiling.
-2. Added `retile` function to split large acquisitions into smaller tile sizes.
-
-
-
+2. Added `retile` function to split large acquisitions into smaller tile sizes, for now this just splits into quadrants.
 
 # 0.3.1
 

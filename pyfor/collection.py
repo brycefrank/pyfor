@@ -3,6 +3,7 @@ import laspy
 import numpy as np
 import pyfor
 import geopandas as gpd
+import pandas as pd
 
 class Indexer:
     """
@@ -152,7 +153,39 @@ class CloudDataFrame(gpd.GeoDataFrame):
         col_bbox = np.min(minx), np.min(miny), np.max(maxx), np.max(maxy)
         return col_bbox
 
-    def retile(self, width, height, dir):
+    def retile(self, out_dir, verbose = False):
+        """
+        Retiles the collection into `out_dir`. This is a simplified retiling function that splits each tile into \
+        quadrants and writes these new quadrants to disk. The written files will be the original file name with an index
+        appended. 0 is the bottom left quadrant, 1 is the bottom right, 2 is the top left and 3 is the top right.
+        """
+        from shapely.geometry import Polygon
+
+        for index, row in self.iterrows():
+            # Build the quadrant geometries, this is defined by the following six values
+            larger_cell = row['bounding_box'].bounds
+
+            x0, y0 = larger_cell[0], larger_cell[1]
+            x2, y2 = larger_cell[2], larger_cell[3]
+            x1 = ((larger_cell[2] - larger_cell[0]) / 2) + x0
+            y1 = ((larger_cell[3] - larger_cell[1]) / 2) + y0
+
+            # Create the geometries
+            bottom_left = Polygon([(x0, y0), (x0, y1), (x1, y1), (x1, y0)])
+            bottom_right = Polygon([(x1, y0), (x1, y1), (x2, y1), (x2, y0)])
+            top_left = Polygon([(x0, y1), (x0, y2), (x1, y2), (x1, y1)])
+            top_right = Polygon([(x1, y1), (x1, y2), (x2, y2), (x2, y1)])
+
+            quadrants = [bottom_left, bottom_right, top_left, top_right]
+
+
+            larger_cloud = pyfor.cloud.Cloud(row['las_path'])
+
+            for i, quad in enumerate(quadrants):
+                clipped = larger_cloud.clip(quad)
+                clipped.write(os.path.join(out_dir, '{}_{}.las'.format(larger_cloud.name, i)))
+
+    def retile2(self, width, height, dir):
         """
         Retiles the collection and writes the new tiles to the directory defined in `dir`.
 
@@ -184,7 +217,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
                 pc.write(os.path.join(dir, '{}_{}{}'.format(larger_cell.name, i, larger_cell.extension)))
 
 
-
 def from_dir(las_dir, n_jobs=1):
     """
     Constructs a CloudDataFrame from a directory of las files.
@@ -193,7 +225,7 @@ def from_dir(las_dir, n_jobs=1):
     :return: A CloudDataFrame constructed from the directory of las files.
     """
 
-    return CloudDataFrame.from_dir(las_dir, n_jobs= n_jobs)
+    return CloudDataFrame.from_dir(las_dir, n_jobs=n_jobs)
 
 
 def stitch_clouds(collection):
@@ -202,3 +234,4 @@ def stitch_clouds(collection):
     :return:
 
     """
+    pass

@@ -241,6 +241,7 @@ class KrausPfeifer1998:
         """
         bem = self.bem(cell_size)
         # Rebin the cloud to the new cell size
+        # TODO make this into a standalone function (in raster, grid?), it is used in several other places
         self.cloud.grid(cell_size)
         self.cloud.data._update()
         df = pd.DataFrame(bem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
