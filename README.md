@@ -6,7 +6,9 @@
 
 [![Documentation Status](https://readthedocs.org/projects/pyfor/badge/?version=latest)](http://brycefrank.com/pyfor)[![Build Status](https://travis-ci.org/brycefrank/pyfor.svg?branch=master)](https://travis-ci.org/brycefrank/pyfor)[![Coverage Status](https://coveralls.io/repos/github/brycefrank/pyfor/badge.svg?branch=master)](https://coveralls.io/github/brycefrank/pyfor?branch=master)[![Gitter](https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg)](https://gitter.im/pyfor-gh/Lobby?source=orgpage)[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=6VGXC3S5RVSPN&lc=US&item_name=Bryce%20Frank&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted)
 
-**pyfor** is a Python package that assists in the processing of point cloud data in the context of forest inventory. It offers functions that convert raw point cloud data to usable information about forested landscapes using an object oriented (OOP) framework accessible for advanced and novice users of Python. pyfor aims to provide a cross platform means to interactively process point cloud data, as well as efficient ways to batch process large acquisitions.
+**pyfor** is a Python package that assists in the processing of point cloud data in the context of forest inventory. 
+This includes manipulation of point data, support for analysis, and a
+memory optimized API for managing large collections of point cloud data.
 
 **Cloud Computing**
 
@@ -14,7 +16,7 @@ pyfor is supported in part by the [AWS Cloud Credits for Research program](https
 
 ## Release Status
 
-Current Release: 0.3.1
+Current Release: 0.3.2
 
 Release Date: October 25, 2018
 

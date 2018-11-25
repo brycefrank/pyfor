@@ -4,6 +4,7 @@ import numpy as np
 import pyfor
 import geopandas as gpd
 import pandas as pd
+import laxpy
 
 class Indexer:
     """
@@ -33,6 +34,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
         :return:
         """
         las_path_init = [[os.path.join(root, file) for file in files] for root, dirs, files in os.walk(las_dir)][0]
+        las_path_init = [las_path for las_path in las_path_init if las_path.endswith('.las') or las_path.endswith('.laz')]
         cdf = CloudDataFrame({'las_path': las_path_init})
         cdf.n_threads = n_jobs
 
@@ -86,6 +88,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
         return((min_x, max_x, min_y, max_y))
 
     def _get_bounding_boxes(self):
+        # TODO joblib is fixed now, merge this above
         """
         Retrieves a bounding box for each path in las path.
         :return:
@@ -132,12 +135,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
         return cdf
 
 
-    def clip(self):
-        """
-        Clips the CloudDataFrame with the supplied geometries.
-        :return:
-        """
-        pass
 
 
     def plot(self, **kwargs):
@@ -216,6 +213,76 @@ class CloudDataFrame(gpd.GeoDataFrame):
                 pc = larger_cell.clip(smaller_cell)
                 pc.write(os.path.join(dir, '{}_{}{}'.format(larger_cell.name, i, larger_cell.extension)))
 
+    def create_index(self):
+        """
+        For each file in the collection, creates `.lax` files for spatial indexing.
+        """
+
+        for las_path in self['las_path']:
+            laxpy.file.init_lax(las_path)
+
+    def clip(self, polygon):
+        """
+        Extracts the points within the `polygon` geometry or, if an iterable of geometries is supplied, extracts all
+        of the points for each geometry.
+
+        :param polygon: A single `shapely.geometry.Polygon` or an iterable of same.
+        :return: A single `pyfor.cloud.Cloud` object or an iterable of same of the clipped point clouds.
+        """
+        # TODO what if polygon is an iterable of polygons?
+        from numpy.lib.recfunctions import append_fields
+        for row in self.iterrows():
+            tile_bbox, las_path = row[1]['bounding_box'], row[1]['las_path']
+            if tile_bbox.intersects(polygon):
+                # Build the spatial index
+                indexed_las = laxpy.IndexedLAS(las_path)
+                points = indexed_las.query_polygon(polygon)
+
+                # Scale X and Y
+                # TODO do this in laxpy.IndexedLAS?
+                x = ((points['point']['X'] * indexed_las.header.scale[0]) + indexed_las.header.offset[0])
+                y = (points['point']['Y'] * indexed_las.header.scale[1]) + indexed_las.header.offset[1]
+                z = (points['point']['Z'] * indexed_las.header.scale[2]) + indexed_las.header.offset[2]
+
+                # Get list of columns that aren't X Y or Z
+                avoid = ['X', 'Y', 'Z']
+                other_columns = [column for column in points['point'].dtype.fields.keys() if column not in avoid]
+
+                # TODO is there a way to avoid copying? Replace fields directly?
+                out_points = points['point'][other_columns].copy()
+
+                out_points = append_fields(out_points, ('x', 'y', 'z'), (x, y, z))
+
+                point_df = pd.DataFrame.from_records(out_points)
+                return pyfor.cloud.Cloud(pyfor.cloud.CloudData(point_df, indexed_las.header))
+
+    def clip2(self, polygons):
+        # Which tiles do I need to make an index for?
+        # It could  be the case that the input polys intersect with the same tile, but are checked out of order
+        # Building this dict requires a bit of overhead, but is more memory efficient in the worst case
+        intersected_tiles = {}
+        for ix, row in self.iterrows():
+            tile_bbox, las_path = row['bounding_box'], row['las_path']
+            for poly in polygons:
+                if tile_bbox.intersects(poly):
+                    if las_path in intersected_tiles:
+                        intersected_tiles[las_path].append(poly)
+                    else:
+                        intersected_tiles[las_path] = [poly]
+
+        # Which polygons have multiple parents?
+        multi_parent = {}
+        for i, poly in enumerate(polygons):
+            parents = []
+            for las_path, poly_list in intersected_tiles.items():
+                if poly in poly_list:
+                    parents.append(las_path)
+
+            if len(parents) > 1:
+                multi_parent[i] = parents
+
+
+
 
 def from_dir(las_dir, n_jobs=1):
     """
@@ -227,11 +294,3 @@ def from_dir(las_dir, n_jobs=1):
 
     return CloudDataFrame.from_dir(las_dir, n_jobs=n_jobs)
 
-
-def stitch_clouds(collection):
-    """
-    Holder function for some ideas.
-    :return:
-
-    """
-    pass

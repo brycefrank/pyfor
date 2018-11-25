@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from pyfor import gisexport
-from pyfor import ground_filter
 from pyfor import plot
 
 class Grid:

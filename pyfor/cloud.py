@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
 from pyfor import rasterizer
-from pyfor import clip_funcs
+from pyfor import clip
 from pyfor import plot
 import pathlib
 
@@ -16,6 +16,7 @@ class CloudData:
     def __init__(self, points, header):
         self.header = header
         self.points = points
+        # TODO are these even used?
         self.x = self.points["x"]
         self.y = self.points["y"]
         self.z = self.points["z"]
@@ -64,7 +65,7 @@ class LASData(CloudData):
             writer.pt_src_id = self.points["pt_src_id"]
             writer.close()
         else:
-            print('No data to write.')
+            raise ValueError('There is no data contained in this Cloud object, it is impossible to write.')
 
 class Cloud:
     """
@@ -296,7 +297,7 @@ class Cloud:
         :return: A new cloud object clipped to the provided polygon.
         """
 
-        keep = clip_funcs.poly_clip(self.data.points, poly)
+        keep = clip.poly_clip(self.data.points, poly)
         # Create copy to avoid warnings
         keep_points = self.data.points.iloc[keep].copy()
 
