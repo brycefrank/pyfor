@@ -212,6 +212,7 @@ class Raster:
         tops = peak_local_max(self.array, indices=False, min_distance=min_distance, threshold_abs=threshold_abs)
         tops = label(tops)[0]
 
+
         # TODO Had to take out corner filter to remove duplicate tops.
         tops_raster = DetectedTops(tops, self.grid, self)
         return(tops_raster)
@@ -288,7 +289,6 @@ class DetectedTops(Raster):
 
 
         # TODO I might not need to repeat this code from raster
-        fig.gca().invert_yaxis()
         ax.xaxis.tick_bottom()
         ax.set_xticks(np.linspace(0, self.grid.n, 3))
         ax.set_yticks(np.linspace(0, self.grid.m, 3))
@@ -297,7 +297,7 @@ class DetectedTops(Raster):
                            np.rint(np.linspace(self.grid.cloud.data.min[1], self.grid.cloud.data.max[1], 3))
 
         ax.set_xticklabels(x_ticks)
-        ax.set_yticklabels(y_ticks)
+        ax.set_yticklabels(reversed(y_ticks))
 
         container = np.zeros((self.grid.m, self.grid.n, 4))
         tops_binary = (self.array > 0).astype(np.int)
@@ -332,4 +332,3 @@ class CrownSegments(Raster):
         plt.ylim((0, self.array.shape[0]))
         ax.invert_yaxis()
         plt.show()
-
