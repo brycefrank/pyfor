@@ -52,7 +52,7 @@ class Zhang2003:
         return(self._dhmax(elev_array) / ((w_k - w_k_1) / 2))
 
 
-    def _dht(self, elev_array, w_k, w_k_1, dh_0, dh_max, c):
+    def _dht(self, w_k, w_k_1, dh_0, dh_max, c):
         """"
         Calculates dh_t.
 
@@ -79,6 +79,9 @@ class Zhang2003:
         m = A.shape[0]
         n = A.shape[1]
         flag = np.zeros((m, n))
+
+        dh_t = self.dh_0
+
         for k, w_k in enumerate(w_k_list):
             opened = grey_opening(self.array, (w_k, w_k))
             if w_k == w_k_min:
@@ -89,15 +92,16 @@ class Zhang2003:
                 P_i = A[i,:]
                 Z = P_i
                 Z_f = opened[i,:]
-                dh_t = self._dht(Z, w_k, w_k_1, self.dh_0, self.dh_max, self.cell_size)
                 for j in range(0, n):
                     if Z[j] - Z_f[j] > dh_t:
                         flag[i, j] = w_k
                 P_i = Z_f
                 A[i,:] = P_i
 
+            dh_t = self._dht(w_k, w_k_1, self.dh_0, self.dh_max, self.cell_size)
+
         if np.sum(flag) == 0:
-            return(None)
+            raise ValueError('No ground points found.')
 
         # Remove interpolated cells
         empty = self.grid.empty_cells

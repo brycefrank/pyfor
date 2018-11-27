@@ -6,11 +6,6 @@ import geopandas as gpd
 import pandas as pd
 import laxpy
 
-class Indexer:
-    """
-    Internal class used to index a directory of las files.
-    """
-
 class CloudDataFrame(gpd.GeoDataFrame):
     """
     Implements a data frame structure for processing and managing multiple cloud objects.
@@ -88,7 +83,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
         return((min_x, max_x, min_y, max_y))
 
     def _get_bounding_boxes(self):
-        # TODO joblib is fixed now, merge this above
         """
         Retrieves a bounding box for each path in las path.
         :return:
