@@ -27,7 +27,7 @@ class Zhang2003:
         self.interp_method = interp_method
 
         self.grid = self.cloud.grid(self.cell_size)
-        self.array = self.grid.raster(np.min, "z").array
+        self.array = self.grid.interpolate(np.min, "z").array
 
     def _window_size(self, k, b):
         return(2 * k * b + 1)
@@ -63,12 +63,16 @@ class Zhang2003:
         #s = self._slope(elev_array, w_k, w_k_1)
         s = 1
 
+
         if w_k <= 3:
-            return(dh_0)
-        elif w_k > 3:
-            return(s * (w_k - w_k_1) * c + dh_0)
+            dh_t = dh_0
         else:
-            return(dh_max)
+            dh_t = (s * (w_k - w_k_1) * c + dh_0)
+
+        if dh_t > dh_max:
+            dh_t = dh_max
+
+        return dh_t
 
     def _filter(self):
         from scipy.ndimage.morphology import grey_opening
@@ -79,9 +83,7 @@ class Zhang2003:
         m = A.shape[0]
         n = A.shape[1]
         flag = np.zeros((m, n))
-
         dh_t = self.dh_0
-
         for k, w_k in enumerate(w_k_list):
             opened = grey_opening(self.array, (w_k, w_k))
             if w_k == w_k_min:
@@ -101,13 +103,14 @@ class Zhang2003:
             dh_t = self._dht(w_k, w_k_1, self.dh_0, self.dh_max, self.cell_size)
 
         if np.sum(flag) == 0:
-            raise ValueError('No ground points found.')
+            raise ValueError('No pixels were determined to be ground, please adjust the filter parameters.')
 
         # Remove interpolated cells
         empty = self.grid.empty_cells
         empty_y, empty_x = empty[:,0], empty[:,1]
         A[empty_y, empty_x] = np.nan
-        B = np.where(flag != 0, A, np.nan)
+
+        B = np.where(flag == 0, A, np.nan)
         return B
 
     def bem(self):
@@ -122,6 +125,19 @@ class Zhang2003:
         dem_array = griddata(np.stack((C[0], C[1]), axis = 1), vals, (X, Y), method=self.interp_method)
 
         return(Raster(dem_array, self.grid))
+
+    def normalize(self):
+        """
+        Normalizes the original point cloud **in place**. This creates a BEM as an intermediate product, please see
+        `.bem()` to return this directly.
+
+        :param cell_size: The cell_size for the intermediate BEM. Values from 0.5 to 3 are common.
+        """
+        bem = self.bem()
+        self.cloud.data._update()
+        df = pd.DataFrame(bem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
+        df = self.cloud.data.points.reset_index().merge(df, how="left").set_index('index')
+        self.cloud.data.points['z'] = df['z'] - df['val']
 
 class KrausPfeifer1998:
     """
