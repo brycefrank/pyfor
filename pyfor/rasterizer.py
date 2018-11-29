@@ -292,8 +292,8 @@ class Raster:
         
         :param kernel_size: The size of the kernel window to pass over the array. For example 3 -> 3x3 kernel window.
         """
-        from scipy.signal import medfilt
-        self.array = medfilt(self.array, kernel_size=kernel_size)
+        from scipy.signal import medfilt2d
+        self.array = medfilt2d(self.array, kernel_size=kernel_size)
 
     def write(self, path):
         """
