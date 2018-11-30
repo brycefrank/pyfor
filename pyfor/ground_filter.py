@@ -194,17 +194,19 @@ class KrausPfeifer1998:
         """
         np.seterr(divide='ignore', invalid='ignore')
 
-        # TODO probably some opportunity for numba optimization, but working well enough for now
+        # TODO probably some opportunity for numba / cython optimization, but working well enough for now
         grid = self.cloud.grid(self.cell_size)
         self.cloud.data.points['bins_z'] = self.cloud.data.points.groupby(['bins_x', 'bins_y']).cumcount()
         depth = np.max(self.cloud.data.points['bins_z'])
         z = np.zeros((grid.m, grid.n, depth + 1))
+        z[:] = np.nan
         z[self.cloud.data.points['bins_y'], self.cloud.data.points['bins_x'], self.cloud.data.points['bins_z']] = self.cloud.data.points['z']
         p_i = np.zeros((grid.m, grid.n, depth+1))
-        p_i[z!=0] = 1
+        p_i[~np.isnan(z)] = 1
 
         for i in range(self.iterations):
-            surface = np.sum(z * p_i, axis=2) / np.sum(p_i, axis = 2)
+            surface = np.nansum(z * p_i, axis=2) / np.sum(p_i, axis=2)
+            # TODO how to deal with edge effect?
             surface = surface.reshape(grid.m, grid.n, 1)
             p_i = self._compute_weights(z - surface)
 

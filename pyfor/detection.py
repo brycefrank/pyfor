@@ -15,7 +15,6 @@ class Ayrey2017:
         # TODO implement arbitrary layer bin widths
         # TODO check if cloud has been normalized
         """
-
         :param cloud: The cloud object to detect on.
         :param n_jobs: The number of threads to conduct KMeans.
         :param chm_resolution: The CHM resolution for the initial detection.
@@ -29,6 +28,7 @@ class Ayrey2017:
         :param scnd_pass_min_dist: The minimum distance for the final top detection.
         :param scnd_pass_threshold_abs: The absolute threshold for initial top detection.
         """
+
         print("Warning: LayerStacking is still in development. Use at your own risk.")
 
         # Meta Information
