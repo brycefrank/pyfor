@@ -34,7 +34,7 @@ class Ayrey2017:
         # Meta Information
         self.cloud = cloud
         self.points = self.cloud.data.points
-        self.chm = self.cloud.chm(chm_resolution, interp_method= "nearest", pit_filter= "median")
+        self.chm = self.cloud.chm(chm_resolution, interp_method="nearest", pit_filter="median")
 
         # Algorithm parameters
         self.n_jobs = n_jobs
@@ -257,6 +257,7 @@ class Ayrey2017:
         layers_of_rasters = [self._rasterize(layers_of_polygons.get_group(key), value) for key, value in weights_dict.items()]
 
         array = np.sum(np.dstack(layers_of_rasters), axis = 2)
+        array = array.astype(np.uint8)
         raster = pyfor.rasterizer.Raster(array, self.chm.grid)
 
         if smoothed:
