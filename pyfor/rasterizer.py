@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from pyfor import gisexport
-from pyfor import ground_filter
 from pyfor import plot
 
 class Grid:
@@ -128,6 +127,51 @@ class Grid:
             metrics = [tup[1] for tup in list(aggregate)]
             return pd.DataFrame({'dim': dims, 'metric': metrics, 'raster': rasters}).set_index(['dim', 'metric'])
 
+class ImportedGrid(Grid):
+    """
+    ImportedGrid is used to normalize a parent cloud object with an arbitrary raster file.
+    """
+
+    def __init__(self, path, cloud):
+        import rasterio
+        self.in_raster = rasterio.open(path)
+
+        # Check cell size
+        cell_size_x, cell_size_y = self.in_raster.transform[0], abs(self.in_raster.transform[4])
+        if cell_size_x != cell_size_y:
+            print('Cell sizes not equal of input raster, not supported.')
+            raise ValueError
+        else:
+            cell_size = cell_size_x
+
+        self.cloud = cloud
+        self.cell_size = cell_size
+
+        min_x, max_x = self.in_raster.bounds[0], self.in_raster.bounds[2]
+        min_y, max_y = self.in_raster.bounds[1], self.in_raster.bounds[3]
+
+        self.m = self.in_raster.height
+        self.n = self.in_raster.width
+
+
+        #min_x, max_x = self.cloud.data.min[0], self.cloud.data.max[0]
+        #min_y, max_y = self.cloud.data.min[1], self.cloud.data.max[1]
+
+        #self.m = int(np.floor((max_y - min_y) / cell_size))
+        #self.n = int(np.floor((max_x - min_x) / cell_size))
+
+        # Create bins
+        bins_x = np.searchsorted(np.linspace(min_x, max_x, self.n), self.cloud.data.points["x"])
+        bins_y = np.searchsorted(np.linspace(min_y, max_y, self.m), self.cloud.data.points["y"])
+
+        self.cloud.data.points["bins_x"] = bins_x
+        self.cloud.data.points["bins_y"] = bins_y
+        self.cells = self.cloud.data.points.groupby(['bins_x', 'bins_y'])
+
+    def _update(self):
+        self.cloud.data._update()
+
+
 class Raster:
     def __init__(self, array, grid):
         self.array = array
@@ -248,8 +292,8 @@ class Raster:
         
         :param kernel_size: The size of the kernel window to pass over the array. For example 3 -> 3x3 kernel window.
         """
-        from scipy.signal import medfilt
-        self.array = medfilt(self.array, kernel_size=kernel_size)
+        from scipy.signal import medfilt2d
+        self.array = medfilt2d(self.array, kernel_size=kernel_size)
 
     def write(self, path):
         """

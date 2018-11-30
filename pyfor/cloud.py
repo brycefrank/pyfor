@@ -16,6 +16,7 @@ class CloudData:
     def __init__(self, points, header):
         self.header = header
         self.points = points
+        # TODO are these even used?
         self.x = self.points["x"]
         self.y = self.points["y"]
         self.z = self.points["z"]
@@ -38,27 +39,33 @@ class CloudData:
 
 class PLYData(CloudData):
     def write(self, path):
-        #coordinate_array = self.points[["x", "y", "z"]].values.T
-        #vertex_array = list(zip(coordinate_array[0],coordinate_array[1], coordinate_array[2]))
-        #vertex_array = np.array(vertex_array, dtype=[('x', 'f4'), ('y', 'f4'), ('z', 'f4')])
-        vertex_array = self.points.to_records(index=False)
-        elements = plyfile.PlyElement.describe(vertex_array, 'vertex')
-        plyfile.PlyData([elements]).write(path)
+        if len(self.points) > 0:
+            #coordinate_array = self.points[["x", "y", "z"]].values.T
+            #vertex_array = list(zip(coordinate_array[0],coordinate_array[1], coordinate_array[2]))
+            #vertex_array = np.array(vertex_array, dtype=[('x', 'f4'), ('y', 'f4'), ('z', 'f4')])
+            vertex_array = self.points.to_records(index=False)
+            elements = plyfile.PlyElement.describe(vertex_array, 'vertex')
+            plyfile.PlyData([elements]).write(path)
+        else:
+            print('No data to write.')
 
 class LASData(CloudData):
     def write(self, path):
-        writer = laspy.file.File(path, header = self.header, mode = "w")
-        writer.x = self.points["x"]
-        writer.y = self.points["y"]
-        writer.z = self.points["z"]
-        writer.return_num = self.points["return_num"]
-        writer.intesity = self.points["intensity"]
-        writer.classification = self.points["classification"]
-        writer.flag_byte = self.points["flag_byte"]
-        writer.scan_angle_rank = self.points["scan_angle_rank"]
-        writer.user_data = self.points["user_data"]
-        writer.pt_src_id = self.points["pt_src_id"]
-        writer.close()
+        if len(self. points) > 0:
+            writer = laspy.file.File(path, header = self.header, mode = "w")
+            writer.x = self.points["x"]
+            writer.y = self.points["y"]
+            writer.z = self.points["z"]
+            writer.return_num = self.points["return_num"]
+            writer.intesity = self.points["intensity"]
+            writer.classification = self.points["classification"]
+            writer.flag_byte = self.points["flag_byte"]
+            writer.scan_angle_rank = self.points["scan_angle_rank"]
+            writer.user_data = self.points["user_data"]
+            writer.pt_src_id = self.points["pt_src_id"]
+            writer.close()
+        else:
+            raise ValueError('There is no data contained in this Cloud object, it is impossible to write.')
 
 class Cloud:
     """
@@ -69,6 +76,7 @@ class Cloud:
 
         if type(path) == str or type(path) == pathlib.PosixPath:
             self.filepath = path
+            self.name = os.path.splitext(os.path.split(path)[1])[0]
             self.extension = os.path.splitext(path)[1]
 
             if self.extension == '.las' or self.extension == '.laz':
@@ -175,6 +183,8 @@ class Cloud:
         :return: If return_plot == True, returns matplotlib plt object. Not yet implemented.
         """
 
+        # FIXME this can break other functions and pipelines if a user plots in between calls, it resets the parent cloud bins_x/bins_y column
+        # it may be best to return an entirely new data structure
         rasterizer.Grid(self, cell_size).raster("max", "z").plot(cmap, block = block, return_plot = return_plot)
 
     def iplot3d(self, max_points=30000, point_size=0.5, dim="z", colorscale="Viridis"):
@@ -255,17 +265,27 @@ class Cloud:
 
     def normalize(self, cell_size, **kwargs):
         """
-        Normalizes this cloud object **in place** by generating a DEM using the default filtering algorithm  and \
-        subtracting the underlying ground elevation. This uses Kraus and Pfeifer (1998). This is a convenience \
-        wrapper for `ground_filter.KrausPfeifer1998.normalize`. See that documentation for more information.
-
-        :param cell_size: The cell_size at which to rasterize the point cloud into bins, in the same units as the \
-        input point cloud.
-        :param kwargs: Keyword arguments to `ground_filter.KrausPfeifer1998`
+        Normalize the cloud using the default Zhang et al. (2003) progressive morphological ground filter. Please see
+        the documentation in ground_filter.Zhang2003 for more information and keyword argument definitions.
         """
-        from pyfor.ground_filter import KrausPfeifer1998
-        filter = KrausPfeifer1998(self, cell_size, **kwargs)
-        filter.normalize(cell_size)
+
+        from pyfor.ground_filter import Zhang2003
+        filter = Zhang2003(self, cell_size, **kwargs)
+        filter.normalize()
+
+    def subtract(self, path):
+        """
+        Normalize using a pre-computed raster file, i.e. "subtract" the heights from the input raster.
+
+        :param path: The path to the raster file.
+        :return:
+        """
+
+        # Bins self.data.points with underlying
+        imported_grid = rasterizer.ImportedGrid(path, self)
+        df = pd.DataFrame(np.flipud(imported_grid.in_raster.read(1))).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
+        df = self.data.points.reset_index().merge(df, how="left").set_index('index')
+        self.data.points['z'] = df['z'] - df['val']
 
     def clip(self, poly):
         """

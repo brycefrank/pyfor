@@ -368,8 +368,7 @@ class Zhang2003TestCase(unittest.TestCase):
 class LayerStackingTestCase(unittest.TestCase):
     def setUp(self):
         self.test_cloud = cloud.Cloud(test_las)
-        self.test_cloud.normalize(10)
-
+        self.test_cloud.normalize(3)
         # Shrink down to a very tiny, sparse cloud for testing individual functions
         self.test_cloud.filter(min=405000, max=405000+25, dim="x")
         self.test_cloud.filter(min=3276300, max=3276300+25, dim="y")
