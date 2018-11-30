@@ -18,10 +18,10 @@ class CloudDataFrame(gpd.GeoDataFrame):
             self.set_geometry("bounding_box", inplace=True)
 
     @classmethod
-    def from_dir(cls, las_dir, n_jobs=1, get_bounding_boxes = True):
+    def from_dir(cls, las_dir, n_jobs=1, get_bounding_boxes=True):
         """
         Wrapped function for producing a CloudDataFrame from a directory of las files.
-        :param las_dir:
+        :param las_dir: A directory of .las or .laz files.
         :param n_jobs: The number of threads used to construct information about the CloudDataFrame.
         :param get_bounding_boxes: If True, builds the bounding boxes for each las tile by manually reading in
         the file and computing the bounding box. For very large collections this may be computationally costly, and
@@ -211,49 +211,36 @@ class CloudDataFrame(gpd.GeoDataFrame):
         """
         For each file in the collection, creates `.lax` files for spatial indexing.
         """
-
         for las_path in self['las_path']:
             laxpy.file.init_lax(las_path)
 
-    def clip(self, polygon):
+    def index_las(self, las_path):
         """
-        Extracts the points within the `polygon` geometry or, if an iterable of geometries is supplied, extracts all
-        of the points for each geometry.
-
-        :param polygon: A single `shapely.geometry.Polygon` or an iterable of same.
-        :return: A single `pyfor.cloud.Cloud` object or an iterable of same of the clipped point clouds.
+        Checks if an equivalent `.lax` file exists. If so, creates a laxpy.IndexedLAS object, otherwise an error is thrown.
+        :return:
         """
-        # TODO what if polygon is an iterable of polygons?
-        from numpy.lib.recfunctions import append_fields
-        for row in self.iterrows():
-            tile_bbox, las_path = row[1]['bounding_box'], row[1]['las_path']
-            if tile_bbox.intersects(polygon):
-                # Build the spatial index
-                indexed_las = laxpy.IndexedLAS(las_path)
-                points = indexed_las.query_polygon(polygon)
+        lax_path = las_path[:-1] + 'x'
 
-                # Scale X and Y
-                # TODO do this in laxpy.IndexedLAS?
-                x = ((points['point']['X'] * indexed_las.header.scale[0]) + indexed_las.header.offset[0])
-                y = (points['point']['Y'] * indexed_las.header.scale[1]) + indexed_las.header.offset[1]
-                z = (points['point']['Z'] * indexed_las.header.scale[2]) + indexed_las.header.offset[2]
+        if os.path.isfile(lax_path):
+            return laxpy.IndexedLAS(las_path)
+        else:
+            raise FileNotFoundError('There is no equivalent .lax file for this .las file.')
 
-                # Get list of columns that aren't X Y or Z
-                avoid = ['X', 'Y', 'Z']
-                other_columns = [column for column in points['point'].dtype.fields.keys() if column not in avoid]
+    def clip(self, polygons):
+        """
+        A collection-level clipping method. This function is meant for efficient querying across the study area using
+        a set of polygons using either a list or gpd.GeoSeries of shapely Polygons.
 
-                # TODO is there a way to avoid copying? Replace fields directly?
-                out_points = points['point'][other_columns].copy()
+        :param polygons:
+        :return:
+        """
 
-                out_points = append_fields(out_points, ('x', 'y', 'z'), (x, y, z))
-
-                point_df = pd.DataFrame.from_records(out_points)
-                return pyfor.cloud.Cloud(pyfor.cloud.CloudData(point_df, indexed_las.header))
-
-    def clip2(self, polygons):
         # Which tiles do I need to make an index for?
         # It could  be the case that the input polys intersect with the same tile, but are checked out of order
         # Building this dict requires a bit of overhead, but is more memory efficient in the worst case
+        if ~hasattr(polygons, '__iter__') and type(polygons) != gpd.GeoSeries:
+            polygons = [polygons]
+
         intersected_tiles = {}
         for ix, row in self.iterrows():
             tile_bbox, las_path = row['bounding_box'], row['las_path']
@@ -264,21 +251,23 @@ class CloudDataFrame(gpd.GeoDataFrame):
                     else:
                         intersected_tiles[las_path] = [poly]
 
-        # Which polygons have multiple parents?
-        multi_parent = {}
+        # Which polygons have which parents?
+        parents = {}
         for i, poly in enumerate(polygons):
-            parents = []
+            poly_parents = []
             for las_path, poly_list in intersected_tiles.items():
                 if poly in poly_list:
-                    parents.append(las_path)
+                    poly_parents.append(las_path)
+                parents[i] = poly_parents
 
-            if len(parents) > 1:
-                multi_parent[i] = parents
+        # For each polygon (i.e. each index in parents) construct the clipped point cloud.
+        # maybe this could just be done in the chunk above?
+        for poly_index, parent_list in parents.items():
+            poly = polygons[poly_index]
+            indexed_parents = [self.index_las(parent_path) for parent_path in parent_list]
+            parent_points = [parent.query_polygon(poly, scale=True) for parent in indexed_parents]
 
-
-
-
-def from_dir(las_dir, n_jobs=1):
+def from_dir(las_dir, **kwargs):
     """
     Constructs a CloudDataFrame from a directory of las files.
 
@@ -286,5 +275,5 @@ def from_dir(las_dir, n_jobs=1):
     :return: A CloudDataFrame constructed from the directory of las files.
     """
 
-    return CloudDataFrame.from_dir(las_dir, n_jobs=n_jobs)
+    return CloudDataFrame.from_dir(las_dir, **kwargs)
 
