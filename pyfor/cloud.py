@@ -183,6 +183,8 @@ class Cloud:
         :return: If return_plot == True, returns matplotlib plt object. Not yet implemented.
         """
 
+        # FIXME this can break other functions and pipelines if a user plots in between calls, it resets the parent cloud bins_x/bins_y column
+        # it may be best to return an entirely new data structure
         rasterizer.Grid(self, cell_size).raster("max", "z").plot(cmap, block = block, return_plot = return_plot)
 
     def iplot3d(self, max_points=30000, point_size=0.5, dim="z", colorscale="Viridis"):
@@ -263,17 +265,13 @@ class Cloud:
 
     def normalize(self, cell_size, **kwargs):
         """
-        Normalizes this cloud object **in place** by generating a DEM using the default filtering algorithm  and \
-        subtracting the underlying ground elevation. This uses Kraus and Pfeifer (1998). This is a convenience \
-        wrapper for `ground_filter.KrausPfeifer1998.normalize`. See that documentation for more information.
-
-        :param cell_size: The cell_size at which to rasterize the point cloud into bins, in the same units as the \
-        input point cloud.
-        :param kwargs: Keyword arguments to `ground_filter.KrausPfeifer1998`
+        Normalize the cloud using the default Zhang et al. (2003) progressive morphological ground filter. Please see
+        the documentation in ground_filter.Zhang2003 for more information and keyword argument definitions.
         """
-        from pyfor.ground_filter import KrausPfeifer1998
-        filter = KrausPfeifer1998(self, cell_size, **kwargs)
-        filter.normalize(cell_size)
+
+        from pyfor.ground_filter import Zhang2003
+        filter = Zhang2003(self, cell_size, **kwargs)
+        filter.normalize()
 
     def subtract(self, path):
         """

@@ -12,12 +12,15 @@ class Zhang2003:
     """
     def __init__(self, cloud, cell_size, n_windows=5, dh_max=2, dh_0=1, b=2, interp_method="nearest"):
         """
+        :param cloud: The input cloud object.
         :param n_windows: The number of windows to construct for filtering.
         :param dh_max: The maximum height threshold.
         :param dh_0: The starting null height threshold.
         :param cell_size: The cell_size used to construct the array for filtering, also the output size of the BEM.
         :param interp_method: The interpolation method used to fill nan values in the final BEM.
         """
+        import warnings
+        warnings.warn('Instantiation of ground filters will no longer require a Cloud argument in 0.3.3, it will instead be moved to _filter, bem, ground points and normalize', DeprecationWarning)
         self.cloud = cloud
         self.n_windows = n_windows
         self.dh_max = dh_max
@@ -157,6 +160,8 @@ class KrausPfeifer1998:
         :param w: The window width from g up considered for weighting.
         :param iterations: The number of iterations, i.e. the number of surfaces constructed.
         """
+        import warnings
+        warnings.warn('Instantiation of ground filters will no longer require a Cloud argument in 0.3.3, it will instead be moved to _filter, bem, ground points and normalize', DeprecationWarning)
         self.cloud = cloud
         self.cell_size = cell_size
         self.a = a
@@ -175,7 +180,7 @@ class KrausPfeifer1998:
         :param v_i: A vector of residuals.
         :return: A vector of weights, p_i
         """
-        p_i = np.empty(v_i.shape)
+        p_i = np.zeros(v_i.shape)
         p_i[v_i <= self.g] = 1
         middle = np.logical_and(v_i > self.g, v_i <= self.g+self.w)
         p_i[middle] = 1 / (1 + (self.a * (v_i[middle] - self.g)**self.b))
@@ -194,15 +199,15 @@ class KrausPfeifer1998:
         self.cloud.data.points['bins_z'] = self.cloud.data.points.groupby(['bins_x', 'bins_y']).cumcount()
         depth = np.max(self.cloud.data.points['bins_z'])
         z = np.zeros((grid.m, grid.n, depth + 1))
-        z[:] = np.nan
         z[self.cloud.data.points['bins_y'], self.cloud.data.points['bins_x'], self.cloud.data.points['bins_z']] = self.cloud.data.points['z']
         p_i = np.zeros((grid.m, grid.n, depth+1))
-        p_i[~np.isnan(z)] = 1
+        p_i[z!=0] = 1
 
         for i in range(self.iterations):
-            surface = np.nansum(z * p_i, axis=2) / np.sum(p_i, axis = 2)
-            surface = surface.reshape(grid.m,grid.n,1)
-            p_i= self._compute_weights(z - surface)
+            surface = np.sum(z * p_i, axis=2) / np.sum(p_i, axis = 2)
+            surface = surface.reshape(grid.m, grid.n, 1)
+            p_i = self._compute_weights(z - surface)
+
         final_resid = z - surface
 
         del p_i
@@ -212,6 +217,7 @@ class KrausPfeifer1998:
         ix[self.cloud.data.points['bins_y'], self.cloud.data.points['bins_x'],
            self.cloud.data.points['bins_z']] = self.cloud.data.points.index.values
         ground_bins = (final_resid <= self.g + self.w).nonzero()
+
         return self.cloud.data.points.loc[ix[ground_bins]]
 
 
