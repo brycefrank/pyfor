@@ -37,6 +37,7 @@ class CloudData:
         self.points = pd.concat([self.points, other.points])
         self._update()
 
+
 class PLYData(CloudData):
     def write(self, path):
         if len(self.points) > 0:
@@ -49,20 +50,15 @@ class PLYData(CloudData):
         else:
             print('No data to write.')
 
+
 class LASData(CloudData):
     def write(self, path):
         if len(self. points) > 0:
             writer = laspy.file.File(path, header = self.header, mode = "w")
-            writer.x = self.points["x"]
-            writer.y = self.points["y"]
-            writer.z = self.points["z"]
-            writer.return_num = self.points["return_num"]
-            writer.intesity = self.points["intensity"]
-            writer.classification = self.points["classification"]
-            writer.flag_byte = self.points["flag_byte"]
-            writer.scan_angle_rank = self.points["scan_angle_rank"]
-            writer.user_data = self.points["user_data"]
-            writer.pt_src_id = self.points["pt_src_id"]
+
+            for dim in self.points:
+                setattr(writer, dim, self.points[dim])
+
             writer.close()
         else:
             raise ValueError('There is no data contained in this Cloud object, it is impossible to write.')
@@ -101,7 +97,7 @@ class Cloud:
             else:
                 raise ValueError('File extension not supported, please input either a las, laz, ply or CloudData object.')
 
-        elif type(path) == CloudData:
+        elif type(path) == CloudData or isinstance(path, CloudData):
             self.data = path
         else:
             raise ValueError("Object type not supported, please input either a file path with a supported extension or a CloudData object.")

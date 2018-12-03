@@ -226,20 +226,26 @@ class CloudDataFrame(gpd.GeoDataFrame):
         else:
             raise FileNotFoundError('There is no equivalent .lax file for this .las file.')
 
-    def clip(self, polygons):
+    def clip(self, polygons, path, poly_names = None):
         """
         A collection-level clipping method. This function is meant for efficient querying across the study area using
         a set of polygons using either a list or gpd.GeoSeries of shapely Polygons.
 
         :param polygons:
+        :param func: A function to perform on a `pyfor.cloud.Cloud` object of each clipped polygon.
+        :param poly_names: A list of polygon names to use when writing to file.
         :return:
         """
+        # TODO currently does not take advantage of multi-threading
+
 
         # Which tiles do I need to make an index for?
         # It could  be the case that the input polys intersect with the same tile, but are checked out of order
         # Building this dict requires a bit of overhead, but is more memory efficient in the worst case
         if ~hasattr(polygons, '__iter__') and type(polygons) != gpd.GeoSeries:
             polygons = [polygons]
+
+        head, tail = os.path.split(path)
 
         intersected_tiles = {}
         for ix, row in self.iterrows():
@@ -265,7 +271,22 @@ class CloudDataFrame(gpd.GeoDataFrame):
         for poly_index, parent_list in parents.items():
             poly = polygons[poly_index]
             indexed_parents = [self.index_las(parent_path) for parent_path in parent_list]
-            parent_points = [parent.query_polygon(poly, scale=True) for parent in indexed_parents]
+            header = indexed_parents[0].header
+            # TODO This is slow, but should be addressed upstream in laxpy, especially _scale_points
+            parent_points = pd.concat([pd.DataFrame.from_records(parent.query_polygon(poly, scale=True)) for parent in indexed_parents])
+
+            print('Clipping polygon {} of {}'.format(poly_index + 1, len(polygons)))
+            pc = pyfor.cloud.Cloud(pyfor.cloud.LASData(parent_points, header))
+
+            if poly_names is not None:
+                out_path = head + os.path.sep + str(poly_names[poly_index]) + '.las'
+            else:
+                out_path = head + os.path.sep + str(poly_index) + '.las'
+
+            print('Writing to {}'.format(out_path))
+            pc.write(out_path)
+
+
 
 def from_dir(las_dir, **kwargs):
     """
