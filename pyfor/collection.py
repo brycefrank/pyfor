@@ -6,6 +6,7 @@ import geopandas as gpd
 import pandas as pd
 import laxpy
 
+
 class CloudDataFrame(gpd.GeoDataFrame):
     """
     Implements a data frame structure for processing and managing multiple cloud objects.
@@ -41,7 +42,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
     def set_index(self, *args):
         return CloudDataFrame(super(CloudDataFrame, self).set_index(*args))
 
-    def par_apply(self, func, column='las_path', buffer_distance = 0, *args):
+    def par_apply(self, func, column='las_path', buffer_distance=0, *args):
         """
         Apply a function to each las path. Allows for parallelization using the n_jobs argument. This is achieved \
         via joblib Parallel and delayed.
@@ -57,9 +58,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
             self._buffer(buffer_distance)
             for i, geom in enumerate(self["bounding_box"]):
                 intersecting = self._get_intersecting(i)
-
                 clip_geom = self['buffered_bounding_box'].iloc[i]
-                print(clip_geom)
                 parent_cloud = pyfor.cloud.Cloud(self["las_path"].iloc[i])
                 for path in intersecting["las_path"]:
                     adjacent_cloud = pyfor.cloud.Cloud(path)
@@ -68,8 +67,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
         output = Parallel(n_jobs=self.n_threads)(delayed(func)(plot_path, *args) for plot_path in self[column])
         return output
 
-    # TODO Many of these _functions are redundant due to a bug in joblib that prevents lambda functions
-    # once this bug is fixed these functions can be drastically simplified and aggregated.
     def _get_bounding_box(self, las_path):
         """
         Vectorized function to get a bounding box from an individual las path.
@@ -82,17 +79,10 @@ class CloudDataFrame(gpd.GeoDataFrame):
         min_y, max_y = pc.header.min[1], pc.header.max[1]
         return((min_x, max_x, min_y, max_y))
 
-    def _get_bounding_boxes(self):
-        """
-        Retrieves a bounding box for each path in las path.
-        :return:
-        """
-        return self.par_apply(self._get_bounding_box, column="las_path")
-
     def _build_polygons(self):
         """Builds the shapely polygons of the bounding boxes and adds them to self.data"""
         from shapely.geometry import Polygon
-        bboxes = self._get_bounding_boxes()
+        bboxes = self.par_apply(self._get_bounding_box, column='las_path')
         self["bounding_box"] = [Polygon(((bbox[0], bbox[2]), (bbox[1], bbox[2]),
                                            (bbox[1], bbox[3]), (bbox[0], bbox[3]))) for bbox in bboxes]
         self.set_geometry("bounding_box", inplace = True)
@@ -111,7 +101,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
         intersect_cdf.n_threads = self.n_threads
         return intersect_cdf
 
-
     def _buffer(self, distance, in_place = True):
         """
         Buffers the CloudDataFrame geometries.
@@ -127,9 +116,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
         cdf.n_threads = self.n_threads
         cdf.set_geometry("bounding_box", inplace=True)
         return cdf
-
-
-
 
     def plot(self, **kwargs):
         """Plots the bounding boxes of the Cloud objects"""
@@ -209,7 +195,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
 
     def create_index(self):
         """
-        For each file in the collection, creates `.lax` files for spatial indexing.
+        For each file in the collection, creates `.lax` files for spatial indexing using the default values.
         """
         for las_path in self['las_path']:
             laxpy.file.init_lax(las_path)
@@ -226,7 +212,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
         else:
             raise FileNotFoundError('There is no equivalent .lax file for this .las file.')
 
-    def clip(self, polygons, path, poly_names = None):
+    def clip(self, polygons, path, poly_names=None):
         """
         A collection-level clipping method. This function is meant for efficient querying across the study area using
         a set of polygons using either a list or gpd.GeoSeries of shapely Polygons.
@@ -237,16 +223,15 @@ class CloudDataFrame(gpd.GeoDataFrame):
         :return:
         """
         # TODO currently does not take advantage of multi-threading
-
-
-        # Which tiles do I need to make an index for?
-        # It could  be the case that the input polys intersect with the same tile, but are checked out of order
-        # Building this dict requires a bit of overhead, but is more memory efficient in the worst case
+        # TODO also a bit long, may be best to break up
         if ~hasattr(polygons, '__iter__') and type(polygons) != gpd.GeoSeries:
             polygons = [polygons]
 
         head, tail = os.path.split(path)
 
+        # Which tiles do I need to make an index for?
+        # It could  be the case that the input polys intersect with the same tile, but are checked out of order
+        # Building this dict requires a bit of overhead, but is more memory efficient in the worst case
         intersected_tiles = {}
         for ix, row in self.iterrows():
             tile_bbox, las_path = row['bounding_box'], row['las_path']

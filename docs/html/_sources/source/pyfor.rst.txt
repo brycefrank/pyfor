@@ -6,7 +6,7 @@ Submodules
 
 .. toctree::
 
-   pyfor.clip_funcs
+   pyfor.clip
    pyfor.cloud
    pyfor.collection
    pyfor.detection

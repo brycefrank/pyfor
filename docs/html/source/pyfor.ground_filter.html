@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyfor.ground_filter module &mdash; pyfor 0.3.1 documentation</title>
+  <title>pyfor.ground_filter module &mdash; pyfor 0.3.2 documentation</title>
   
 
   
@@ -83,6 +83,7 @@
             
             
               <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="pyfor.clip.html">pyfor.clip module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.clip_funcs.html">pyfor.clip_funcs module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.cloud.html">pyfor.cloud module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.collection.html">pyfor.collection module</a></li>
@@ -266,6 +267,7 @@ implementation interacts only with a raster, so the output resolution will be di
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cloud</strong> – The input cloud object.</li>
 <li><strong>n_windows</strong> – The number of windows to construct for filtering.</li>
 <li><strong>dh_max</strong> – The maximum height threshold.</li>
 <li><strong>dh_0</strong> – The starting null height threshold.</li>
@@ -282,6 +284,21 @@ implementation interacts only with a raster, so the output resolution will be di
 <dt id="pyfor.ground_filter.Zhang2003.bem">
 <code class="descname">bem</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.Zhang2003.bem" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="pyfor.ground_filter.Zhang2003.normalize">
+<code class="descname">normalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.Zhang2003.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalizes the original point cloud <strong>in place</strong>. This creates a BEM as an intermediate product, please see
+<cite>.bem()</cite> to return this directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cell_size</strong> – The cell_size for the intermediate BEM. Values from 0.5 to 3 are common.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
@@ -329,7 +346,7 @@ implementation interacts only with a raster, so the output resolution will be di
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.3.1',
+            VERSION:'0.3.2',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

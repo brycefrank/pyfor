@@ -76,36 +76,31 @@ class LASDataTestCase(unittest.TestCase):
         read.close()
         os.remove(os.path.join(data_dir, "temp_test_write.las"))
 
-class CloudTestCase(unittest.TestCase):
+class LASCloudTestCase(unittest.TestCase):
     def setUp(self):
-        self.test_cloud_las = cloud.Cloud(test_las)
-        self.test_cloud_laz = cloud.Cloud(test_laz)
-        self.test_cloud_ply = cloud.Cloud(test_ply)
+        self.test_cloud = cloud.Cloud(test_las)
 
     def test_las_load(self):
         """Tests if a .las file succesfully loads when cloud.Cloud is called"""
-        self.assertEqual(type(self.test_cloud_las), cloud.Cloud)
+        self.assertEqual(type(self.test_cloud), cloud.Cloud)
 
     def test_ply_load(self):
         cloud.Cloud(os.path.join(data_dir, "test.ply"))
 
     def test_print_summary(self):
-        print(self.test_cloud_las)
-        print(self.test_cloud_laz)
-        print(self.test_cloud_ply)
+        print(self.test_cloud)
 
     def test_not_supported(self):
         with self.assertRaises(ValueError):
             cloud.Cloud(os.path.join(data_dir, "clip.shp"))
 
     def test_cloud_summary(self):
-        print(self.test_cloud_las)
-        print(self.test_cloud_ply)
+        print(self.test_cloud)
 
     def test_grid_creation(self):
         """Tests if the grid is successfully created."""
         # Does the call to grid return the proper type
-        self.assertEqual(type(self.test_cloud_las.grid(1)), rasterizer.Grid)
+        self.assertEqual(type(self.test_cloud.grid(1)), rasterizer.Grid)
 
     def test_filter_z(self):
         self.test_filter = cloud.Cloud(test_las)
@@ -116,23 +111,15 @@ class CloudTestCase(unittest.TestCase):
 
     def test_clip_polygon(self):
         poly = gpd.read_file(test_shp)['geometry'][0]
-        self.test_cloud_las.clip(poly)
-
-    # FIXME will be deprecated in 0.3.2
-    def test_discrete_cmap(self):
-        self.test_cloud_las._discrete_cmap(10)
-
-    # FIXME will be deprecated in 0.3.2
-    def test_set_discrete_color(self):
-        self.test_cloud_las._set_discrete_color(10, self.test_cloud_las.data.points['x'])
+        self.test_cloud.clip(poly)
 
     def test_plot(self):
-        self.test_cloud_las.plot()
+        self.test_cloud.plot()
         plt.close()
 
     def test_plot3d(self):
-        self.test_cloud_las.plot3d()
-        self.test_cloud_las.plot3d(dim='user_data')
+        self.test_cloud.plot3d()
+        self.test_cloud.plot3d(dim='user_data')
 
     def test_normalize(self):
         test_cloud = cloud.Cloud(test_las)
@@ -140,22 +127,40 @@ class CloudTestCase(unittest.TestCase):
         self.assertLess(test_cloud.data.max[2], 65)
 
     def test_chm(self):
-        self.test_cloud_las.chm(0.5, interp_method="nearest", pit_filter="median")
+        self.test_cloud.chm(0.5, interp_method="nearest", pit_filter="median")
 
     def test_chm_without_interpolation_method(self):
-        self.assertEqual(type(self.test_cloud_las.chm(0.5, interp_method=None)), rasterizer.Raster)
+        self.assertEqual(type(self.test_cloud.chm(0.5, interp_method=None)), rasterizer.Raster)
 
-    def test_convex_hull(self):
-        self.test_cloud_las.convex_hull
 
     def test_append(self):
-        n_points = len(self.test_cloud_las.data.points)
-        self.test_cloud_las.data._append(self.test_cloud_las.data)
-        self.assertGreater(len(self.test_cloud_las.data.points), n_points)
+        n_points = len(self.test_cloud.data.points)
+        self.test_cloud.data._append(self.test_cloud.data)
+        self.assertGreater(len(self.test_cloud.data.points), n_points)
 
     def test_write(self):
-        self.test_cloud_las.write(os.path.join(data_dir, 'test_write.las'))
+        self.test_cloud.write(os.path.join(data_dir, 'test_write.las'))
         os.remove(os.path.join(data_dir, 'test_write.las'))
+
+class LAZCloudTestCase(LASCloudTestCase):
+    def setUp(self):
+        self.test_cloud = cloud.Cloud(test_laz)
+
+class PLYCloudTestCase(LASCloudTestCase):
+    def setUp(self):
+        self.test_cloud = cloud.Cloud(test_ply)
+
+    def test_plot3d(self):
+        self.test_cloud.plot3d()
+
+    def test_convex_hull(self):
+        # Fixme, too few points to do this test correctly
+        pass
+
+    def test_write(self):
+        self.test_cloud.write(os.path.join(data_dir, 'test_write.ply'))
+        os.remove(os.path.join(data_dir, 'test_write.ply'))
+
 
 
 class GridTestCase(unittest.TestCase):

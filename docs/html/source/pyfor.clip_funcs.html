@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyfor.clip_funcs module &mdash; pyfor 0.3.1 documentation</title>
+  <title>pyfor.clip_funcs module &mdash; pyfor 0.3.2 documentation</title>
   
 
   
@@ -29,7 +29,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="pyfor.cloud module" href="pyfor.cloud.html" />
-    <link rel="prev" title="pyfor" href="../index.html" /> 
+    <link rel="prev" title="pyfor.clip module" href="pyfor.clip.html" /> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -83,6 +83,7 @@
             
             
               <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="pyfor.clip.html">pyfor.clip module</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">pyfor.clip_funcs module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.cloud.html">pyfor.cloud module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.collection.html">pyfor.collection module</a></li>
@@ -157,68 +158,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-pyfor.clip_funcs">
-<span id="pyfor-clip-funcs-module"></span><h1>pyfor.clip_funcs module<a class="headerlink" href="#module-pyfor.clip_funcs" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
-<dt id="pyfor.clip_funcs.poly_clip">
-<code class="descclassname">pyfor.clip_funcs.</code><code class="descname">poly_clip</code><span class="sig-paren">(</span><em>points</em>, <em>poly</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip_funcs.poly_clip" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the indices within a given polygon.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>cloud</strong> – A cloud object.</li>
-<li><strong>poly</strong> – A shapely Polygon, with coordinates in the same CRS as the point cloud (for best results).</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A 1D numpy array of indices corresponding to points within the given polygon.</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyfor.clip_funcs.ray_trace">
-<code class="descclassname">pyfor.clip_funcs.</code><code class="descname">ray_trace</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>poly</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip_funcs.ray_trace" title="Permalink to this definition">¶</a></dt>
-<dd><p>A numba implementation of the ray tracing algorithm.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> – A 1D numpy array of x coordinates.</li>
-<li><strong>y</strong> – A 1D numpy array of y coordinates.</li>
-<li><strong>poly</strong> – The coordinates of a polygon as a numpy array (i.e. from geo_json[‘coordinates’]</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyfor.clip_funcs.square_clip">
-<code class="descclassname">pyfor.clip_funcs.</code><code class="descname">square_clip</code><span class="sig-paren">(</span><em>points</em>, <em>bounds</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip_funcs.square_clip" title="Permalink to this definition">¶</a></dt>
-<dd><p>Clips a square from a tuple describing the position of the square.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>las_xy</strong> – A N x 2 numpy array of x and y coordinates, x in</td>
-</tr>
-</tbody>
-</table>
-<p>column 0
-:param bounds: A tuple of length 4, min y and max y coordinates of the square.
-:return: A boolean mask, true is within the square</p>
-</dd></dl>
-
+  <div class="section" id="pyfor-clip-funcs-module">
+<h1>pyfor.clip_funcs module<a class="headerlink" href="#pyfor-clip-funcs-module" title="Permalink to this headline">¶</a></h1>
 </div>
 
 
@@ -232,7 +173,7 @@
         <a href="pyfor.cloud.html" class="btn btn-neutral float-right" title="pyfor.cloud module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../index.html" class="btn btn-neutral" title="pyfor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="pyfor.clip.html" class="btn btn-neutral" title="pyfor.clip module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -263,7 +204,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.3.1',
+            VERSION:'0.3.2',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

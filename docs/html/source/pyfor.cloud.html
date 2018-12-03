@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyfor.cloud module &mdash; pyfor 0.3.1 documentation</title>
+  <title>pyfor.cloud module &mdash; pyfor 0.3.2 documentation</title>
   
 
   
@@ -83,6 +83,7 @@
             
             
               <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="pyfor.clip.html">pyfor.clip module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.clip_funcs.html">pyfor.clip_funcs module</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">pyfor.cloud module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.collection.html">pyfor.collection module</a></li>
@@ -282,19 +283,8 @@ See the documentation for Grid for more information.</p>
 <dl class="method">
 <dt id="pyfor.cloud.Cloud.normalize">
 <code class="descname">normalize</code><span class="sig-paren">(</span><em>cell_size</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.normalize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Normalizes this cloud object <strong>in place</strong> by generating a DEM using the default filtering algorithm  and         subtracting the underlying ground elevation. This uses Kraus and Pfeifer (1998). This is a convenience         wrapper for <cite>ground_filter.KrausPfeifer1998.normalize</cite>. See that documentation for more information.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>cell_size</strong> – The cell_size at which to rasterize the point cloud into bins, in the same units as the         input point cloud.</li>
-<li><strong>kwargs</strong> – Keyword arguments to <cite>ground_filter.KrausPfeifer1998</cite></li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
+<dd><p>Normalize the cloud using the default Zhang et al. (2003) progressive morphological ground filter. Please see
+the documentation in ground_filter.Zhang2003 for more information and keyword argument definitions.</p>
 </dd></dl>
 
 <dl class="method">
@@ -333,6 +323,22 @@ See the documentation for Grid for more information.</p>
 <li><strong>max_points</strong> – The maximum number of points to render.</li>
 </ul>
 </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.subtract">
+<code class="descname">subtract</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.subtract" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize using a pre-computed raster file, i.e. “subtract” the heights from the input raster.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> – The path to the raster file.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
@@ -434,7 +440,7 @@ See the documentation for Grid for more information.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.3.1',
+            VERSION:'0.3.2',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

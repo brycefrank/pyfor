@@ -63,6 +63,7 @@ class LASData(CloudData):
         else:
             raise ValueError('There is no data contained in this Cloud object, it is impossible to write.')
 
+
 class Cloud:
     """
     The cloud object is the integral unit of pyfor, and is where most of the action takes place. Many of the following \
