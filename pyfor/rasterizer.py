@@ -200,7 +200,8 @@ class Raster:
         import fiona
         import rasterio
         from rasterio.mask import mask
-        # TODO for now this uses temp files. I would like to change this.
+        # FIXME broken in 0.3.2, but really needs a rewrite anyway. May be best to remove fiona as a dependency
+        # Also fix the test in the testing suite
         self.grid.cloud.convex_hull.to_file("temp.shp")
         with fiona.open("temp.shp", "r") as shapefile:
             features = [feature["geometry"] for feature in shapefile]

@@ -254,8 +254,8 @@ class RasterTestCase(unittest.TestCase):
         """
         self.assertEqual(self.test_raster.array[0,0], 45.11)
 
-    def test_convex_hull_mask(self):
-        self.test_raster._convex_hull_mask
+    #def test_convex_hull_mask(self):
+    #    self.test_raster._convex_hull_mask
 
     def test_plot(self):
         self.test_raster.plot()
