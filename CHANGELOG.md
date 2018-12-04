@@ -4,6 +4,7 @@ Updates between October 25th, 2018 and []. Note: some of these were applied dire
 0.3.2 represents many bug fixes and the addition of a few (relatively performant, your mileage may very) functions to `collection`.
 A shoutout to Ben Weinstein, whos diligent bug reporting has made `pyfor` a friendlier package during this update.
 
+
 ## Cloud
 1. Fixed a bug with the `name` attribute that returned the entire directory instead of just the filename (without extension)
 2. Added `.subtract` function, this allows a user to provide their own (properly referenced) DEM for use in normalizing the parent cloud object.
