@@ -18,9 +18,9 @@ pyfor is supported in part by the [AWS Cloud Credits for Research program](https
 
 Current Release: 0.3.2
 
-Release Date: October 25, 2018
+Release Date: December 4th, 2018
 
-Release Status: 0.3 is an adolescent LiDAR data processing package adequate for single tile processing and large acqusitions. Routine processing functions are available, and many features are being added.
+Release Status: 0.3 is an adolescent LiDAR data processing package adequate for single tile processing and large acqusitions.
 
 ## Samples
 
@@ -82,24 +82,13 @@ pip install . --upgrade
 
 Below is a list of features, complete and otherwise.
 
-- [X] Ground filter
-    - [X] Kraus and Pfeifer (1998)
-    - [X] Zhang et al. (2003)
+- [X] Ground filtering
 - [X] Interactive 2d & 3d plotting via Jupyter
-	- [X] Point cloud plotting
-	- [X] Raster plotting
 - [X] Grid metrics extraction
 - [X] Tree detection methods
-    - [X] Watershed segmentation
-    - [X] Layer stacking (Ayrey et al. 2017)
 - [X] Canopy height model
-	- [X] Median pit filter
-	- [ ] Pit free algorithm (Chen et al. 2017)
 - [X] Clipping point clouds
 - [X] Batch processing
-	- [X] Multiprocessor support
-	- [X] Cluster support
-- [X] Voxelization methods
 
 ## Collaboration & Requests
 
