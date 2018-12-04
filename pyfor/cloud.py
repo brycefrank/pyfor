@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
 from pyfor import rasterizer
-from pyfor import clip_funcs
+from pyfor import clip
 from pyfor import plot
 import pathlib
 
@@ -37,8 +37,14 @@ class CloudData:
         self.points = pd.concat([self.points, other.points])
         self._update()
 
+
 class PLYData(CloudData):
     def write(self, path):
+        """
+        Writes the object to file. This is a wrapper for :func:`plyfile.PlyData.write`
+
+        :param path: The path of the ouput file.
+        """
         if len(self.points) > 0:
             #coordinate_array = self.points[["x", "y", "z"]].values.T
             #vertex_array = list(zip(coordinate_array[0],coordinate_array[1], coordinate_array[2]))
@@ -47,30 +53,33 @@ class PLYData(CloudData):
             elements = plyfile.PlyElement.describe(vertex_array, 'vertex')
             plyfile.PlyData([elements]).write(path)
         else:
-            print('No data to write.')
+            raise ValueError('There is no data contained in this Cloud object, it is impossible to write.')
+
 
 class LASData(CloudData):
     def write(self, path):
+        """
+        Writes the object to file. This is a wrapper for :func:`laspy.file.File`
+
+        :param path: The path of the ouput file.
+        """
         if len(self. points) > 0:
             writer = laspy.file.File(path, header = self.header, mode = "w")
-            writer.x = self.points["x"]
-            writer.y = self.points["y"]
-            writer.z = self.points["z"]
-            writer.return_num = self.points["return_num"]
-            writer.intesity = self.points["intensity"]
-            writer.classification = self.points["classification"]
-            writer.flag_byte = self.points["flag_byte"]
-            writer.scan_angle_rank = self.points["scan_angle_rank"]
-            writer.user_data = self.points["user_data"]
-            writer.pt_src_id = self.points["pt_src_id"]
+
+            for dim in self.points:
+                setattr(writer, dim, self.points[dim])
+
             writer.close()
         else:
             raise ValueError('There is no data contained in this Cloud object, it is impossible to write.')
+            print('No data to write.')
 
 class Cloud:
     """
-    The cloud object is the integral unit of pyfor, and is where most of the action takes place. Many of the following \
-    attributes are convenience functions for other classes and modules.
+    The cloud object is an API for interacting with `.las`, `.laz`, and `.ply` files in memory, and is generally \
+    the starting point for any analysis with `pyfor`. For a more qualitative assessment of getting started with \
+    :class:`Cloud` please see the \
+    `user manual <https://github.com/brycefrank/pyfor_manual/blob/master/notebooks/2-ImportsExports.ipynb>`_.
     """
     def __init__(self, path):
 
@@ -87,7 +96,6 @@ class Cloud:
                 header = las.header
                 self.data = LASData(points, header)
 
-
             elif self.extension == '.ply':
                 ply = plyfile.PlyData.read(path)
                 ply_points = ply.elements[0].data
@@ -101,7 +109,7 @@ class Cloud:
             else:
                 raise ValueError('File extension not supported, please input either a las, laz, ply or CloudData object.')
 
-        elif type(path) == CloudData:
+        elif type(path) == CloudData or isinstance(path, CloudData):
             self.data = path
         else:
             raise ValueError("Object type not supported, please input either a file path with a supported extension or a CloudData object.")
@@ -164,21 +172,21 @@ class Cloud:
 
     def grid(self, cell_size):
         """
-        Generates a Grid object for this Cloud given a cell size. The Grid is generally used to compute Raster objects
-        See the documentation for Grid for more information.
+        Generates a :class:`.Grid` object for the parent object given a cell size. \
+        See the documentation for :class:`.Grid` for more information.
 
         :param cell_size: The resolution of the plot in the same units as the input file.
-        :return: A Grid object.
+        :return: A :class:`.Grid` object.
         """
-        return(rasterizer.Grid(self, cell_size))
+        return rasterizer.Grid(self, cell_size)
 
     def plot(self, cell_size = 1, cmap = "viridis", return_plot = False, block=False):
         """
         Plots a basic canopy height model of the Cloud object. This is mainly a convenience function for \
-        rasterizer.Grid.plot, check that method docstring for more information and more robust usage cases (i.e. \
-        pit filtering and interpolation methods).
+        :class:`.Raster.plot`. More robust methods exist for dealing with canopy height models. Please see the \
+        `user manual <https://github.com/brycefrank/pyfor_manual/blob/master/notebooks/3-CanopyHeightModel.ipynb>`_.
 
-        :param cellf vmin or vmax is not given, they are initialized from the minimum and maximum value respectively of the first input processed. That is, __call__(A) calls autoscale_None(A). If clip _size: The resolution of the plot in the same units as the input file.
+        :param clip_size: The resolution of the plot in the same units as the input file.
         :param return_plot: If true, returns a matplotlib plt object.
         :return: If return_plot == True, returns matplotlib plt object. Not yet implemented.
         """
@@ -191,27 +199,26 @@ class Cloud:
         """
         Plots the 3d point cloud in a compatible version for Jupyter notebooks using Plotly as a backend. If \
         max_points exceeds 30,000, the point cloud is downsampled using a uniform random distribution by default. \
-        This can be changed using the max_points argument.
+        This can be changed using the `max_points` argument.
 
         :param max_points: The maximum number of points to render.
         :param point_size: The point size of the rendered point cloud.
         :param dim: The dimension on which to color (i.e. "z", "intensity", etc.)
         :param colorscale: The Plotly colorscale with which to color.
         """
-        plot.iplot3d(self.data, max_points, point_size, dim, colorscale)
+
+        plot._iplot3d(self.data, max_points, point_size, dim, colorscale)
 
     def plot3d(self, dim = "z", point_size=1, cmap='Spectral_r', max_points=5e5, n_bin=8, plot_trees=False):
         """
-        Plots the three dimensional point cloud using a method suitable for non-Jupyter use (i.e. via the Python \
-        console). By default, if the point cloud exceeds 5e5 points, then it is downsampled using a uniform random \
-        distribution of 5e5 points. This is for performance purposes.
+        Plots the three dimensional point cloud using a `Qt` backend. By default, if the point cloud exceeds 5e5 \
+         points, then it is downsampled using a uniform random distribution. This is for performance purposes.
 
         :param point_size: The size of the rendered points.
         :param dim: The dimension upon which to color (i.e. "z", "intensity", etc.)
         :param cmap: The matplotlib color map used to color the height distribution.
         :param max_points: The maximum number of points to render.
         """
-
         from pyqtgraph.Qt import QtCore, QtGui
         import pyqtgraph as pg
         import pyqtgraph.opengl as gl
@@ -255,7 +262,7 @@ class Cloud:
         # Add points to the viewer
         view.addItem(points)
 
-        # Center on the aritgmetic mean of the point cloud and display
+        # Center on the arithmetic mean of the point cloud and display
         center = np.mean(coordinates, axis = 0)
         view.opts['center'] = pg.Vector(center[0], center[1], center[2])
         # Very ad-hoc
@@ -265,8 +272,10 @@ class Cloud:
 
     def normalize(self, cell_size, **kwargs):
         """
-        Normalize the cloud using the default Zhang et al. (2003) progressive morphological ground filter. Please see
-        the documentation in ground_filter.Zhang2003 for more information and keyword argument definitions.
+        Normalize the cloud using the default Zhang et al. (2003) progressive morphological ground filter. Please see \
+        the documentation in :class:`.ground_filter.Zhang2003` for more information and keyword argument definitions. \
+        If you want to use a pre-computed DEM to normalize, please see :meth:`.subtract`.
+
         """
 
         from pyfor.ground_filter import Zhang2003
@@ -275,33 +284,31 @@ class Cloud:
 
     def subtract(self, path):
         """
-        Normalize using a pre-computed raster file, i.e. "subtract" the heights from the input raster.
-
-        :param path: The path to the raster file.
+        Normalize using a pre-computed raster file, i.e. "subtract" the heights from the input raster **in place**. \
+        This assumes the raster and the point cloud are in the same coordinate system.
+        :param path: The path to the raster file, must be in a format supported by `rasterio`.
         :return:
         """
 
-        # Bins self.data.points with underlying
+
         imported_grid = rasterizer.ImportedGrid(path, self)
         df = pd.DataFrame(np.flipud(imported_grid.in_raster.read(1))).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
         df = self.data.points.reset_index().merge(df, how="left").set_index('index')
         self.data.points['z'] = df['z'] - df['val']
 
-    def clip(self, poly):
+    def clip(self, polygon):
         """
-        Clips the point cloud to the provided shapely polygon using a ray casting algorithm.
+        Clips the point cloud to the provided shapely polygon using a ray casting algorithm. This method calls \
+        :func:`.clip.poly_clip` directly. This returns a new :class:`.Cloud`.
 
-        :param poly: A shapely polygon in the same CRS as the Cloud.
-        :return: A new cloud object clipped to the provided polygon.
+        :param polygon: A :class:`shapely.geometry.Polygon` in the same CRS as the Cloud.
+        :return: A new :class:.`Cloud` object clipped to the provided polygon.
         """
 
-        keep = clip_funcs.poly_clip(self.data.points, poly)
+        keep = clip.poly_clip(self.data.points, polygon)
         # Create copy to avoid warnings
         keep_points = self.data.points.iloc[keep].copy()
-
         new_cloud = Cloud(CloudData(keep_points, self.data.header))
-
-        # TODO consider resetting index in update?
         new_cloud.data.points = new_cloud.data.points.reset_index()
         new_cloud.data._update()
 
@@ -314,7 +321,7 @@ class Cloud:
         :param min: Minimum dimension to retain.
         :param max: Maximum dimension to retain.
         :param dim: The dimension of interest as a string. For example "z". This corresponds to a column label in \
-        self.las.points dataframe.
+        :attr:`self.data.points`.
         """
         condition = (self.data.points[dim] > min) & (self.data.points[dim] < max)
 
@@ -323,49 +330,51 @@ class Cloud:
 
     def chm(self, cell_size, interp_method=None, pit_filter=None, kernel_size=3):
         """
-        Returns a Raster object of the maximum z value in each cell.
+        Returns a :class:`.Raster` object of the maximum z value in each cell, with optional interpolation \
+         (i.e. nan-filling) and pit filter parameters. Currently, only a median pit filter is implemented.
 
         :param cell_size: The cell size for the returned raster in the same units as the parent Cloud or las file.
-        :param interp_method: The interpolation method to fill in NA values of the produced canopy height model, one \
-        of either "nearest", "cubic", or "linear"
+        :param interp_method: The interpolation method as a string to fill in NA values of the produced canopy height \
+         model, one of either "nearest", "cubic", or "linear". This is an argument to `scipy.interpolate.griddata`.
         :param pit_filter: If "median" passes a median filter over the produced canopy height model.
         :param kernel_size: The kernel size of the median filter, must be an odd integer.
-        :return: A Raster object of the canopy height model.
+        :return: A :class:`.Raster` object of the canopy height model.
         """
 
+        # TODO make user pass the function itself?
         if pit_filter == "median":
             raster = self.grid(cell_size).interpolate("max", "z", interp_method=interp_method)
             raster.pit_filter(kernel_size=kernel_size)
             return raster
 
         if interp_method==None:
-            return(self.grid(cell_size).raster("max", "z"))
+            return self.grid(cell_size).raster("max", "z")
 
         else:
-            return(self.grid(cell_size).interpolate("max", "z", interp_method))
+            return self.grid(cell_size).interpolate("max", "z", interp_method)
 
     @property
     def convex_hull(self):
         """
-        Calculates the convex hull of the 2d plane.
+        Calculates the convex hull of the cloud projected onto a 2d plane, a wrapper for \
+         :func:`scipy.spatial.ConvexHull`.
 
-        :return: A single-element geoseries of the convex hull.
+        :return: A :class:`shapely.geometry.Polygon` of the convex hull.
         """
         from scipy.spatial import ConvexHull
-        import geopandas as gpd
         from shapely.geometry import Polygon
 
         hull = ConvexHull(self.data.points[["x", "y"]].values)
-        hull_poly = Polygon(hull.points[hull.vertices])
 
-        return gpd.GeoSeries(hull_poly)
+        return Polygon(hull.points[hull.vertices])
+
 
     def write(self, path):
         """
-        Write the Cloud to a las file.
+        Write to file. The precise mechanisms of this writing will depend on the file input type. For `.las` files \
+        this will be handled by :meth:`.LASData.write`, for `.ply` files this will be handled by :meth:`.PLYData.write`.
 
         :param path: The path of the output file.
-        :return:
         """
         self.data.write(path)
 

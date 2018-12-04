@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyfor.rasterizer module &mdash; pyfor 0.3.1 documentation</title>
+  <title>pyfor.rasterizer module &mdash; pyfor 0.3.2 documentation</title>
   
 
   
@@ -83,13 +83,12 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="pyfor.clip_funcs.html">pyfor.clip_funcs module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.clip.html">pyfor.clip module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.cloud.html">pyfor.cloud module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.collection.html">pyfor.collection module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.detection.html">pyfor.detection module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.gisexport.html">pyfor.gisexport module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.ground_filter.html">pyfor.ground_filter module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.parser.html">pyfor.parser module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.plot.html">pyfor.plot module</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">pyfor.rasterizer module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.voxelizer.html">pyfor.voxelizer module</a></li>
@@ -184,6 +183,11 @@
 </table>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="pyfor.rasterizer.CrownSegments.segments">
+<code class="descname">segments</code><a class="headerlink" href="#pyfor.rasterizer.CrownSegments.segments" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -205,32 +209,49 @@ Raster.local_maxima</p>
 # <a class="reference external" href="https://matplotlib.org/gallery/images_contours_and_fields/image_transparency_blend.html">https://matplotlib.org/gallery/images_contours_and_fields/image_transparency_blend.html</a></p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="pyfor.rasterizer.DetectedTops.points">
+<code class="descname">points</code><a class="headerlink" href="#pyfor.rasterizer.DetectedTops.points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an Nx2 numpy array of detected top locations projected to the input Cloud space.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyfor.rasterizer.DetectedTops.tops_binary">
+<code class="descname">tops_binary</code><a class="headerlink" href="#pyfor.rasterizer.DetectedTops.tops_binary" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A binary array, where 1 indicates a detected top, 0 otherwise</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
 <dt id="pyfor.rasterizer.Grid">
 <em class="property">class </em><code class="descclassname">pyfor.rasterizer.</code><code class="descname">Grid</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. It is     not quite a raster yet. A raster has only one value per cell, whereas the Grid object merely sorts all points     into their respective cells.</p>
+<p>The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. From     the Grid object we can derive other useful products, most importantly, <a class="reference internal" href="#pyfor.rasterizer.Raster" title="pyfor.rasterizer.Raster"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raster</span></code></a> objects.</p>
+<dl class="method">
+<dt id="pyfor.rasterizer.Grid.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upon initialization, the parent cloud object’s <code class="xref py py-attr docutils literal notranslate"><span class="pre">data.points</span></code> attribute is sorted into bins in place. The
+columns ‘bins_x’ and ‘bins_y’ are appended. Other useful information, such as the resolution, number of rows         and columns are also stored.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>cloud</strong> – The “parent” cloud object.</li>
 <li><strong>cell_size</strong> – The size of the cell for sorting in the units of the input cloud object.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Returns a dataframe with sorted x and y with associated bins in a new columns</p>
-</td>
-</tr>
 </tbody>
 </table>
-<dl class="method">
-<dt id="pyfor.rasterizer.Grid.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -287,12 +308,38 @@ Raster.local_maxima</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>func</strong> – A function string, i.e. “max” or a function itself, i.e. np.max. This function must be able to         take a 1D array of the given dimension as an input and produce a single value as an output. This single value         will become the value of each cell in the array.</li>
-<li><strong>dim</strong> – The dimension to calculate on as a string, see the column names of self.data for a full list of         options</li>
+<li><strong>func</strong> – A function string, i.e. “max” or a function itself, i.e. <code class="xref py py-func docutils literal notranslate"><span class="pre">np.max()</span></code>. This function must be         able to take a 1D array of the given dimension as an input and produce a single value as an output. This         single value will become the value of each cell in the array.</li>
+<li><strong>dim</strong> – The dimension to calculate on as a string, see the column names of self.data for a full list of         options.</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A 2D numpy array where the value of each cell is the result of the passed function.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyfor.rasterizer.ImportedGrid">
+<em class="property">class </em><code class="descclassname">pyfor.rasterizer.</code><code class="descname">ImportedGrid</code><span class="sig-paren">(</span><em>path</em>, <em>cloud</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.ImportedGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyfor.rasterizer.Grid" title="pyfor.rasterizer.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyfor.rasterizer.Grid</span></code></a></p>
+<p>ImportedGrid is used to normalize a parent cloud object with an arbitrary raster file.</p>
+<dl class="method">
+<dt id="pyfor.rasterizer.ImportedGrid.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>path</em>, <em>cloud</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.ImportedGrid.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upon initialization, the parent cloud object’s <code class="xref py py-attr docutils literal notranslate"><span class="pre">data.points</span></code> attribute is sorted into bins in place. The
+columns ‘bins_x’ and ‘bins_y’ are appended. Other useful information, such as the resolution, number of rows         and columns are also stored.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cloud</strong> – The “parent” cloud object.</li>
+<li><strong>cell_size</strong> – The size of the cell for sorting in the units of the input cloud object.</li>
+</ul>
 </td>
 </tr>
 </tbody>
@@ -452,7 +499,7 @@ This function modifies the raster array <strong>in place</strong>.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.3.1',
+            VERSION:'0.3.2',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

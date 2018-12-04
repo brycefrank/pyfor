@@ -1,6 +1,45 @@
+# 0.3.2
+
+Updates between October 25th, 2018 and December 4th, 2018. Note: some of these were applied directly to `master` before the merging of this branch.
+0.3.2 represents many bug fixes and the addition of a few (relatively performant, your mileage may very) functions to `collection`.
+A shoutout to Ben Weinstein, whos diligent bug reporting has made `pyfor` a friendlier package during this update.
+
+## Cloud
+1. Fixed a bug with the `name` attribute that returned the entire directory instead of just the filename (without extension)
+2. Added `.subtract` function, this allows a user to provide their own (properly referenced) DEM for use in normalizing the parent cloud object.
+3. `Cloud.clip` now resets the index of the points dataframe `Cloud.data.points`
+4. Resolved issues instantiating `Cloud` objects using `.laz` files.
+5. Changed the default normalization algorithm back to `Zhang2003` now that it is working properly again (see below).
+6. `Cloud.convex_hull` now returns a single `shapely.geometry.Polygon` instead of `geopandas.GeoSeries`
+
+## Collection
+1. Added `bounding_box` attribute that retrieves the bounding box of the entire collection, used in retiling.
+2. Added `retile` function to split large acquisitions into smaller tile sizes, for now this just splits into quadrants.
+3. Added `clip` function to make memory-optimized spatial queries of collections, for example: clipping a collection of field
+plots.
+4. Made `CloudDataFrame.index_las` and `CloudDataFrame.from_dir` into internal functions: `CloudDataFrame._index_las` and `CloudDataFrame._from_dir` respectively.
+
+## *Data
+1. Added a check for empty dataframe before writing to file.
+2. Improved the structure of `LASData` to prevent writing non-existant columns to file.
+
+## Ground Filter
+1. Added `normalize` function to `Zhang2003`.
+2. Fixed an issue where `KrausPfeifer1998` was producing non-sensical normalizations.
+
+## Rasterizer
+1. `Grid` now computes bins starting from the top left of an input `Cloud`. This fixes a lot of unnecessary array flipping further downstream.
+A UserWarning was added and will remain in effect until `0.3.3`.
+
+## General Adjustments
+1. Now testing multiple file types, `.ply`, `.laz` and `.las`
+2. Added `lastools` and `laxpy` to the dependency stack.
+3. Edited ~60% of the docstrings to reflect recent changes. Added cross referenced links and other small improvements.
+4. Updated the samples to reflect recent changes. Added a few sections to the Normalization and Collections samples.
+
 # 0.3.1
 
-Updates between October 11th, 2018 and []
+Updates between October 11th, 2018 and October 25th, 2018
 
 ## Detection
 1. Refactored `LayerStacking` to `Ayrey2017` to cohere more with the citation format.

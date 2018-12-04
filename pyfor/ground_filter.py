@@ -12,12 +12,15 @@ class Zhang2003:
     """
     def __init__(self, cloud, cell_size, n_windows=5, dh_max=2, dh_0=1, b=2, interp_method="nearest"):
         """
+        :param cloud: The input cloud object.
         :param n_windows: The number of windows to construct for filtering.
         :param dh_max: The maximum height threshold.
         :param dh_0: The starting null height threshold.
         :param cell_size: The cell_size used to construct the array for filtering, also the output size of the BEM.
         :param interp_method: The interpolation method used to fill nan values in the final BEM.
         """
+        import warnings
+        warnings.warn('Instantiation of ground filters will no longer require a Cloud argument in 0.3.3, it will instead be moved to _filter, bem, ground points and normalize', DeprecationWarning)
         self.cloud = cloud
         self.n_windows = n_windows
         self.dh_max = dh_max
@@ -114,6 +117,12 @@ class Zhang2003:
         return B
 
     def bem(self):
+        """
+        Retrieve the bare earth model (BEM). Unlike :class:`.KrausPfeifer1998`, the cell size is defined upon \
+        initialization of the filter, and thus it is not required to retrieve the bare earth model from the filter.
+
+        :return: A :class:`.Raster` object that represents the bare earth model.
+        """
         from scipy.interpolate import griddata
         from pyfor.rasterizer import Raster
         B = self._filter()
@@ -149,7 +158,7 @@ class KrausPfeifer1998:
     def __init__(self, cloud, cell_size, a=1, b=4, g=-2, w=2.5, iterations=5, tolerance=0):
         """
         :param cloud: The input `Cloud` object.
-        :param cell_size: The cell size of the intermediate surface used in filtering in the same units as the input
+        :param cell_size: The cell size of the intermediate surface used in filtering in the same units as the input \
         cloud. Values from 1 to 40 are common, depending on the units in which the original point cloud is projected.
         :param a: A steepness parameter for the interpolating function.
         :param b: A steepness parameter for the interpolating function.
@@ -157,6 +166,8 @@ class KrausPfeifer1998:
         :param w: The window width from g up considered for weighting.
         :param iterations: The number of iterations, i.e. the number of surfaces constructed.
         """
+        import warnings
+        warnings.warn('Instantiation of ground filters will no longer require a Cloud argument in 0.3.3, it will instead be moved to _filter, bem, ground points and normalize', DeprecationWarning)
         self.cloud = cloud
         self.cell_size = cell_size
         self.a = a
@@ -175,7 +186,7 @@ class KrausPfeifer1998:
         :param v_i: A vector of residuals.
         :return: A vector of weights, p_i
         """
-        p_i = np.empty(v_i.shape)
+        p_i = np.zeros(v_i.shape)
         p_i[v_i <= self.g] = 1
         middle = np.logical_and(v_i > self.g, v_i <= self.g+self.w)
         p_i[middle] = 1 / (1 + (self.a * (v_i[middle] - self.g)**self.b))
@@ -189,7 +200,7 @@ class KrausPfeifer1998:
         """
         np.seterr(divide='ignore', invalid='ignore')
 
-        # TODO probably some opportunity for numba optimization, but working well enough for now
+        # TODO probably some opportunity for numba / cython optimization, but working well enough for now
         grid = self.cloud.grid(self.cell_size)
         self.cloud.data.points['bins_z'] = self.cloud.data.points.groupby(['bins_x', 'bins_y']).cumcount()
         depth = np.max(self.cloud.data.points['bins_z'])
@@ -200,9 +211,11 @@ class KrausPfeifer1998:
         p_i[~np.isnan(z)] = 1
 
         for i in range(self.iterations):
-            surface = np.nansum(z * p_i, axis=2) / np.sum(p_i, axis = 2)
-            surface = surface.reshape(grid.m,grid.n,1)
-            p_i= self._compute_weights(z - surface)
+            surface = np.nansum(z * p_i, axis=2) / np.sum(p_i, axis=2)
+            # TODO how to deal with edge effect?
+            surface = surface.reshape(grid.m, grid.n, 1)
+            p_i = self._compute_weights(z - surface)
+
         final_resid = z - surface
 
         del p_i
@@ -212,6 +225,7 @@ class KrausPfeifer1998:
         ix[self.cloud.data.points['bins_y'], self.cloud.data.points['bins_x'],
            self.cloud.data.points['bins_z']] = self.cloud.data.points.index.values
         ground_bins = (final_resid <= self.g + self.w).nonzero()
+
         return self.cloud.data.points.loc[ix[ground_bins]]
 
 
@@ -261,6 +275,7 @@ class KrausPfeifer1998:
         """
         bem = self.bem(cell_size)
         # Rebin the cloud to the new cell size
+        # TODO make this into a standalone function (in raster, grid?), it is used in several other places
         self.cloud.grid(cell_size)
         self.cloud.data._update()
         df = pd.DataFrame(bem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')

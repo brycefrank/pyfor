@@ -5,7 +5,7 @@ __version__ = '0.3'
 from pyfor import cloud
 from pyfor import rasterizer
 from pyfor import gisexport
-from pyfor import clip_funcs
+from pyfor import clip
 from pyfor import ground_filter
 from pyfor import plot
 from pyfor import collection
