@@ -6,17 +6,21 @@ from pyfor import gisexport
 from pyfor import plot
 
 class Grid:
-    """The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. It is \
-    not quite a raster yet. A raster has only one value per cell, whereas the Grid object merely sorts all points \
-    into their respective cells.
-
-    :param cloud: The "parent" cloud object.
-    :param cell_size: The size of the cell for sorting in the units of the input cloud object.
-    :return: Returns a dataframe with sorted x and y with associated bins in a new columns
+    """The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. From \
+    the Grid object we can derive other useful products, most importantly, :class:`.Raster` objects.
     """
+
     def __init__(self, cloud, cell_size):
+        """
+        Upon initialization, the parent cloud object's :attr:`data.points` attribute is sorted into bins in place. \ The
+        columns 'bins_x' and 'bins_y' are appended. Other useful information, such as the resolution, number of rows \
+        and columns are also stored.
+
+        :param cloud: The "parent" cloud object.
+        :param cell_size: The size of the cell for sorting in the units of the input cloud object.
+        """
+        # TODO remove warning in 0.3.3
         import warnings
-        # TODO remove in 0.3.2
         self.cloud = cloud
         self.cell_size = cell_size
 
@@ -30,7 +34,7 @@ class Grid:
         x_edges = np.linspace(min_x, max_x, self.n)
         y_edges = np.linspace(min_y, max_y, self.m)
 
-        warnings.warn('This behavior has changed from < 0.3.1, points are now binned from the top left of the point '
+        warnings.warn('This behavior has changed from <= 0.3.1, points are now binned from the top left of the point '
                       'cloud instead of the bottom right to cohere with arrays produced later.', UserWarning)
 
         bins_x = np.searchsorted(x_edges,   self.cloud.data.points['x'], side='right') - 1
@@ -49,11 +53,11 @@ class Grid:
         Generates an m x n matrix with values as calculated for each cell in func. This is a raw array without \
         missing cells interpolated. See self.interpolate for interpolation methods.
 
-        :param func: A function string, i.e. "max" or a function itself, i.e. np.max. This function must be able to \
-        take a 1D array of the given dimension as an input and produce a single value as an output. This single value \
-        will become the value of each cell in the array.
+        :param func: A function string, i.e. "max" or a function itself, i.e. :func:`np.max`. This function must be \
+        able to take a 1D array of the given dimension as an input and produce a single value as an output. This \
+        single value will become the value of each cell in the array.
         :param dim: The dimension to calculate on as a string, see the column names of self.data for a full list of \
-        options
+        options.
         :return: A 2D numpy array where the value of each cell is the result of the passed function.
         """
 
@@ -196,7 +200,8 @@ class Raster:
         import fiona
         import rasterio
         from rasterio.mask import mask
-        # TODO for now this uses temp files. I would like to change this.
+        # FIXME broken in 0.3.2, but really needs a rewrite anyway. May be best to remove fiona as a dependency
+        # Also fix the test in the testing suite
         self.grid.cloud.convex_hull.to_file("temp.shp")
         with fiona.open("temp.shp", "r") as shapefile:
             features = [feature["geometry"] for feature in shapefile]
@@ -238,7 +243,7 @@ class Raster:
         """
         Plots the raster as a surface using Plotly.
         """
-        plot.iplot3d_surface(self.array, colorscale)
+        plot._iplot3d_surface(self.array, colorscale)
 
     def local_maxima(self, min_distance=2, threshold_abs=2, as_coordinates=False):
         """
@@ -321,6 +326,21 @@ class DetectedTops(Raster):
         super().__init__(array, grid)
         self.chm = chm
 
+    @property
+    def points(self):
+        """
+        Returns an Nx2 numpy array of detected top locations projected to the input Cloud space.
+        """
+        from pyfor.gisexport import project_indices
+        return project_indices(np.stack(np.where(self.array > 0), axis=1), self)
+
+    @property
+    def tops_binary(self):
+        """
+        :return: A binary array, where 1 indicates a detected top, 0 otherwise
+        """
+        return (self.array > 0).astype(np.int)
+
     def plot(self):
         """
         Plots the detected tops against the original input raster.
@@ -344,9 +364,8 @@ class DetectedTops(Raster):
         ax.set_yticklabels(reversed(y_ticks))
 
         container = np.zeros((self.grid.m, self.grid.n, 4))
-        tops_binary = (self.array > 0).astype(np.int)
-        container[:, :, 0][tops_binary >0] = 1
-        container[:, :, 3][tops_binary >0] = 1
+        container[:, :, 0][self.tops_binary >0] = 1
+        container[:, :, 3][self.tops_binary >0] = 1
         ax.imshow(container)
 
 
@@ -360,8 +379,11 @@ class CrownSegments(Raster):
         super().__init__(array, grid)
         watershed_array = self.array
         tops = self.local_maxima(min_distance=min_distance, threshold_abs=threshold_abs).array
-        labels = watershed(-watershed_array, tops, mask=watershed_array)
-        self.segments = gisexport.array_to_polygons(labels, affine=None)
+        self.labels = watershed(-watershed_array, tops, mask=watershed_array)
+
+    @property
+    def segments(self):
+        return gisexport.array_to_polygons(self.labels, affine=None)
 
     def plot(self):
         from matplotlib.collections import PatchCollection

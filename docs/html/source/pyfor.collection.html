@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyfor.collection module &mdash; pyfor 0.3.1 documentation</title>
+  <title>pyfor.collection module &mdash; pyfor 0.3.2 documentation</title>
   
 
   
@@ -83,13 +83,12 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="pyfor.clip_funcs.html">pyfor.clip_funcs module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.clip.html">pyfor.clip module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.cloud.html">pyfor.cloud module</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">pyfor.collection module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.detection.html">pyfor.detection module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.gisexport.html">pyfor.gisexport module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.ground_filter.html">pyfor.ground_filter module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.parser.html">pyfor.parser module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.plot.html">pyfor.plot module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.rasterizer.html">pyfor.rasterizer module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.voxelizer.html">pyfor.voxelizer module</a></li>
@@ -163,44 +162,55 @@
 <dt id="pyfor.collection.CloudDataFrame">
 <em class="property">class </em><code class="descclassname">pyfor.collection.</code><code class="descname">CloudDataFrame</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">geopandas.geodataframe.GeoDataFrame</span></code></p>
-<p>Implements a data frame structure for processing and managing multiple cloud objects.</p>
+<p>Implements a data frame structure for processing and managing multiple <a class="reference internal" href="pyfor.cloud.html#pyfor.cloud.Cloud" title="pyfor.cloud.Cloud"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cloud</span></code></a> objects. It is recommended     to initialize using the <a class="reference internal" href="#pyfor.collection.from_dir" title="pyfor.collection.from_dir"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_dir()</span></code></a> function.</p>
 <dl class="method">
 <dt id="pyfor.collection.CloudDataFrame.__init__">
 <code class="descname">__init__</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="pyfor.collection.CloudDataFrame.bounding_box">
+<code class="descname">bounding_box</code><a class="headerlink" href="#pyfor.collection.CloudDataFrame.bounding_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the bounding box for the entire collection. As a tuple (minx, muny, maxx, maxy)</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="pyfor.collection.CloudDataFrame.clip">
-<code class="descname">clip</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.clip" title="Permalink to this definition">¶</a></dt>
-<dd><p>Clips the CloudDataFrame with the supplied geometries.
-:return:</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="pyfor.collection.CloudDataFrame.from_dir">
-<em class="property">classmethod </em><code class="descname">from_dir</code><span class="sig-paren">(</span><em>las_dir</em>, <em>n_jobs=1</em>, <em>get_bounding_boxes=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.from_dir" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrapped function for producing a CloudDataFrame from a directory of las files.
-:param las_dir:
-:param n_jobs: The number of threads used to construct information about the CloudDataFrame.
-:param get_bounding_boxes: If True, builds the bounding boxes for each las tile by manually reading in
-the file and computing the bounding box. For very large collections this may be computationally costly, and
-can be set to False.
-:return:</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyfor.collection.CloudDataFrame.par_apply">
-<code class="descname">par_apply</code><span class="sig-paren">(</span><em>func</em>, <em>column='las_path'</em>, <em>buffer_distance=0</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.par_apply" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply a function to each las path. Allows for parallelization using the n_jobs argument. This is achieved         via joblib Parallel and delayed.</p>
+<code class="descname">clip</code><span class="sig-paren">(</span><em>polygons</em>, <em>path</em>, <em>poly_names=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.clip" title="Permalink to this definition">¶</a></dt>
+<dd><p>A collection-level clipping method. This function is meant for efficient querying across the study area using         a set of polygons. This method requires the presence of <cite>.lax</cite> files in the collection directory. To generate         these <cite>.lax</cite> files please use <a class="reference internal" href="#pyfor.collection.CloudDataFrame.create_index" title="pyfor.collection.CloudDataFrame.create_index"><code class="xref py py-meth docutils literal notranslate"><span class="pre">create_index()</span></code></a> first. Each polygon will be clipped and written to the         specified <cite>path</cite>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>func</strong> – The user defined function, must accept a single argument, the path of the las file.</li>
-<li><strong>n_jobs</strong> – The number of threads to spawn, default of 1.</li>
-<li><strong>column</strong> – The column to apply on, will be the first argument to func</li>
+<li><strong>polygons</strong> – Either a list or <code class="xref py py-class docutils literal notranslate"><span class="pre">geopandas.GeoSeries</span></code> of shapely polygons.</li>
+<li><strong>path</strong> – The output path of the clip.</li>
+<li><strong>poly_names</strong> – A list of polygon names to use when writing to file.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.create_index">
+<code class="descname">create_index</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.create_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each file in the collection, creates <cite>.lax</cite> files for spatial indexing using the default values.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.par_apply">
+<code class="descname">par_apply</code><span class="sig-paren">(</span><em>func</em>, <em>column='las_path'</em>, <em>buffer_distance=0</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.par_apply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply a function to each item in <cite>column</cite>. Allows for parallelization using the n_jobs argument. This is         achieved via <code class="xref py py-class docutils literal notranslate"><span class="pre">joblib.Parallel</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">joblib.delayed()</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>func</strong> – The user defined function, must accept as an argument the value of each row of <cite>column</cite>.</li>
+<li><strong>column</strong> – The column to apply on, will be the first argument to func.</li>
 <li><strong>buffer_distance</strong> – The distance to buffer and aggregate each tile.</li>
 <li><strong>*args</strong> – <p>Further arguments to <cite>func</cite></p>
 </li>
@@ -213,8 +223,24 @@ can be set to False.
 
 <dl class="method">
 <dt id="pyfor.collection.CloudDataFrame.plot">
-<code class="descname">plot</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.plot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots the bounding boxes of the Cloud objects</p>
+<code class="descname">plot</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the bounding boxes of the Cloud objects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>**kwargs</strong> – <p>Keyword arguments to <code class="xref py py-meth docutils literal notranslate"><span class="pre">geopandas.GeoDataFrame.plot()</span></code>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.retile">
+<code class="descname">retile</code><span class="sig-paren">(</span><em>out_dir</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.retile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retiles the collection into <cite>out_dir</cite>. This is a simplified retiling function that splits each tile into         quadrants and writes these new quadrants to disk. The written files will be the original file name with an index
+appended. 0 is the bottom left quadrant, 1 is the bottom right, 2 is the top left and 3 is the top right.</p>
 </dd></dl>
 
 <dl class="method">
@@ -281,16 +307,9 @@ method</dd>
 
 </dd></dl>
 
-<dl class="class">
-<dt id="pyfor.collection.Indexer">
-<em class="property">class </em><code class="descclassname">pyfor.collection.</code><code class="descname">Indexer</code><a class="headerlink" href="#pyfor.collection.Indexer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Internal class used to index a directory of las files.</p>
-</dd></dl>
-
 <dl class="function">
 <dt id="pyfor.collection.from_dir">
-<code class="descclassname">pyfor.collection.</code><code class="descname">from_dir</code><span class="sig-paren">(</span><em>las_dir</em>, <em>n_jobs=1</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.from_dir" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyfor.collection.</code><code class="descname">from_dir</code><span class="sig-paren">(</span><em>las_dir</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.from_dir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs a CloudDataFrame from a directory of las files.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -302,13 +321,6 @@ method</dd>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyfor.collection.stitch_clouds">
-<code class="descclassname">pyfor.collection.</code><code class="descname">stitch_clouds</code><span class="sig-paren">(</span><em>collection</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.stitch_clouds" title="Permalink to this definition">¶</a></dt>
-<dd><p>Holder function for some ideas.
-:return:</p>
 </dd></dl>
 
 </div>
@@ -355,7 +367,7 @@ method</dd>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.3.1',
+            VERSION:'0.3.2',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

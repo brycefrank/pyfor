@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyfor.ground_filter module &mdash; pyfor 0.3.1 documentation</title>
+  <title>pyfor.ground_filter module &mdash; pyfor 0.3.2 documentation</title>
   
 
   
@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pyfor.parser module" href="pyfor.parser.html" />
+    <link rel="next" title="pyfor.plot module" href="pyfor.plot.html" />
     <link rel="prev" title="pyfor.gisexport module" href="pyfor.gisexport.html" /> 
 
   
@@ -83,13 +83,12 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="pyfor.clip_funcs.html">pyfor.clip_funcs module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyfor.clip.html">pyfor.clip module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.cloud.html">pyfor.cloud module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.collection.html">pyfor.collection module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.detection.html">pyfor.detection module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.gisexport.html">pyfor.gisexport module</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">pyfor.ground_filter module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.parser.html">pyfor.parser module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.plot.html">pyfor.plot module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.rasterizer.html">pyfor.rasterizer module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyfor.voxelizer.html">pyfor.voxelizer module</a></li>
@@ -181,18 +180,17 @@ This filter is used in FUSION software, and the same default values for the para
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>cloud</strong> – The input <cite>Cloud</cite> object.</li>
-<li><strong>cell_size</strong> – The cell size of the intermediate surface used in filtering in the same units as the input</li>
+<li><strong>cell_size</strong> – The cell size of the intermediate surface used in filtering in the same units as the input         cloud. Values from 1 to 40 are common, depending on the units in which the original point cloud is projected.</li>
+<li><strong>a</strong> – A steepness parameter for the interpolating function.</li>
+<li><strong>b</strong> – A steepness parameter for the interpolating function.</li>
+<li><strong>g</strong> – The distance from the surface under which all points are given a weight of 1.</li>
+<li><strong>w</strong> – The window width from g up considered for weighting.</li>
+<li><strong>iterations</strong> – The number of iterations, i.e. the number of surfaces constructed.</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
-<p>cloud. Values from 1 to 40 are common, depending on the units in which the original point cloud is projected.
-:param a: A steepness parameter for the interpolating function.
-:param b: A steepness parameter for the interpolating function.
-:param g: The distance from the surface under which all points are given a weight of 1.
-:param w: The window width from g up considered for weighting.
-:param iterations: The number of iterations, i.e. the number of surfaces constructed.</p>
 </dd></dl>
 
 <dl class="method">
@@ -266,6 +264,7 @@ implementation interacts only with a raster, so the output resolution will be di
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cloud</strong> – The input cloud object.</li>
 <li><strong>n_windows</strong> – The number of windows to construct for filtering.</li>
 <li><strong>dh_max</strong> – The maximum height threshold.</li>
 <li><strong>dh_0</strong> – The starting null height threshold.</li>
@@ -281,7 +280,31 @@ implementation interacts only with a raster, so the output resolution will be di
 <dl class="method">
 <dt id="pyfor.ground_filter.Zhang2003.bem">
 <code class="descname">bem</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.Zhang2003.bem" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Retrieve the bare earth model (BEM). Unlike <a class="reference internal" href="#pyfor.ground_filter.KrausPfeifer1998" title="pyfor.ground_filter.KrausPfeifer1998"><code class="xref py py-class docutils literal notranslate"><span class="pre">KrausPfeifer1998</span></code></a>, the cell size is defined upon         initialization of the filter, and thus it is not required to retrieve the bare earth model from the filter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A <a class="reference internal" href="pyfor.rasterizer.html#pyfor.rasterizer.Raster" title="pyfor.rasterizer.Raster"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raster</span></code></a> object that represents the bare earth model.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.ground_filter.Zhang2003.normalize">
+<code class="descname">normalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.Zhang2003.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalizes the original point cloud <strong>in place</strong>. This creates a BEM as an intermediate product, please see
+<cite>.bem()</cite> to return this directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cell_size</strong> – The cell_size for the intermediate BEM. Values from 0.5 to 3 are common.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
@@ -295,7 +318,7 @@ implementation interacts only with a raster, so the output resolution will be di
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="pyfor.parser.html" class="btn btn-neutral float-right" title="pyfor.parser module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="pyfor.plot.html" class="btn btn-neutral float-right" title="pyfor.plot module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="pyfor.gisexport.html" class="btn btn-neutral" title="pyfor.gisexport module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -329,7 +352,7 @@ implementation interacts only with a raster, so the output resolution will be di
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.3.1',
+            VERSION:'0.3.2',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

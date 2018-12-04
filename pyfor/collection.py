@@ -6,9 +6,11 @@ import geopandas as gpd
 import pandas as pd
 import laxpy
 
+
 class CloudDataFrame(gpd.GeoDataFrame):
     """
-    Implements a data frame structure for processing and managing multiple cloud objects.
+    Implements a data frame structure for processing and managing multiple :class:`.Cloud` objects. It is recommended \
+    to initialize using the :func:`.from_dir` function.
     """
     def __init__(self, *args, **kwargs):
         super(CloudDataFrame, self).__init__(*args, **kwargs)
@@ -18,7 +20,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
             self.set_geometry("bounding_box", inplace=True)
 
     @classmethod
-    def from_dir(cls, las_dir, n_jobs=1, get_bounding_boxes=True):
+    def _from_dir(cls, las_dir, n_jobs=1, get_bounding_boxes=True):
         """
         Wrapped function for producing a CloudDataFrame from a directory of las files.
         :param las_dir: A directory of .las or .laz files.
@@ -41,14 +43,13 @@ class CloudDataFrame(gpd.GeoDataFrame):
     def set_index(self, *args):
         return CloudDataFrame(super(CloudDataFrame, self).set_index(*args))
 
-    def par_apply(self, func, column='las_path', buffer_distance = 0, *args):
+    def par_apply(self, func, column='las_path', buffer_distance=0, *args):
         """
-        Apply a function to each las path. Allows for parallelization using the n_jobs argument. This is achieved \
-        via joblib Parallel and delayed.
+        Apply a function to each item in `column`. Allows for parallelization using the n_jobs argument. This is \
+        achieved via :class:`joblib.Parallel` and :func:`joblib.delayed`.
 
-        :param func: The user defined function, must accept a single argument, the path of the las file.
-        :param n_jobs: The number of threads to spawn, default of 1.
-        :param column: The column to apply on, will be the first argument to func
+        :param func: The user defined function, must accept as an argument the value of each row of `column`.
+        :param column: The column to apply on, will be the first argument to func.
         :param buffer_distance: The distance to buffer and aggregate each tile.
         :param *args: Further arguments to `func`
         """
@@ -57,9 +58,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
             self._buffer(buffer_distance)
             for i, geom in enumerate(self["bounding_box"]):
                 intersecting = self._get_intersecting(i)
-
                 clip_geom = self['buffered_bounding_box'].iloc[i]
-                print(clip_geom)
                 parent_cloud = pyfor.cloud.Cloud(self["las_path"].iloc[i])
                 for path in intersecting["las_path"]:
                     adjacent_cloud = pyfor.cloud.Cloud(path)
@@ -68,8 +67,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
         output = Parallel(n_jobs=self.n_threads)(delayed(func)(plot_path, *args) for plot_path in self[column])
         return output
 
-    # TODO Many of these _functions are redundant due to a bug in joblib that prevents lambda functions
-    # once this bug is fixed these functions can be drastically simplified and aggregated.
     def _get_bounding_box(self, las_path):
         """
         Vectorized function to get a bounding box from an individual las path.
@@ -82,17 +79,10 @@ class CloudDataFrame(gpd.GeoDataFrame):
         min_y, max_y = pc.header.min[1], pc.header.max[1]
         return((min_x, max_x, min_y, max_y))
 
-    def _get_bounding_boxes(self):
-        """
-        Retrieves a bounding box for each path in las path.
-        :return:
-        """
-        return self.par_apply(self._get_bounding_box, column="las_path")
-
     def _build_polygons(self):
         """Builds the shapely polygons of the bounding boxes and adds them to self.data"""
         from shapely.geometry import Polygon
-        bboxes = self._get_bounding_boxes()
+        bboxes = self.par_apply(self._get_bounding_box, column='las_path')
         self["bounding_box"] = [Polygon(((bbox[0], bbox[2]), (bbox[1], bbox[2]),
                                            (bbox[1], bbox[3]), (bbox[0], bbox[3]))) for bbox in bboxes]
         self.set_geometry("bounding_box", inplace = True)
@@ -111,7 +101,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
         intersect_cdf.n_threads = self.n_threads
         return intersect_cdf
 
-
     def _buffer(self, distance, in_place = True):
         """
         Buffers the CloudDataFrame geometries.
@@ -128,17 +117,18 @@ class CloudDataFrame(gpd.GeoDataFrame):
         cdf.set_geometry("bounding_box", inplace=True)
         return cdf
 
-
-
-
     def plot(self, **kwargs):
-        """Plots the bounding boxes of the Cloud objects"""
+        """
+        Plots the bounding boxes of the Cloud objects.
+
+        :param **kwargs: Keyword arguments to :meth:`geopandas.GeoDataFrame.plot`.
+        """
         plot = super(CloudDataFrame, self).plot(**kwargs)
         plot.figure.show()
 
     @property
     def bounding_box(self):
-        """Retrieves the bounding box for the entire collection."""
+        """Retrieves the bounding box for the entire collection. As a tuple (minx, muny, maxx, maxy)"""
         minx, miny, maxx, maxy = [i.bounds[0] for i in self['bounding_box']], [i.bounds[1] for i in self['bounding_box']], \
                                  [i.bounds[2] for i in self['bounding_box']], [i.bounds[3] for i in self['bounding_box']]
         col_bbox = np.min(minx), np.min(miny), np.max(maxx), np.max(maxy)
@@ -176,7 +166,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
                 clipped = larger_cloud.clip(quad)
                 clipped.write(os.path.join(out_dir, '{}_{}.las'.format(larger_cloud.name, i)))
 
-    def retile2(self, width, height, dir):
+    def _retile2(self, width, height, dir):
         """
         Retiles the collection and writes the new tiles to the directory defined in `dir`.
 
@@ -187,6 +177,9 @@ class CloudDataFrame(gpd.GeoDataFrame):
         # TODO Handle "edge" smaller tiles that straddle more than one larger tile
         from shapely.geometry import MultiLineString
         from shapely.ops import polygonize
+        import warnings
+
+        warnings.warn('_retile2 is in development, use at your own risk.', UserWarning)
 
         colbbox = self.bounding_box
         x = np.arange(colbbox[0], colbbox[2], width)
@@ -209,15 +202,14 @@ class CloudDataFrame(gpd.GeoDataFrame):
 
     def create_index(self):
         """
-        For each file in the collection, creates `.lax` files for spatial indexing.
+        For each file in the collection, creates `.lax` files for spatial indexing using the default values.
         """
         for las_path in self['las_path']:
             laxpy.file.init_lax(las_path)
 
-    def index_las(self, las_path):
+    def _index_las(self, las_path):
         """
         Checks if an equivalent `.lax` file exists. If so, creates a laxpy.IndexedLAS object, otherwise an error is thrown.
-        :return:
         """
         lax_path = las_path[:-1] + 'x'
 
@@ -226,21 +218,27 @@ class CloudDataFrame(gpd.GeoDataFrame):
         else:
             raise FileNotFoundError('There is no equivalent .lax file for this .las file.')
 
-    def clip(self, polygons):
+    def clip(self, polygons, path, poly_names=None):
         """
-        A collection-level clipping method. This function is meant for efficient querying across the study area using
-        a set of polygons using either a list or gpd.GeoSeries of shapely Polygons.
+        A collection-level clipping method. This function is meant for efficient querying across the study area using \
+        a set of polygons. This method requires the presence of `.lax` files in the collection directory. To generate \
+        these `.lax` files please use :meth:`.create_index` first. Each polygon will be clipped and written to the \
+        specified `path`.
 
-        :param polygons:
-        :return:
+        :param polygons: Either a list or :class:`geopandas.GeoSeries` of shapely polygons.
+        :param path: The output path of the clip.
+        :param poly_names: A list of polygon names to use when writing to file.
         """
+        # TODO currently does not take advantage of multi-threading
+        # TODO also a bit long, may be best to break up
+        if ~hasattr(polygons, '__iter__') and type(polygons) != gpd.GeoSeries:
+            polygons = [polygons]
+
+        head, tail = os.path.split(path)
 
         # Which tiles do I need to make an index for?
         # It could  be the case that the input polys intersect with the same tile, but are checked out of order
         # Building this dict requires a bit of overhead, but is more memory efficient in the worst case
-        if ~hasattr(polygons, '__iter__') and type(polygons) != gpd.GeoSeries:
-            polygons = [polygons]
-
         intersected_tiles = {}
         for ix, row in self.iterrows():
             tile_bbox, las_path = row['bounding_box'], row['las_path']
@@ -264,8 +262,23 @@ class CloudDataFrame(gpd.GeoDataFrame):
         # maybe this could just be done in the chunk above?
         for poly_index, parent_list in parents.items():
             poly = polygons[poly_index]
-            indexed_parents = [self.index_las(parent_path) for parent_path in parent_list]
-            parent_points = [parent.query_polygon(poly, scale=True) for parent in indexed_parents]
+            indexed_parents = [self._index_las(parent_path) for parent_path in parent_list]
+            header = indexed_parents[0].header
+            # TODO This is slow, but should be addressed upstream in laxpy, especially _scale_points
+            parent_points = pd.concat([pd.DataFrame.from_records(parent.query_polygon(poly, scale=True)) for parent in indexed_parents])
+
+            print('Clipping polygon {} of {}'.format(poly_index + 1, len(polygons)))
+            pc = pyfor.cloud.Cloud(pyfor.cloud.LASData(parent_points, header))
+
+            if poly_names is not None:
+                out_path = head + os.path.sep + str(poly_names[poly_index]) + '.las'
+            else:
+                out_path = head + os.path.sep + str(poly_index) + '.las'
+
+            print('Writing to {}'.format(out_path))
+            pc.write(out_path)
+
+
 
 def from_dir(las_dir, **kwargs):
     """
@@ -275,5 +288,5 @@ def from_dir(las_dir, **kwargs):
     :return: A CloudDataFrame constructed from the directory of las files.
     """
 
-    return CloudDataFrame.from_dir(las_dir, **kwargs)
+    return CloudDataFrame._from_dir(las_dir, **kwargs)
 

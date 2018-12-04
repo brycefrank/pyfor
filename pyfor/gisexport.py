@@ -16,7 +16,7 @@ def get_las_crs():
 def project_indices(indices, raster):
     """
     Converts indices of an array (for example, those indices that describe the location of a local maxima) to the
-    same space as the input cloud object. Assumes the array has already been flipped upside down.
+    same space as the input cloud object.
 
     :param indices: The indices to project, an Nx2 matrix of indices where the first column are the rows (Y) and
     the second column is the columns (X)
