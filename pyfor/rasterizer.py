@@ -6,17 +6,21 @@ from pyfor import gisexport
 from pyfor import plot
 
 class Grid:
-    """The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. It is \
-    not quite a raster yet. A raster has only one value per cell, whereas the Grid object merely sorts all points \
-    into their respective cells.
-
-    :param cloud: The "parent" cloud object.
-    :param cell_size: The size of the cell for sorting in the units of the input cloud object.
-    :return: Returns a dataframe with sorted x and y with associated bins in a new columns
+    """The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. From \
+    the Grid object we can derive other useful products, most importantly, :class:`.Raster` objects.
     """
+
     def __init__(self, cloud, cell_size):
+        """
+        Upon initialization, the parent cloud object's :attr:`data.points` attribute is sorted into bins in place. \ The
+        columns 'bins_x' and 'bins_y' are appended. Other useful information, such as the resolution, number of rows \
+        and columns are also stored.
+
+        :param cloud: The "parent" cloud object.
+        :param cell_size: The size of the cell for sorting in the units of the input cloud object.
+        """
+        # TODO remove warning in 0.3.3
         import warnings
-        # TODO remove in 0.3.2
         self.cloud = cloud
         self.cell_size = cell_size
 
@@ -30,7 +34,7 @@ class Grid:
         x_edges = np.linspace(min_x, max_x, self.n)
         y_edges = np.linspace(min_y, max_y, self.m)
 
-        warnings.warn('This behavior has changed from < 0.3.1, points are now binned from the top left of the point '
+        warnings.warn('This behavior has changed from <= 0.3.1, points are now binned from the top left of the point '
                       'cloud instead of the bottom right to cohere with arrays produced later.', UserWarning)
 
         bins_x = np.searchsorted(x_edges,   self.cloud.data.points['x'], side='right') - 1
@@ -49,11 +53,11 @@ class Grid:
         Generates an m x n matrix with values as calculated for each cell in func. This is a raw array without \
         missing cells interpolated. See self.interpolate for interpolation methods.
 
-        :param func: A function string, i.e. "max" or a function itself, i.e. np.max. This function must be able to \
-        take a 1D array of the given dimension as an input and produce a single value as an output. This single value \
-        will become the value of each cell in the array.
+        :param func: A function string, i.e. "max" or a function itself, i.e. :func:`np.max`. This function must be \
+        able to take a 1D array of the given dimension as an input and produce a single value as an output. This \
+        single value will become the value of each cell in the array.
         :param dim: The dimension to calculate on as a string, see the column names of self.data for a full list of \
-        options
+        options.
         :return: A 2D numpy array where the value of each cell is the result of the passed function.
         """
 
@@ -238,7 +242,7 @@ class Raster:
         """
         Plots the raster as a surface using Plotly.
         """
-        plot.iplot3d_surface(self.array, colorscale)
+        plot._iplot3d_surface(self.array, colorscale)
 
     def local_maxima(self, min_distance=2, threshold_abs=2, as_coordinates=False):
         """

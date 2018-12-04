@@ -2,7 +2,7 @@ from plotly import offline
 from plotly.graph_objs import graph_objs as go
 import numpy as np
 
-def iplot3d(las, max_points, point_size, dim, colorscale):
+def _iplot3d(las, max_points, point_size, dim, colorscale):
     """
     Plots the 3d point cloud in a compatible version for Jupyter notebooks.
     :return:
@@ -53,7 +53,7 @@ def iplot3d(las, max_points, point_size, dim, colorscale):
     except NameError:
         return(False)
 
-def iplot3d_surface(array, colorscale):
+def _iplot3d_surface(array, colorscale):
     data = [
         go.Surface(
             z=array,

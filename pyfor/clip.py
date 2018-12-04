@@ -8,10 +8,9 @@ def square_clip(points, bounds):
     """
     Clips a square from a tuple describing the position of the square.
 
-    :param las_xy: A N x 2 numpy array of x and y coordinates, x in
-    column 0
+    :param points: A N x 2 numpy array of x and y coordinates, where x is in column 0
     :param bounds: A tuple of length 4, min y and max y coordinates of the square.
-    :return: A boolean mask, true is within the square
+    :return: A boolean mask, true is within the square, false is outside of the square.
     """
 
     # Extact x y coordinates from cloud
@@ -27,12 +26,13 @@ def square_clip(points, bounds):
 
 def ray_trace(x, y, poly):
     """
-    A numba implementation of the ray tracing algorithm.
+    Determines for some set of x and y coordinates, which of those coordinates is within `poly`. Ray trace is \
+    generally called as an internal function, see :func:`.poly_clip`
 
     :param x: A 1D numpy array of x coordinates.
     :param y: A 1D numpy array of y coordinates.
     :param poly: The coordinates of a polygon as a numpy array (i.e. from geo_json['coordinates']
-    :return:
+    :return: A 1D boolean numpy array, true values are those points that are within `poly`.
     """
     @vectorize([bool_(float64, float64)])
     def ray(x, y):
@@ -59,10 +59,12 @@ def ray_trace(x, y, poly):
 
 def poly_clip(points, poly):
     """
-    Returns the indices within a given polygon.
+    Returns the indices of `points` that are within a given polygon. This differs from :func:`.ray_trace` \
+    in that it enforces a small "pre-clip" optimization by first clipping to the polygon bounding box. This function \
+    is directly called by :meth:`.Cloud.clip`.
 
     :param cloud: A cloud object.
-    :param poly: A shapely Polygon, with coordinates in the same CRS as the point cloud (for best results).
+    :param poly: A shapely Polygon, with coordinates in the same CRS as the point cloud.
     :return: A 1D numpy array of indices corresponding to points within the given polygon.
     """
     # Clip to bounding box

@@ -54,6 +54,7 @@ class PLYDataTestCase(unittest.TestCase):
         self.test_ply_data.write(os.path.join(data_dir, "temp_test_write.ply"))
         plyfile.PlyData.read(os.path.join(data_dir, 'temp_test_write.ply'))
 
+
 class LASDataTestCase(unittest.TestCase):
     def setUp(self):
         self.test_points = pd.DataFrame.from_dict(test_points)
@@ -75,6 +76,7 @@ class LASDataTestCase(unittest.TestCase):
         self.assertEqual(type(read), laspy.file.File)
         read.close()
         os.remove(os.path.join(data_dir, "temp_test_write.las"))
+
 
 class LASCloudTestCase(unittest.TestCase):
     def setUp(self):
@@ -142,9 +144,11 @@ class LASCloudTestCase(unittest.TestCase):
         self.test_cloud.write(os.path.join(data_dir, 'test_write.las'))
         os.remove(os.path.join(data_dir, 'test_write.las'))
 
+
 class LAZCloudTestCase(LASCloudTestCase):
     def setUp(self):
         self.test_cloud = cloud.Cloud(test_laz)
+
 
 class PLYCloudTestCase(LASCloudTestCase):
     def setUp(self):
@@ -160,7 +164,6 @@ class PLYCloudTestCase(LASCloudTestCase):
     def test_write(self):
         self.test_cloud.write(os.path.join(data_dir, 'test_write.ply'))
         os.remove(os.path.join(data_dir, 'test_write.ply'))
-
 
 
 class GridTestCase(unittest.TestCase):
@@ -179,7 +182,6 @@ class GridTestCase(unittest.TestCase):
     def test_cell_size(self):
         self.assertEqual(self.test_grid.cell_size, 1)
 
-
     def test_empty_cells(self):
         np.set_printoptions(threshold=np.nan)
         empty = self.test_grid.empty_cells
@@ -188,7 +190,6 @@ class GridTestCase(unittest.TestCase):
 
         # Check the 18th empty is the same as expected
         np.testing.assert_array_equal(empty[18,:], np.array([3, 56]))
-
 
     def test_raster(self):
         raster = self.test_grid.raster("max", "z")

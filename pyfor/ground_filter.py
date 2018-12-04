@@ -117,6 +117,12 @@ class Zhang2003:
         return B
 
     def bem(self):
+        """
+        Retrieve the bare earth model (BEM). Unlike :class:`.KrausPfeifer1998`, the cell size is defined upon \
+        initialization of the filter, and thus it is not required to retrieve the bare earth model from the filter.
+
+        :return: A :class:`.Raster` object that represents the bare earth model.
+        """
         from scipy.interpolate import griddata
         from pyfor.rasterizer import Raster
         B = self._filter()
@@ -152,7 +158,7 @@ class KrausPfeifer1998:
     def __init__(self, cloud, cell_size, a=1, b=4, g=-2, w=2.5, iterations=5, tolerance=0):
         """
         :param cloud: The input `Cloud` object.
-        :param cell_size: The cell size of the intermediate surface used in filtering in the same units as the input
+        :param cell_size: The cell size of the intermediate surface used in filtering in the same units as the input \
         cloud. Values from 1 to 40 are common, depending on the units in which the original point cloud is projected.
         :param a: A steepness parameter for the interpolating function.
         :param b: A steepness parameter for the interpolating function.
