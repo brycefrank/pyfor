@@ -45,7 +45,6 @@ class PLYData(CloudData):
 
         :param path: The path of the ouput file.
         """
-
         if len(self.points) > 0:
             #coordinate_array = self.points[["x", "y", "z"]].values.T
             #vertex_array = list(zip(coordinate_array[0],coordinate_array[1], coordinate_array[2]))
@@ -73,7 +72,7 @@ class LASData(CloudData):
             writer.close()
         else:
             raise ValueError('There is no data contained in this Cloud object, it is impossible to write.')
-
+            print('No data to write.')
 
 class Cloud:
     """
@@ -276,6 +275,7 @@ class Cloud:
         Normalize the cloud using the default Zhang et al. (2003) progressive morphological ground filter. Please see \
         the documentation in :class:`.ground_filter.Zhang2003` for more information and keyword argument definitions. \
         If you want to use a pre-computed DEM to normalize, please see :meth:`.subtract`.
+
         """
 
         from pyfor.ground_filter import Zhang2003
@@ -286,9 +286,10 @@ class Cloud:
         """
         Normalize using a pre-computed raster file, i.e. "subtract" the heights from the input raster **in place**. \
         This assumes the raster and the point cloud are in the same coordinate system.
-
         :param path: The path to the raster file, must be in a format supported by `rasterio`.
+        :return:
         """
+
 
         imported_grid = rasterizer.ImportedGrid(path, self)
         df = pd.DataFrame(np.flipud(imported_grid.in_raster.read(1))).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
