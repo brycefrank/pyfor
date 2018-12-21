@@ -383,7 +383,7 @@ class CrownSegments(Raster):
 
     @property
     def segments(self):
-        return gisexport.array_to_polygons(self.labels, affine=None)
+        return gisexport.array_to_polygons(self.labels, affine=self._affine)
 
     def plot(self):
         from matplotlib.collections import PatchCollection

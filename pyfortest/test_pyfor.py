@@ -293,6 +293,11 @@ class CrownSegmentsTestCase(unittest.TestCase):
     def setUp(self):
         self.test_segs = cloud.Cloud(test_las).chm(1, interp_method='nearest').watershed_seg()
 
+    def test_projected_segments(self):
+        # Test with affine (i.e. crs)
+        first_coord = list(self.test_segs.segments.iloc[0]['geometry'].exterior.coords)[0]
+        self.assertEqual(first_coord, (405000.01, 3276499.99))
+
     # TODO Broken on travis
     #def test_plot(self):
     #    self.test_segs.plot()
