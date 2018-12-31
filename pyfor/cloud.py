@@ -10,6 +10,7 @@ from pyfor import rasterizer
 from pyfor import clip
 from pyfor import plot
 import pathlib
+import warnings
 
 # General class
 class CloudData:
@@ -306,11 +307,16 @@ class Cloud:
         """
 
         keep = clip.poly_clip(self.data.points, polygon)
+        
         # Create copy to avoid warnings
         keep_points = self.data.points.iloc[keep].copy()
         new_cloud = Cloud(CloudData(keep_points, self.data.header))
         new_cloud.data.points = new_cloud.data.points.reset_index()
         new_cloud.data._update()
+        
+        #Warn user if the resulting cloud has no points.
+        if len(new_cloud.data.points) ==0:
+            warnings.warn("The clipped point cloud has no remaining points")
 
         return new_cloud
 
