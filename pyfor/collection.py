@@ -270,6 +270,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
             print('Clipping polygon {} of {}'.format(poly_index + 1, len(polygons)))
             pc = pyfor.cloud.Cloud(pyfor.cloud.LASData(parent_points, header))
 
+            # FIXME if there is not a trailing / in path, this fails to write to the correct directory
             if poly_names is not None:
                 out_path = head + os.path.sep + str(poly_names[poly_index]) + '.las'
             else:
@@ -277,6 +278,23 @@ class CloudDataFrame(gpd.GeoDataFrame):
 
             print('Writing to {}'.format(out_path))
             pc.write(out_path)
+
+    def standard_metrics(self, index=None):
+        """
+        Retrieves a set of 29 standard metrics, including height percentiles and other summaries.
+
+        :param index: An iterable of indices to set as the output dataframe index.
+        :return: A pandas dataframe of standard metrics.
+        """
+        from pyfor.metrics import standard_metrics
+
+        get_metrics = lambda las_path: standard_metrics(pyfor.cloud.Cloud(las_path).data.points)
+        metrics = pd.concat(self.par_apply(get_metrics), sort=False)
+
+        if index:
+            metrics.index = index
+
+        return metrics
 
 
 
