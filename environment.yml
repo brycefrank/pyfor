@@ -12,7 +12,7 @@ dependencies:
   - scikit-image
   - scikit-learn
   - pyqtgraph
-  - matplotlib
+  - matplotlib=2.2.3
   - pyopengl
   - plotly
   - numba
