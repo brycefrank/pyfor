@@ -65,7 +65,7 @@ class LASData(CloudData):
         :param path: The path of the ouput file.
         """
         if len(self. points) > 0:
-            writer = laspy.file.File(path, header = self.header, mode = "w")
+            writer = laspy.file.File(path, header=self.header, mode="w")
 
             for dim in self.points:
                 setattr(writer, dim, self.points[dim])
@@ -84,6 +84,7 @@ class Cloud:
     """
     def __init__(self, path):
 
+        # If read from file path
         if type(path) == str or type(path) == pathlib.PosixPath:
             self.filepath = path
             self.name = os.path.splitext(os.path.split(path)[1])[0]
@@ -104,14 +105,22 @@ class Cloud:
 
                 # ply headers are very basic, this is set here for compatibility with modifications to the header downstream (for now)
                 # TODO handle ply headers
-                header = None
+                header = 'ply_header'
                 self.data = PLYData(points , header)
 
             else:
                 raise ValueError('File extension not supported, please input either a las, laz, ply or CloudData object.')
 
+        # If imported from a CloudData object
         elif type(path) == CloudData or isinstance(path, CloudData):
             self.data = path
+
+            if type(self.data.header) == laspy.header.HeaderManager:
+                self.data = LASData(self.data.points, self.data.header)
+
+            elif self.data.header == 'ply_header':
+                self.data = PLYData(self.data.points, self.data.header)
+
         else:
             raise ValueError("Object type not supported, please input either a file path with a supported extension or a CloudData object.")
 
