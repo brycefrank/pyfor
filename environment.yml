@@ -21,6 +21,7 @@ dependencies:
   - geopandas
   - joblib
   - lastools
+  - hdf5=1.10.4
   - pip:
       - laspy
       - laxpy
