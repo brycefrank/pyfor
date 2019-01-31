@@ -10,6 +10,7 @@ from pyfor import rasterizer
 from pyfor import clip
 from pyfor import plot
 import pathlib
+import warnings
 
 # General class
 class CloudData:
@@ -64,7 +65,7 @@ class LASData(CloudData):
         :param path: The path of the ouput file.
         """
         if len(self. points) > 0:
-            writer = laspy.file.File(path, header = self.header, mode = "w")
+            writer = laspy.file.File(path, header=self.header, mode="w")
 
             for dim in self.points:
                 setattr(writer, dim, self.points[dim])
@@ -83,6 +84,7 @@ class Cloud:
     """
     def __init__(self, path):
 
+        # If read from file path
         if type(path) == str or type(path) == pathlib.PosixPath:
             self.filepath = path
             self.name = os.path.splitext(os.path.split(path)[1])[0]
@@ -103,14 +105,22 @@ class Cloud:
 
                 # ply headers are very basic, this is set here for compatibility with modifications to the header downstream (for now)
                 # TODO handle ply headers
-                header = None
+                header = 'ply_header'
                 self.data = PLYData(points , header)
 
             else:
                 raise ValueError('File extension not supported, please input either a las, laz, ply or CloudData object.')
 
+        # If imported from a CloudData object
         elif type(path) == CloudData or isinstance(path, CloudData):
             self.data = path
+
+            if type(self.data.header) == laspy.header.HeaderManager:
+                self.data = LASData(self.data.points, self.data.header)
+
+            elif self.data.header == 'ply_header':
+                self.data = PLYData(self.data.points, self.data.header)
+
         else:
             raise ValueError("Object type not supported, please input either a file path with a supported extension or a CloudData object.")
 
@@ -306,11 +316,16 @@ class Cloud:
         """
 
         keep = clip.poly_clip(self.data.points, polygon)
+        
         # Create copy to avoid warnings
         keep_points = self.data.points.iloc[keep].copy()
         new_cloud = Cloud(CloudData(keep_points, self.data.header))
         new_cloud.data.points = new_cloud.data.points.reset_index()
         new_cloud.data._update()
+        
+        #Warn user if the resulting cloud has no points.
+        if len(new_cloud.data.points) ==0:
+            warnings.warn("The clipped point cloud has no remaining points")
 
         return new_cloud
 
