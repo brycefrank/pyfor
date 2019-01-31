@@ -1,3 +1,16 @@
+# 0.3.3
+
+Updates between December 4th, 2018 and []
+
+## Cloud
+1. Added warning to `.clip` when no points are present after the clip. #38
+
+## Collection
+1. Parallelized `CloudDataFrame.clip`
+
+## CrownSegments
+1. Fixed a bug where crown segments were misprojects. #37
+
 # 0.3.2
 
 Updates between October 25th, 2018 and December 4th, 2018. Note: some of these were applied directly to `master` before the merging of this branch.
