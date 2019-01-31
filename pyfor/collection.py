@@ -279,7 +279,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
             print('Writing to {}'.format(out_path))
             pc.write(out_path)
 
-    def standard_metrics(self, index=None):
+    def standard_metrics(self, heightbreak, index=None):
         """
         Retrieves a set of 29 standard metrics, including height percentiles and other summaries.
 
@@ -288,7 +288,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
         """
         from pyfor.metrics import standard_metrics
 
-        get_metrics = lambda las_path: standard_metrics(pyfor.cloud.Cloud(las_path).data.points)
+        get_metrics = lambda las_path: standard_metrics(pyfor.cloud.Cloud(las_path).data.points, heightbreak=heightbreak)
         metrics = pd.concat(self.par_apply(get_metrics), sort=False)
 
         if index:
