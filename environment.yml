@@ -1,4 +1,4 @@
-name: pyfor_debug1
+name: pyfor_env
 
 channels:
   - conda-forge
