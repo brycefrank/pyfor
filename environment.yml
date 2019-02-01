@@ -1,9 +1,9 @@
-name: pyfor_env
+name: pyfor_debug1
 
 channels:
   - conda-forge
 dependencies:
-  - poppler<0.62
+  - poppler
   - python=3.6
   - numpy
   - gdal
@@ -12,11 +12,11 @@ dependencies:
   - scikit-image
   - scikit-learn
   - pyqtgraph
-  - matplotlib=2.2.3
+  - matplotlib
   - pyopengl
   - plotly
   - numba
-  - rasterio>1.0
+  - rasterio
   - libkml
   - geopandas
   - joblib
