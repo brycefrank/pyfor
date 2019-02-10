@@ -285,12 +285,11 @@ class Cloud:
         Normalize the cloud using the default Zhang et al. (2003) progressive morphological ground filter. Please see \
         the documentation in :class:`.ground_filter.Zhang2003` for more information and keyword argument definitions. \
         If you want to use a pre-computed DEM to normalize, please see :meth:`.subtract`.
-
         """
 
         from pyfor.ground_filter import Zhang2003
-        filter = Zhang2003(self, cell_size, **kwargs)
-        filter.normalize()
+        filter = Zhang2003(cell_size, **kwargs)
+        filter.normalize(self)
 
     def subtract(self, path):
         """
@@ -299,7 +298,6 @@ class Cloud:
         :param path: The path to the raster file, must be in a format supported by `rasterio`.
         :return:
         """
-
 
         imported_grid = rasterizer.ImportedGrid(path, self)
         df = pd.DataFrame(np.flipud(imported_grid.in_raster.read(1))).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
@@ -339,8 +337,7 @@ class Cloud:
         :attr:`self.data.points`.
         """
         condition = (self.data.points[dim] > min) & (self.data.points[dim] < max)
-
-        self.data = CloudData(self.data.points[condition], self.data.header)
+        self.data.points = self.data.points[condition]
         self.data._update()
 
     def chm(self, cell_size, interp_method=None, pit_filter=None, kernel_size=3):
