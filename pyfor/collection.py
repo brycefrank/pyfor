@@ -5,6 +5,7 @@ import pyfor
 import geopandas as gpd
 import pandas as pd
 import laxpy
+from joblib import Parallel, delayed
 
 
 class CloudDataFrame(gpd.GeoDataFrame):
@@ -53,7 +54,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
         :param buffer_distance: The distance to buffer and aggregate each tile.
         :param *args: Further arguments to `func`
         """
-        from joblib import Parallel, delayed
         if buffer_distance > 0:
             self._buffer(buffer_distance)
             for i, geom in enumerate(self["bounding_box"]):
@@ -218,22 +218,36 @@ class CloudDataFrame(gpd.GeoDataFrame):
         else:
             raise FileNotFoundError('There is no equivalent .lax file for this .las file.')
 
-    def clip(self, polygons, path, poly_names=None):
+    def _write_clip(self, polygon, poly_index, out_path, parent_list):
+        """
+        Internal function that clips an indexed las and writes to file. This is used exclusively by `.clip` and is meant to be parallelized
+
+        :return:
+        """
+        indexed_parents = [self._index_las(parent_path) for parent_path in parent_list]
+        header = indexed_parents[0].header
+
+        parent_points = pd.concat([pd.DataFrame.from_records(parent.query_polygon(polygon, scale=True)) \
+                                   for parent in indexed_parents])
+
+        pc = pyfor.cloud.Cloud(pyfor.cloud.LASData(parent_points, header))
+
+        # TODO generalize to other filetypes
+        pc.write(out_path+'.las')
+
+    def clip(self, polygons, path, poly_names=None, verbose=False):
         """
         A collection-level clipping method. This function is meant for efficient querying across the study area using \
         a set of polygons. This method requires the presence of `.lax` files in the collection directory. To generate \
         these `.lax` files please use :meth:`.create_index` first. Each polygon will be clipped and written to the \
         specified `path`.
 
-        :param polygons: Either a list or :class:`geopandas.GeoSeries` of shapely polygons.
+        :param polygons: Either a list of shapely polygons. If only one polygon is required wrap into a list before hand.
         :param path: The output path of the clip.
         :param poly_names: A list of polygon names to use when writing to file.
         """
         # TODO currently does not take advantage of multi-threading
         # TODO also a bit long, may be best to break up
-        if ~hasattr(polygons, '__iter__') and type(polygons) != gpd.GeoSeries:
-            polygons = [polygons]
-
         head, tail = os.path.split(path)
 
         # Which tiles do I need to make an index for?
@@ -258,25 +272,30 @@ class CloudDataFrame(gpd.GeoDataFrame):
                     poly_parents.append(las_path)
                 parents[i] = poly_parents
 
-        # For each polygon (i.e. each index in parents) construct the clipped point cloud.
-        # maybe this could just be done in the chunk above?
-        for poly_index, parent_list in parents.items():
-            poly = polygons[poly_index]
-            indexed_parents = [self._index_las(parent_path) for parent_path in parent_list]
-            header = indexed_parents[0].header
-            # TODO This is slow, but should be addressed upstream in laxpy, especially _scale_points
-            parent_points = pd.concat([pd.DataFrame.from_records(parent.query_polygon(poly, scale=True)) for parent in indexed_parents])
+        if poly_names is not None:
+            Parallel(n_jobs=self.n_threads)(delayed(self._write_clip)(polygons[poly_index], poly_index, head + os.path.sep + str(poly_names[poly_index]), parent_list) \
+                                            for poly_index, parent_list in parents.items())
+        else:
+            Parallel(n_jobs=self.n_threads)(delayed(self._write_clip)(polygons[poly_index], poly_index, head + os.path.sep + str(poly_index), parent_list) \
+                                            for poly_index, parent_list in parents.items())
 
-            print('Clipping polygon {} of {}'.format(poly_index + 1, len(polygons)))
-            pc = pyfor.cloud.Cloud(pyfor.cloud.LASData(parent_points, header))
 
-            if poly_names is not None:
-                out_path = head + os.path.sep + str(poly_names[poly_index]) + '.las'
-            else:
-                out_path = head + os.path.sep + str(poly_index) + '.las'
+    def standard_metrics(self, heightbreak, index=None):
+        """
+        Retrieves a set of 29 standard metrics, including height percentiles and other summaries.
 
-            print('Writing to {}'.format(out_path))
-            pc.write(out_path)
+        :param index: An iterable of indices to set as the output dataframe index.
+        :return: A pandas dataframe of standard metrics.
+        """
+        from pyfor.metrics import standard_metrics
+
+        get_metrics = lambda las_path: standard_metrics(pyfor.cloud.Cloud(las_path).data.points, heightbreak=heightbreak)
+        metrics = pd.concat(self.par_apply(get_metrics), sort=False)
+
+        if index:
+            metrics.index = index
+
+        return metrics
 
 
 

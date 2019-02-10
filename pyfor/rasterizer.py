@@ -34,9 +34,6 @@ class Grid:
         x_edges = np.linspace(min_x, max_x, self.n)
         y_edges = np.linspace(min_y, max_y, self.m)
 
-        warnings.warn('This behavior has changed from <= 0.3.1, points are now binned from the top left of the point '
-                      'cloud instead of the bottom right to cohere with arrays produced later.', UserWarning)
-
         bins_x = np.searchsorted(x_edges,   self.cloud.data.points['x'], side='right') - 1
         bins_y = np.searchsorted(-y_edges, -self.cloud.data.points['y'], side='right', sorter=(-y_edges).argsort())-1
 

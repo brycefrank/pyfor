@@ -16,9 +16,9 @@ pyfor is supported in part by the [AWS Cloud Credits for Research program](https
 
 ## Release Status
 
-Current Release: 0.3.2
+Current Release: 0.3.3
 
-Release Date: December 4th, 2018
+Release Date: February 10th, 2019
 
 Release Status: 0.3 is an adolescent LiDAR data processing package adequate for single tile processing and large acqusitions.
 

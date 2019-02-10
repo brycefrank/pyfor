@@ -1,3 +1,25 @@
+# 0.3.3
+
+Updates between December 4th, 2018 and February 10, 2019. `0.3.3` implements a few structural changes and bug fixes.
+Its release will be followed by a major restructuring to implement in-memory `.laz` support in 0.3.4.
+
+## Cloud
+1. Added warning to `.clip` when no points are present after the clip. #38
+2. Minor restructuring to accommodate for a file write bug, addresses #40
+
+## Collection
+1. Parallelized `CloudDataFrame.clip`
+
+## CrownSegments
+1. Fixed a bug where crown segments were misprojected. #37
+
+## Ground Filter
+1. For both `Zhang2003` and `KrausPfeifer1998`, changed filter instantiation to reflect `scikit-learn` type instantiation.
+
+## Other
+1. Implemented single sourcing for package versioning. #43
+2. Minor adjustments to `environment.yml` to ensure Travis success. #41
+
 # 0.3.2
 
 Updates between October 25th, 2018 and December 4th, 2018. Note: some of these were applied directly to `master` before the merging of this branch.
