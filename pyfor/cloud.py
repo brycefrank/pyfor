@@ -26,8 +26,8 @@ class CloudData:
         self.count = np.alen(self.points)
 
     def _update(self):
-        self.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
-        self.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
+        self.min = [np.min(self.points['x']), np.min(self.points['y']), np.min(self.points['z'])]
+        self.max = [np.max(self.points['x']), np.max(self.points['y']), np.max(self.points['z'])]
         self.count = np.alen(self.points)
 
     def _append(self, other):
