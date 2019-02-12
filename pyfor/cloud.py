@@ -90,7 +90,7 @@ class Cloud:
             self.name = os.path.splitext(os.path.split(path)[1])[0]
             self.extension = os.path.splitext(path)[1]
 
-            if self.extension == '.las' or self.extension == '.laz':
+            if self.extension.lower() == '.las' or self.extension.lower() == '.laz':
                 las = laspy.file.File(path)
                 points = pd.DataFrame({"x": las.x, "y": las.y, "z": las.z, "intensity": las.intensity, "return_num": las.return_num, "classification": las.classification,
                                        "flag_byte":las.flag_byte, "scan_angle_rank":las.scan_angle_rank, "user_data": las.user_data,
@@ -98,7 +98,7 @@ class Cloud:
                 header = las.header
                 self.data = LASData(points, header)
 
-            elif self.extension == '.ply':
+            elif self.extension.lower() == '.ply':
                 ply = plyfile.PlyData.read(path)
                 ply_points = ply.elements[0].data
                 points = pd.DataFrame({"x": ply_points["x"], "y": ply_points["y"], "z": ply_points["z"]})
@@ -144,7 +144,7 @@ class Cloud:
                 filesize = getsize(self.filepath)
                 las_version = self.data.header.version
                 out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}\nLas Version: {}
-                
+
                 """.format(self.filepath, filesize, self.data.count, min, max, las_version)
             elif self.extension == '.ply':
                 filesize = getsize(self.filepath)
@@ -314,13 +314,13 @@ class Cloud:
         """
 
         keep = clip.poly_clip(self.data.points, polygon)
-        
+
         # Create copy to avoid warnings
         keep_points = self.data.points.iloc[keep].copy()
         new_cloud = Cloud(CloudData(keep_points, self.data.header))
         new_cloud.data.points = new_cloud.data.points.reset_index()
         new_cloud.data._update()
-        
+
         #Warn user if the resulting cloud has no points.
         if len(new_cloud.data.points) ==0:
             warnings.warn("The clipped point cloud has no remaining points")
@@ -389,4 +389,3 @@ class Cloud:
         :param path: The path of the output file.
         """
         self.data.write(path)
-
