@@ -140,13 +140,13 @@ class Cloud:
 
         # TODO: Incorporate this in CloudData somehow, messy!
         if hasattr(self, 'extension'):
-            if self.extension == '.las' or self.extension == '.laz':
+            if self.extension.lower() == '.las' or self.extension.lower() == '.laz':
                 filesize = getsize(self.filepath)
                 las_version = self.data.header.version
                 out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}\nLas Version: {}
 
                 """.format(self.filepath, filesize, self.data.count, min, max, las_version)
-            elif self.extension == '.ply':
+            elif self.extension.lower() == '.ply':
                 filesize = getsize(self.filepath)
                 out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}""".format(self.filepath, filesize, self.data.count, min, max)
         else:
