@@ -96,11 +96,13 @@ class Cloud:
                 # Iterate over point format specification
                 points = {}
                 for spec in las.point_format.specs:
+                    print(spec.name)
                     # FIXME laspy renames this column for some reason.
-                    if spec.name == 'classification_byte':
+                    if spec.name == 'classification_byte' or spec.name == 'raw_classification':
                         points[spec.name.lower()] = eval('las.classification'.format(spec.name))
                     else:
                         points[spec.name.lower()] = eval('las.{}'.format(spec.name))
+                points = pd.DataFrame(points)
 
                 header = las.header
                 self.data = LASData(points, header)
