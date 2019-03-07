@@ -146,7 +146,7 @@ class Zhang2003:
         self.cloud.data._update()
         df = pd.DataFrame(bem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
         df = self.cloud.data.points.reset_index().merge(df, how="left").set_index('index')
-        self.cloud.data.points['z'] = df['z'] - df['val']
+        self.cloud.data.points['z'] = (df['z'] - df['val']).values # For some reason .values is needed to prevent an error
 
 class KrausPfeifer1998:
     """

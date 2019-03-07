@@ -5,6 +5,7 @@ import pyfor
 import geopandas as gpd
 import pandas as pd
 import laxpy
+import pyproj
 
 
 class CloudDataFrame(gpd.GeoDataFrame):
@@ -54,6 +55,8 @@ class CloudDataFrame(gpd.GeoDataFrame):
         :param *args: Further arguments to `func`
         """
         from joblib import Parallel, delayed
+
+
         if buffer_distance > 0:
             self._buffer(buffer_distance)
             for i, geom in enumerate(self["bounding_box"]):
@@ -182,23 +185,26 @@ class CloudDataFrame(gpd.GeoDataFrame):
         warnings.warn('_retile2 is in development, use at your own risk.', UserWarning)
 
         colbbox = self.bounding_box
-        x = np.arange(colbbox[0], colbbox[2], width)
-        y = np.arange(colbbox[1], colbbox[3], height)
+
+        # TODO adding the constant makes it an inclusive stop, seems sloppy
+        x = np.arange(colbbox[0], colbbox[2] + width, width)
+        y = np.arange(colbbox[1], colbbox[3] + height, height)
 
         hlines = [((x1, yi), (x2, yi)) for x1, x2 in zip(x[:-1], x[1:]) for yi in y]
         vlines = [((xi, y1), (xi, y2)) for y1, y2 in zip(y[:-1], y[1:]) for xi in x]
 
         grids = gpd.GeoSeries(polygonize(MultiLineString(hlines + vlines)))
+        return(grids)
 
-        # Iterate through each larger tile and find the intersecting smaller tiles
-        # TODO better way for this?
-        for index, row in self.iterrows():
-            # Find the set of smaller tiles that intersect with the larger
-            # Load the larger cell into memory
-            larger_cell = pyfor.cloud.Cloud(row['las_path'])
-            for i, smaller_cell in enumerate(grids[grids.intersects(row['bounding_box'])]):
-                pc = larger_cell.clip(smaller_cell)
-                pc.write(os.path.join(dir, '{}_{}{}'.format(larger_cell.name, i, larger_cell.extension)))
+        ## Iterate through each original tile and find the intersecting new tile
+        ## TODO better way for this?
+        #for index, row in self.iterrows():
+        #    # Find the set of smaller tiles that intersect with the larger
+        #    # Load the larger cell into memory
+        #    original_cell = pyfor.cloud.Cloud(row['las_path'])
+        #    for i, new_cell in enumerate(grids[grids.intersects(row['bounding_box'])]):
+        #        pc = original_cell.clip(new_cell)
+        #        pc.write(os.path.join(dir, '{}_{}{}'.format(original_cell.name, i, original_cell.extension)))
 
     def create_index(self):
         """
@@ -217,6 +223,156 @@ class CloudDataFrame(gpd.GeoDataFrame):
             return laxpy.IndexedLAS(las_path)
         else:
             raise FileNotFoundError('There is no equivalent .lax file for this .las file.')
+
+
+    def _merge_parents(self, parent_list, func, args):
+        """
+        Used in retiling and project level clipping operations.
+
+        :return:
+        """
+
+        if len(parent_list) > 0:
+            first = pyfor.cloud.Cloud(parent_list[0])
+
+            for parent in parent_list[1:]:
+                pc = pyfor.cloud.Cloud(parent)
+                first.data._append(pc.data)
+
+            func(first, *args)
+
+    def _get_parents(self, polygon):
+        return self[self['bounding_box'].intersects(polygon)]
+
+    def _square_buffer(self, polygon, buffer):
+        from shapely.geometry import Polygon
+        minx, miny, maxx, maxy = polygon.bounds
+        n_minx, n_miny, n_maxx, n_maxy = minx - buffer, miny - buffer, maxx + buffer, maxy + buffer
+
+        buffered_poly = Polygon([[n_minx, n_miny],
+                                 [n_minx, n_maxy],
+                                 [n_maxx, n_maxy],
+                                 [n_maxx, n_miny]])
+        return buffered_poly
+
+    def _clip_no_index(self, polygons, func):
+        # TODO clean this function, parallelize, etc.
+        """
+        A very rough way to bypass indexing for clipping, currently in development
+        :param polygons:
+        :return:
+        """
+        from joblib import Parallel, delayed
+
+        # FIXME spatial join would be optimized
+        parents = {}
+        for i, poly in enumerate(polygons):
+            poly_parents = []
+            for ix, row in self.iterrows():
+                if row['bounding_box'].intersects(poly):
+                    poly_parents.append(row['las_path'])
+                parents[i] = poly_parents
+
+        Parallel(n_jobs=self.n_threads)(delayed(self._merge_parents)(parent_list, func, [polygons[poly_index], poly_index]) for poly_index, parent_list in parents.items())
+
+    def _retiling_grid(self, target_cell_size, original_tile_size, buffer = 0):
+        """
+        Creates a retiling grid for a specified target cell size. This creates a list of polygons such that if a raster
+        is constructed from a polygon it will exactly fit inside given the specified target cell size. Useful for creating
+        project level rasters.
+
+        :param target_cell_size: The desired output cell size
+        :param original_tile_size: The original tile size of the project
+        :param buffer: The distance to buffer each new tile to prevent edge effects.
+        :return: A list of shapely polygons that correspond to the new grid.
+        """
+        from shapely.geometry import Polygon
+
+        bottom, left = self.bounding_box[1], self.bounding_box[0]
+        top, right = self.bounding_box[3], self.bounding_box[2]
+
+        new_tile_size = np.ceil(original_tile_size / target_cell_size) * target_cell_size
+        extension = new_tile_size - original_tile_size
+
+        project_width = right - left
+        project_height = top - bottom
+
+        num_x = int(np.ceil(project_width / new_tile_size))
+        num_y = int(np.ceil(project_height / new_tile_size))
+
+        new_tiles = []
+        for i in range(num_x):
+            for j in range(num_y):
+                # Create geometry
+                tile_left, tile_bottom = left + i * new_tile_size, bottom + j * new_tile_size
+
+                new_tile = Polygon([
+                    [tile_left, tile_bottom], #bl
+                    [tile_left, tile_bottom + new_tile_size], #tl
+                    [tile_left + new_tile_size, tile_bottom + new_tile_size], #tr
+                    [tile_left + new_tile_size, tile_bottom]]) #br
+
+                if buffer > 0:
+                    new_tile = self._square_buffer(new_tile, buffer)
+
+                # Only append if there are any original tiles touching
+                if len(self._get_parents(new_tile)) > 0:
+                    new_tiles.append(new_tile)
+
+        return new_tiles
+
+
+
+    def _clip_no_index1(self, polygons, func):
+        # TODO clean this function, parallelize, etc.
+        """
+        A very rough way to bypass indexing for clipping, currently in development
+        :param polygons:
+        :return:
+        """
+
+        # TODO make this block its own function
+        intersected_tiles = {}
+        for ix, row in self.iterrows():
+            tile_bbox, las_path = row['bounding_box'], row['las_path']
+            for poly in polygons:
+                if tile_bbox.intersects(poly):
+                    if las_path in intersected_tiles:
+                        intersected_tiles[las_path].append(poly)
+                    else:
+                        intersected_tiles[las_path] = [poly]
+
+
+        # TODO make this block its own function
+        parents = {}
+        for i, poly in enumerate(polygons):
+            poly_parents = []
+            for las_path, poly_list in intersected_tiles.items():
+                if poly in poly_list:
+                    poly_parents.append(las_path)
+                parents[i] = poly_parents
+
+        # For each polygon (i.e. each index in parents) construct the clipped point cloud.
+        # maybe this could just be done in the chunk above?
+        for poly_index, parent_list in parents.items():
+            poly = polygons[poly_index]
+
+            # Load first parent, append to this
+            first = pyfor.cloud.Cloud(parent_list[0])
+            first.normalize(3)
+
+            for parent in parent_list[1:]:
+                pc = pyfor.cloud.Cloud(parent)
+                pc.normalize(3)
+                first.data._append(pc.data)
+
+            first = first.clip(poly)
+
+            func(first)
+
+            first.crs = pyproj.Proj(init='epsg:26910').srs
+            p80 = first.grid(30).raster(lambda z_vec: np.percentile(z_vec, 80), "z")
+            p80.write('/home/bryce/Documents/Dissertation/Chapter3/data/grids/p80_debug/{}_new.tif'.format(poly_index))
 
     def clip(self, polygons, path, poly_names=None):
         """
@@ -263,21 +419,26 @@ class CloudDataFrame(gpd.GeoDataFrame):
         for poly_index, parent_list in parents.items():
             poly = polygons[poly_index]
             indexed_parents = [self._index_las(parent_path) for parent_path in parent_list]
-            header = indexed_parents[0].header
-            # TODO This is slow, but should be addressed upstream in laxpy, especially _scale_points
-            parent_points = pd.concat([pd.DataFrame.from_records(parent.query_polygon(poly, scale=True)) for parent in indexed_parents])
+            try:
+                header = indexed_parents[0].header
+                # TODO This is slow, but should be addressed upstream in laxpy, especially _scale_points
 
-            print('Clipping polygon {} of {}'.format(poly_index + 1, len(polygons)))
-            pc = pyfor.cloud.Cloud(pyfor.cloud.LASData(parent_points, header))
 
-            if poly_names is not None:
-                out_path = head + os.path.sep + str(poly_names[poly_index]) + '.las'
-            else:
-                out_path = head + os.path.sep + str(poly_index) + '.las'
+                parent_points = pd.concat([pd.DataFrame.from_records(parent.query_polygon(poly, scale=True)) for parent in indexed_parents])
 
-            print('Writing to {}'.format(out_path))
-            pc.write(out_path)
+                print('Clipping polygon {} of {}'.format(poly_index + 1, len(polygons)))
+                pc = pyfor.cloud.Cloud(pyfor.cloud.LASData(parent_points, header))
 
+                if poly_names is not None:
+                    out_path = head + os.path.sep + str(poly_names[poly_index]) + '.las'
+                else:
+                    out_path = head + os.path.sep + str(poly_index) + '.las'
+
+                print('Writing to {}'.format(out_path))
+                pc.write(out_path)
+
+            except IndexError:
+                pass
 
 
 def from_dir(las_dir, **kwargs):

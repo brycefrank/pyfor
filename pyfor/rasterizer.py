@@ -10,7 +10,7 @@ class Grid:
     the Grid object we can derive other useful products, most importantly, :class:`.Raster` objects.
     """
 
-    def __init__(self, cloud, cell_size):
+    def __init__(self, cloud, cell_size, force_extent = None):
         """
         Upon initialization, the parent cloud object's :attr:`data.points` attribute is sorted into bins in place. \ The
         columns 'bins_x' and 'bins_y' are appended. Other useful information, such as the resolution, number of rows \
@@ -24,24 +24,32 @@ class Grid:
         self.cloud = cloud
         self.cell_size = cell_size
 
-        min_x, max_x = self.cloud.data.min[0], self.cloud.data.max[0]
-        min_y, max_y = self.cloud.data.min[1], self.cloud.data.max[1]
+        if force_extent:
+            min_x, max_x = force_extent[0], force_extent[1]
+            min_y, max_y = force_extent[2], force_extent[3]
+            self.forced_extent = force_extent
 
-        self.m = int(np.floor((max_y - min_y) / cell_size))
-        self.n = int(np.floor((max_x - min_x) / cell_size))
+        else:
+            min_x, max_x = self.cloud.data.min[0], self.cloud.data.max[0]
+            min_y, max_y = self.cloud.data.min[1], self.cloud.data.max[1]
 
-        # Create bins
-        x_edges = np.linspace(min_x, max_x, self.n)
-        y_edges = np.linspace(min_y, max_y, self.m)
+        self.m = int(np.ceil((max_y - min_y) / cell_size))
+        self.n = int(np.ceil((max_x - min_x) / cell_size))
 
-        warnings.warn('This behavior has changed from <= 0.3.1, points are now binned from the top left of the point '
-                      'cloud instead of the bottom right to cohere with arrays produced later.', UserWarning)
+        x_edges = np.arange(min_x, max_x, self.cell_size)
+        y_edges = np.arange(min_y, max_y, self.cell_size)
 
         bins_x = np.searchsorted(x_edges,   self.cloud.data.points['x'], side='right') - 1
-        bins_y = np.searchsorted(-y_edges, -self.cloud.data.points['y'], side='right', sorter=(-y_edges).argsort())-1
+        bins_y = np.searchsorted(-y_edges, -self.cloud.data.points['y'], side='left', sorter=(-y_edges).argsort())
 
         self.cloud.data.points["bins_x"] = bins_x
         self.cloud.data.points["bins_y"] = bins_y
+
+        if force_extent: # Remove points that are not in the bins defined by the forced extent
+            self.cloud.data.points = self.cloud.data.points[(self.cloud.data.points['bins_x'] >= 0) & (self.cloud.data.points['bins_x'] <= self.n - 1)]
+            self.cloud.data.points = self.cloud.data.points[(self.cloud.data.points['bins_y'] >= 0) & (self.cloud.data.points['bins_y'] <= self.m - 1)]
+            self.cloud.data._update()
+
         self.cells = self.cloud.data.points.groupby(['bins_x', 'bins_y'])
 
     def _update(self):
@@ -60,7 +68,6 @@ class Grid:
         options.
         :return: A 2D numpy array where the value of each cell is the result of the passed function.
         """
-
         bin_summary = self.cells.agg({dim: func}, **kwargs).reset_index()
         array = np.full((self.m, self.n), np.nan)
         array[bin_summary["bins_y"], bin_summary["bins_x"]] = bin_summary[dim]
@@ -186,7 +193,11 @@ class Raster:
     def _affine(self):
         """Constructs the affine transformation, used for plotting and exporting polygons and rasters."""
         from rasterio.transform import from_origin
-        affine = from_origin(self.grid.cloud.data.min[0], self.grid.cloud.data.max[1], self.grid.cell_size, self.grid.cell_size)
+        # FIXME broken for forced extent
+        if hasattr(self.grid, 'forced_extent'):
+            affine = from_origin(self.grid.forced_extent[0], self.grid.forced_extent[3], self.grid.cell_size, self.grid.cell_size)
+        else:
+            affine = from_origin(self.grid.cloud.data.min[0], self.grid.cloud.data.max[1], self.grid.cell_size, self.grid.cell_size)
         return affine
 
     @property
@@ -212,12 +223,23 @@ class Raster:
 
         return out_image[0].data
 
+    def remove_sparse_cells(self, min_points):
+        """
+        Sets sparse cells, i.e. those that have < `min_points` to nan **in place**. This improves the reliability of edge-cells
+        when handling multiple tile rasters.
+
+        :return:
+        """
+
+        with np.errstate(invalid='ignore'):
+            count_array = self.grid.raster("count", "z").array
+            self.array[count_array < min_points] = np.nan
+
     def plot(self, cmap = "viridis", block = False, return_plot = False):
         """
         Default plotting method for the Raster object.
-
-        :param block: An optional parameter, mostly for debugging purposes.
         """
+
         #TODO implement cmap
         fig = plt.figure()
         ax = fig.add_subplot(111)
@@ -260,7 +282,6 @@ class Raster:
         from scipy.ndimage import label
         tops = peak_local_max(self.array, indices=False, min_distance=min_distance, threshold_abs=threshold_abs)
         tops = label(tops)[0]
-
 
         # TODO Had to take out corner filter to remove duplicate tops.
         tops_raster = DetectedTops(tops, self.grid, self)
@@ -312,8 +333,7 @@ class Raster:
             from warnings import warn
             warn('No coordinate reference system defined. Please set the .crs attribute of the Cloud object.', UserWarning)
 
-        gisexport.array_to_raster(self.array, self.cell_size, self.grid.cloud.data.min[0], self.grid.cloud.data.max[1],
-                                      self.grid.cloud.crs, path)
+        gisexport.array_to_raster(self.array, self._affine, self.grid.cloud.crs, path)
 
 
 class DetectedTops(Raster):

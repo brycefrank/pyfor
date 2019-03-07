@@ -30,7 +30,7 @@ def project_indices(indices, raster):
     seed_xy = np.stack(seed_xy, axis = 1)
     return(seed_xy)
 
-def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
+def array_to_raster(array, affine, wkt, path):
     """Writes a GeoTIFF raster from a numpy array.
 
     :param array: 2D numpy array of cell values
@@ -41,9 +41,9 @@ def array_to_raster(array, pixel_size, x_min, y_max, wkt, path):
     :param path: The output bath of the GeoTIFF
     """
     # First flip the array
-    transform = rasterio.transform.from_origin(x_min, y_max, pixel_size, pixel_size)
+    #transform = rasterio.transform.from_origin(x_min, y_max, pixel_size, pixel_size)
     out_dataset = rasterio.open(path, 'w', driver='GTiff', height=array.shape[0], width = array.shape[1], count=1,
-                                dtype=str(array.dtype),crs=wkt, transform=transform)
+                                dtype=str(array.dtype),crs=wkt, transform=affine)
     out_dataset.write(array, 1)
     out_dataset.close()
 

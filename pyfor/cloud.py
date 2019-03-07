@@ -26,8 +26,8 @@ class CloudData:
         self.count = np.alen(self.points)
 
     def _update(self):
-        self.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
-        self.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
+        self.min = [np.min(self.points["x"]), np.min(self.points["y"]), np.min(self.points["z"])]
+        self.max = [np.max(self.points["x"]), np.max(self.points["y"]), np.max(self.points["z"])]
         self.count = np.alen(self.points)
 
     def _append(self, other):
@@ -180,7 +180,7 @@ class Cloud:
 
         self.data.points = pd.merge(self.data.points, pre_merge, left_on = 'user_data', right_on = 'unique_id')
 
-    def grid(self, cell_size):
+    def grid(self, cell_size, force_extent = None):
         """
         Generates a :class:`.Grid` object for the parent object given a cell size. \
         See the documentation for :class:`.Grid` for more information.
@@ -188,7 +188,7 @@ class Cloud:
         :param cell_size: The resolution of the plot in the same units as the input file.
         :return: A :class:`.Grid` object.
         """
-        return rasterizer.Grid(self, cell_size)
+        return rasterizer.Grid(self, cell_size, force_extent)
 
     def plot(self, cell_size = 1, cmap = "viridis", return_plot = False, block=False):
         """
