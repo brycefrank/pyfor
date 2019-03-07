@@ -433,23 +433,23 @@ class CloudDataFrame(gpd.GeoDataFrame):
         for poly_index, parent_list in parents.items():
             poly = polygons[poly_index]
             indexed_parents = [self._index_las(parent_path) for parent_path in parent_list]
-            try:
-                header = indexed_parents[0].header
-                # TODO This is slow, but should be addressed upstream in laxpy, especially _scale_points
+            header = indexed_parents[0].header
+            # TODO This is slow, but should be addressed upstream in laxpy, especially _scale_points
 
 
-                parent_points = pd.concat([pd.DataFrame.from_records(parent.query_polygon(poly, scale=True)) for parent in indexed_parents])
+            parent_points = pd.concat([pd.DataFrame.from_records(parent.query_polygon(poly, scale=True)) for parent in indexed_parents])
 
-                print('Clipping polygon {} of {}'.format(poly_index + 1, len(polygons)))
-                pc = pyfor.cloud.Cloud(pyfor.cloud.LASData(parent_points, header))
+            print('Clipping polygon {} of {}'.format(poly_index + 1, len(polygons)))
+            pc = pyfor.cloud.Cloud(pyfor.cloud.LASData(parent_points, header))
 
-                if poly_names is not None:
-                    out_path = head + os.path.sep + str(poly_names[poly_index]) + '.las'
-                else:
-                    out_path = head + os.path.sep + str(poly_index) + '.las'
+            if poly_names is not None:
+                out_path = head + os.path.sep + str(poly_names[poly_index]) + '.las'
+            else:
+                out_path = head + os.path.sep + str(poly_index) + '.las'
 
-                print('Writing to {}'.format(out_path))
-                pc.write(out_path)
+            print('Writing to {}'.format(out_path))
+            pc.write(out_path)
+
         if poly_names is not None:
             Parallel(n_jobs=self.n_threads)(delayed(self._write_clip)(polygons[poly_index], poly_index, head + os.path.sep + str(poly_names[poly_index]), parent_list) \
                                             for poly_index, parent_list in parents.items())
