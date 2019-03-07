@@ -92,9 +92,16 @@ class Cloud:
 
             if self.extension.lower() == '.las' or self.extension.lower() == '.laz':
                 las = laspy.file.File(path)
-                points = pd.DataFrame({"x": las.x, "y": las.y, "z": las.z, "intensity": las.intensity, "return_num": las.return_num, "classification": las.classification,
-                                       "flag_byte":las.flag_byte, "scan_angle_rank":las.scan_angle_rank, "user_data": las.user_data,
-                                       "pt_src_id": las.pt_src_id})
+
+                # Iterate over point format specification
+                points = {}
+                for spec in las.point_format.specs:
+                    # FIXME laspy renames this column for some reason.
+                    if spec.name == 'classification_byte':
+                        points[spec.name.lower()] = eval('las.classification'.format(spec.name))
+                    else:
+                        points[spec.name.lower()] = eval('las.{}'.format(spec.name))
+
                 header = las.header
                 self.data = LASData(points, header)
 
