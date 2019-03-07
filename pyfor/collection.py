@@ -32,7 +32,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
         :return:
         """
         las_path_init = [[os.path.join(root, file) for file in files] for root, dirs, files in os.walk(las_dir)][0]
-        las_path_init = [las_path for las_path in las_path_init if las_path.endswith('.las') or las_path.endswith('.laz')]
+        las_path_init = [las_path for las_path in las_path_init if las_path.endswith('.las')]
         cdf = CloudDataFrame({'las_path': las_path_init})
         cdf.n_threads = n_jobs
 

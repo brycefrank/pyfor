@@ -98,9 +98,9 @@ class Cloud:
                 for spec in las.point_format.specs:
                     # FIXME laspy renames this column for some reason.
                     if spec.name == 'classification_byte' or spec.name == 'raw_classification':
-                        points[spec.name.lower()] = eval('las.classification'.format(spec.name))
+                        points[spec.name.lower()] = eval('las.classification'.format(spec.name.lower))
                     else:
-                        points[spec.name.lower()] = eval('las.{}'.format(spec.name))
+                        points[spec.name.lower()] = eval('las.{}'.format(spec.name.lower))
                 points = pd.DataFrame(points)
 
                 header = las.header
