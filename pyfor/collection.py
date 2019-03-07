@@ -56,7 +56,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
         """
         from joblib import Parallel, delayed
 
-
         if buffer_distance > 0:
             self._buffer(buffer_distance)
             for i, geom in enumerate(self["bounding_box"]):
@@ -224,7 +223,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
         else:
             raise FileNotFoundError('There is no equivalent .lax file for this .las file.')
 
-
     def _merge_parents(self, parent_list, func, args):
         """
         Used in retiling and project level clipping operations.
@@ -374,27 +372,43 @@ class CloudDataFrame(gpd.GeoDataFrame):
             p80 = first.grid(30).raster(lambda z_vec: np.percentile(z_vec, 80), "z")
             p80.write('/home/bryce/Documents/Dissertation/Chapter3/data/grids/p80_debug/{}_new.tif'.format(poly_index))
 
-    def clip(self, polygons, path, poly_names=None):
+    def _write_clip(self, polygon, poly_index, out_path, parent_list):
+        """
+        Internal function that clips an indexed las and writes to file. This is used exclusively by `.clip` and is meant to be parallelized
+
+        :return:
+        """
+        indexed_parents = [self._index_las(parent_path) for parent_path in parent_list]
+        header = indexed_parents[0].header
+
+        parent_points = pd.concat([pd.DataFrame.from_records(parent.query_polygon(polygon, scale=True)) \
+                                   for parent in indexed_parents])
+
+        pc = pyfor.cloud.Cloud(pyfor.cloud.LASData(parent_points, header))
+
+        # TODO generalize to other filetypes
+        pc.write(out_path+'.las')
+
+    def clip(self, polygons, path, poly_names=None, verbose=False):
         """
         A collection-level clipping method. This function is meant for efficient querying across the study area using \
         a set of polygons. This method requires the presence of `.lax` files in the collection directory. To generate \
         these `.lax` files please use :meth:`.create_index` first. Each polygon will be clipped and written to the \
         specified `path`.
 
-        :param polygons: Either a list or :class:`geopandas.GeoSeries` of shapely polygons.
+        :param polygons: Either a list of shapely polygons. If only one polygon is required wrap into a list before hand.
         :param path: The output path of the clip.
         :param poly_names: A list of polygon names to use when writing to file.
         """
         # TODO currently does not take advantage of multi-threading
         # TODO also a bit long, may be best to break up
-        if ~hasattr(polygons, '__iter__') and type(polygons) != gpd.GeoSeries:
-            polygons = [polygons]
-
         head, tail = os.path.split(path)
 
         # Which tiles do I need to make an index for?
         # It could  be the case that the input polys intersect with the same tile, but are checked out of order
         # Building this dict requires a bit of overhead, but is more memory efficient in the worst case
+        from joblib import Parallel, delayed
+
         intersected_tiles = {}
         for ix, row in self.iterrows():
             tile_bbox, las_path = row['bounding_box'], row['las_path']
@@ -436,9 +450,31 @@ class CloudDataFrame(gpd.GeoDataFrame):
 
                 print('Writing to {}'.format(out_path))
                 pc.write(out_path)
+        if poly_names is not None:
+            Parallel(n_jobs=self.n_threads)(delayed(self._write_clip)(polygons[poly_index], poly_index, head + os.path.sep + str(poly_names[poly_index]), parent_list) \
+                                            for poly_index, parent_list in parents.items())
+        else:
+            Parallel(n_jobs=self.n_threads)(delayed(self._write_clip)(polygons[poly_index], poly_index, head + os.path.sep + str(poly_index), parent_list) \
+                                            for poly_index, parent_list in parents.items())
 
-            except IndexError:
-                pass
+
+    def standard_metrics(self, heightbreak, index=None):
+        """
+        Retrieves a set of 29 standard metrics, including height percentiles and other summaries.
+
+        :param index: An iterable of indices to set as the output dataframe index.
+        :return: A pandas dataframe of standard metrics.
+        """
+        from pyfor.metrics import standard_metrics
+
+        get_metrics = lambda las_path: standard_metrics(pyfor.cloud.Cloud(las_path).data.points, heightbreak=heightbreak)
+        metrics = pd.concat(self.par_apply(get_metrics), sort=False)
+
+        if index:
+            metrics.index = index
+
+        return metrics
+
 
 
 def from_dir(las_dir, **kwargs):

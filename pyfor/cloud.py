@@ -90,15 +90,23 @@ class Cloud:
             self.name = os.path.splitext(os.path.split(path)[1])[0]
             self.extension = os.path.splitext(path)[1]
 
-            if self.extension == '.las' or self.extension == '.laz':
+            if self.extension.lower() == '.las' or self.extension.lower() == '.laz':
                 las = laspy.file.File(path)
-                points = pd.DataFrame({"x": las.x, "y": las.y, "z": las.z, "intensity": las.intensity, "return_num": las.return_num, "classification": las.classification,
-                                       "flag_byte":las.flag_byte, "scan_angle_rank":las.scan_angle_rank, "user_data": las.user_data,
-                                       "pt_src_id": las.pt_src_id})
+
+                # Iterate over point format specification
+                points = {}
+                for spec in las.point_format.specs:
+                    # FIXME laspy renames this column for some reason.
+                    if spec.name == 'classification_byte' or spec.name == 'raw_classification':
+                        points[spec.name.lower()] = eval('las.classification'.format(spec.name))
+                    else:
+                        points[spec.name.lower()] = eval('las.{}'.format(spec.name))
+                points = pd.DataFrame(points)
+
                 header = las.header
                 self.data = LASData(points, header)
 
-            elif self.extension == '.ply':
+            elif self.extension.lower() == '.ply':
                 ply = plyfile.PlyData.read(path)
                 ply_points = ply.elements[0].data
                 points = pd.DataFrame({"x": ply_points["x"], "y": ply_points["y"], "z": ply_points["z"]})
@@ -140,13 +148,13 @@ class Cloud:
 
         # TODO: Incorporate this in CloudData somehow, messy!
         if hasattr(self, 'extension'):
-            if self.extension == '.las' or self.extension == '.laz':
+            if self.extension.lower() == '.las' or self.extension.lower() == '.laz':
                 filesize = getsize(self.filepath)
                 las_version = self.data.header.version
                 out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}\nLas Version: {}
-                
+
                 """.format(self.filepath, filesize, self.data.count, min, max, las_version)
-            elif self.extension == '.ply':
+            elif self.extension.lower() == '.ply':
                 filesize = getsize(self.filepath)
                 out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}""".format(self.filepath, filesize, self.data.count, min, max)
         else:
@@ -285,12 +293,11 @@ class Cloud:
         Normalize the cloud using the default Zhang et al. (2003) progressive morphological ground filter. Please see \
         the documentation in :class:`.ground_filter.Zhang2003` for more information and keyword argument definitions. \
         If you want to use a pre-computed DEM to normalize, please see :meth:`.subtract`.
-
         """
 
         from pyfor.ground_filter import Zhang2003
-        filter = Zhang2003(self, cell_size, **kwargs)
-        filter.normalize()
+        filter = Zhang2003(cell_size, **kwargs)
+        filter.normalize(self)
 
     def subtract(self, path):
         """
@@ -299,7 +306,6 @@ class Cloud:
         :param path: The path to the raster file, must be in a format supported by `rasterio`.
         :return:
         """
-
 
         imported_grid = rasterizer.ImportedGrid(path, self)
         df = pd.DataFrame(np.flipud(imported_grid.in_raster.read(1))).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
@@ -316,13 +322,13 @@ class Cloud:
         """
 
         keep = clip.poly_clip(self.data.points, polygon)
-        
+
         # Create copy to avoid warnings
         keep_points = self.data.points.iloc[keep].copy()
         new_cloud = Cloud(CloudData(keep_points, self.data.header))
         new_cloud.data.points = new_cloud.data.points.reset_index()
         new_cloud.data._update()
-        
+
         #Warn user if the resulting cloud has no points.
         if len(new_cloud.data.points) ==0:
             warnings.warn("The clipped point cloud has no remaining points")
@@ -339,8 +345,7 @@ class Cloud:
         :attr:`self.data.points`.
         """
         condition = (self.data.points[dim] > min) & (self.data.points[dim] < max)
-
-        self.data = CloudData(self.data.points[condition], self.data.header)
+        self.data.points = self.data.points[condition]
         self.data._update()
 
     def chm(self, cell_size, interp_method=None, pit_filter=None, kernel_size=3):
@@ -392,4 +397,3 @@ class Cloud:
         :param path: The path of the output file.
         """
         self.data.write(path)
-

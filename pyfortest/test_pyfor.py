@@ -353,21 +353,21 @@ class VoxelGridTestCase(unittest.TestCase):
 class KrausPfeifer1998(unittest.TestCase):
     def setUp(self):
         self.test_cloud = cloud.Cloud(test_las)
-        self.test_kp_filter = ground_filter.KrausPfeifer1998(self.test_cloud, 3)
+        self.test_kp_filter = ground_filter.KrausPfeifer1998(3)
 
     def test_filter(self):
-        self.test_kp_filter._filter()
+        self.test_kp_filter._filter(self.test_cloud.grid(self.test_kp_filter.cell_size))
 
 class Zhang2003TestCase(unittest.TestCase):
     def setUp(self):
         self.test_cloud = cloud.Cloud(test_las)
-        self.test_zhang_filter = ground_filter.Zhang2003(self.test_cloud, 3)
+        self.test_zhang_filter = ground_filter.Zhang2003(3)
 
     def test_filter(self):
-        self.test_zhang_filter._filter()
+        self.test_zhang_filter._filter(self.test_cloud.grid(self.test_zhang_filter.cell_size))
 
     def test_bem(self):
-        self.test_zhang_filter.bem()
+        self.test_zhang_filter.bem(self.test_cloud)
 
 class LayerStackingTestCase(unittest.TestCase):
     def setUp(self):

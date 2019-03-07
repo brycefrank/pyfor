@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-__version__ = '0.3'
+__version__ = '0.3.3'
 
 from pyfor import cloud
 from pyfor import rasterizer
@@ -11,3 +11,4 @@ from pyfor import plot
 from pyfor import collection
 from pyfor import voxelizer
 from pyfor import detection
+from pyfor import metrics
