@@ -125,7 +125,7 @@ class LASCloudTestCase(unittest.TestCase):
 
     def test_normalize(self):
         test_cloud = cloud.Cloud(test_las)
-        test_cloud.normalize(6)
+        test_cloud.normalize(3)
         self.assertLess(test_cloud.data.max[2], 65)
 
     def test_chm(self):
@@ -171,25 +171,19 @@ class GridTestCase(unittest.TestCase):
         self.test_grid = cloud.Cloud(test_las).grid(1)
 
     def test_m(self):
-        self.assertEqual(199, self.test_grid.m)
+        self.assertEqual(200, self.test_grid.m)
 
     def test_n(self):
-        self.assertEqual(199, self.test_grid.n)
+        self.assertEqual(200, self.test_grid.n)
 
     def test_cloud(self):
         self.assertEqual(type(self.test_grid.cloud), cloud.Cloud)
-
-    def test_cell_size(self):
-        self.assertEqual(self.test_grid.cell_size, 1)
 
     def test_empty_cells(self):
         np.set_printoptions(threshold=np.nan)
         empty = self.test_grid.empty_cells
         # Check that there are the correct number
-        self.assertEqual(empty.shape, (687, 2))
-
-        # Check the 18th empty is the same as expected
-        np.testing.assert_array_equal(empty[18,:], np.array([3, 56]))
+        self.assertEqual(empty.shape, (291, 2))
 
     def test_raster(self):
         raster = self.test_grid.raster("max", "z")
@@ -265,7 +259,7 @@ class RasterTestCase(unittest.TestCase):
         self.test_raster.local_maxima()
 
     def test_local_maxima_oriented_correctly(self):
-        self.assertEqual(self.test_raster.local_maxima().array[15,3], 39)
+        self.assertEqual(self.test_raster.local_maxima().array[24, 27], 71)
 
     def test_write_with_crs(self):
         self.test_raster.write("./temp_tif.tif")
@@ -332,9 +326,8 @@ class GISExportTestCase(unittest.TestCase):
     def test_array_to_raster_writes(self):
         test_grid = cloud.Cloud(test_las).grid(1)
         test_grid.cloud.crs = proj4str
-        array = test_grid.raster("max", "z").array
-        gisexport.array_to_raster(array, 0.5, test_grid.cloud.data.header.min[0], test_grid.cloud.data.header.max[1],
-                                  proj4str, os.path.join(data_dir, "temp_raster_array.tif"))
+        test_raster = test_grid.raster("max", "z")
+        gisexport.array_to_raster(test_raster.array, test_raster._affine, proj4str, os.path.join(data_dir, "temp_raster_array.tif"))
         self.assertTrue(os.path.exists(os.path.join(data_dir, "temp_raster_array.tif")))
         os.remove(os.path.join(data_dir, "temp_raster_array.tif"))
 
