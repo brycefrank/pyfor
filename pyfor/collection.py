@@ -6,6 +6,7 @@ import geopandas as gpd
 import pandas as pd
 import laxpy
 import pyproj
+from shapely.geometry import Polygon
 
 class CloudDataFrame(gpd.GeoDataFrame):
     """
@@ -44,6 +45,14 @@ class CloudDataFrame(gpd.GeoDataFrame):
 
     def set_index(self, *args):
         return CloudDataFrame(super(CloudDataFrame, self).set_index(*args))
+
+    @property
+    def bounding_box(self):
+        """Retrieves the bounding box for the entire collection. As a tuple (minx, muny, maxx, maxy)"""
+        minx, miny, maxx, maxy = [i.bounds[0] for i in self['bounding_box']], [i.bounds[1] for i in self['bounding_box']], \
+                                 [i.bounds[2] for i in self['bounding_box']], [i.bounds[3] for i in self['bounding_box']]
+        col_bbox = np.min(minx), np.min(miny), np.max(maxx), np.max(maxy)
+        return col_bbox
 
     def par_apply(self, func, *args):
         """
@@ -104,41 +113,22 @@ class CloudDataFrame(gpd.GeoDataFrame):
     def _build_polygons(self):
         """Builds the shapely polygons of the bounding boxes and adds them to self.data"""
         from shapely.geometry import Polygon
-        bboxes = self.par_apply(self._get_bounding_box, column='las_path')
+
+        bboxes = [self._get_bounding_box(las_path) for las_path in self['las_path']]
+        print(bboxes)
         self["bounding_box"] = [Polygon(((bbox[0], bbox[2]), (bbox[1], bbox[2]),
                                            (bbox[1], bbox[3]), (bbox[0], bbox[3]))) for bbox in bboxes]
         self.set_geometry("bounding_box", inplace = True)
-        self.tiles = self['geometry'].values
+        self.tiles = self['bounding_box'].values
 
-    def _get_intersecting(self, tile_index):
+    def _get_parents(self, polygon):
         """
-        Gets the intersecting tiles for the given tile_index
+        For a given input polygon, finds the files whose bounding boxes intersect with that polygon.
 
-        :param: The index of the tile within the CloudDataFrame
-        :return: A CloudDataFrame of intersecting tiles
+        :param polygon:
+        :return: A GeoDataFrame of intersecting file bounding boxes.
         """
-        # TODO Seek more efficient solution...
-        # FIXME this is probably a sloppy way
-        intersect_bool = self.intersects(self["buffered_bounding_box"].iloc[tile_index])
-        intersect_cdf = CloudDataFrame(self[intersect_bool])
-        intersect_cdf.n_threads = self.n_threads
-        return intersect_cdf
-
-    def _buffer(self, distance, in_place = True):
-        """
-        Buffers the CloudDataFrame geometries.
-        :return: A new CloudDataFrame with buffered geometries.
-        """
-        # TODO implement in_place
-        # also, pretty sloppy, consider relegating to a function, like "copy" or something
-        norm_geoms = self["bounding_box"].copy()
-        buffered = super(CloudDataFrame, self).buffer(distance)
-        cdf = CloudDataFrame(self)
-        cdf["bounding_box"] = norm_geoms
-        cdf["buffered_bounding_box"] = buffered
-        cdf.n_threads = self.n_threads
-        cdf.set_geometry("bounding_box", inplace=True)
-        return cdf
+        return self[self['bounding_box'].intersects(polygon)]
 
     def plot(self, **kwargs):
         """
@@ -149,13 +139,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
         plot = super(CloudDataFrame, self).plot(**kwargs)
         plot.figure.show()
 
-    @property
-    def bounding_box(self):
-        """Retrieves the bounding box for the entire collection. As a tuple (minx, muny, maxx, maxy)"""
-        minx, miny, maxx, maxy = [i.bounds[0] for i in self['bounding_box']], [i.bounds[1] for i in self['bounding_box']], \
-                                 [i.bounds[2] for i in self['bounding_box']], [i.bounds[3] for i in self['bounding_box']]
-        col_bbox = np.min(minx), np.min(miny), np.max(maxx), np.max(maxy)
-        return col_bbox
 
 
     def _retile2(self, width, height, dir):
@@ -409,17 +392,8 @@ class Retiler:
         """
         Retiles a CloudDataFrame. Generally used to create tiles such that rasters generated from tiles are properly aligned.
         """
-        from shapely.geometry import Polygon
         self.cdf = cdf
 
-    def _get_parents(self, polygon):
-        """
-        For a given input polygon, finds the files whose bounding boxes intersect with that polygon.
-
-        :param polygon:
-        :return: A GeoDataFrame of intersecting file bounding boxes.
-        """
-        return self.cdf[self.cdf['bounding_box'].intersects(polygon)]
 
     def _square_buffer(self, polygon, buffer):
         """
@@ -450,6 +424,8 @@ class Retiler:
         :param buffer: The distance to buffer each new tile to prevent edge effects.
         :return: A list of shapely polygons that correspond to the new grid.
         """
+        from shapely.geometry import Polygon
+
 
         bottom, left = self.cdf.bounding_box[1], self.cdf.bounding_box[0]
         top, right = self.cdf.bounding_box[3], self.cdf.bounding_box[2]
@@ -478,7 +454,7 @@ class Retiler:
                     new_tile = self._square_buffer(new_tile, buffer)
 
                 # Only append if there are any original tiles touching
-                if len(self._get_parents(new_tile)) > 0:
+                if len(self.cdf._get_parents(new_tile)) > 0:
                     new_tiles.append(new_tile)
 
         return new_tiles
