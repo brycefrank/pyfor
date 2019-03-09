@@ -94,11 +94,18 @@ class Cloud:
                 las = laspy.file.File(path)
 
                 # Iterate over point format specification
-                points = pd.DataFrame(
-                    {"x": las.x, "y": las.y, "z": las.z, "intensity": las.intensity, "return_num": las.return_num,
-                     "classification": las.classification,
-                     "flag_byte": las.flag_byte, "scan_angle_rank": las.scan_angle_rank, "user_data": las.user_data,
-                     "pt_src_id": las.pt_src_id})
+                dims = ["x", "y", "z", "intensity", "return_num", "classification", "flag_byte", "scan_angle_rank",
+                        "user_data", "pt_src_id"]
+
+                points = {}
+                for dim in dims:
+                    try:
+                        print(dim)
+                        points[dim] = eval('las.{}'.format(dim))
+                    except:
+                        pass
+                points = pd.DataFrame(points)
+
                 header = las.header
                 self.data = LASData(points, header)
 

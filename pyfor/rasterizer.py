@@ -64,8 +64,7 @@ class Grid:
         :param func: A function string, i.e. "max" or a function itself, i.e. :func:`np.max`. This function must be \
         able to take a 1D array of the given dimension as an input and produce a single value as an output. This \
         single value will become the value of each cell in the array.
-        :param dim: The dimension to calculate on as a string, see the column names of self.data for a full list of \
-        options.
+        :param dim: A dimension to calculate on.
         :return: A 2D numpy array where the value of each cell is the result of the passed function.
         """
         bin_summary = self.cells.agg({dim: func}, **kwargs).reset_index()
