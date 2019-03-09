@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from pyfor import gisexport
-from pyfor import plot
 
 class Grid:
     """The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. From \
@@ -259,12 +258,6 @@ class Raster:
 
         else:
             plt.show(block = block)
-
-    def iplot3d(self, colorscale="Viridis"):
-        """
-        Plots the raster as a surface using Plotly.
-        """
-        plot._iplot3d_surface(self.array, colorscale)
 
     def local_maxima(self, min_distance=2, threshold_abs=2, as_coordinates=False):
         """

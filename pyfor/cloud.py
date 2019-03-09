@@ -8,7 +8,6 @@ import pandas as pd
 import matplotlib.cm as cm
 from pyfor import rasterizer
 from pyfor import clip
-from pyfor import plot
 import pathlib
 import warnings
 
@@ -100,7 +99,6 @@ class Cloud:
                 points = {}
                 for dim in dims:
                     try:
-                        print(dim)
                         points[dim] = eval('las.{}'.format(dim))
                     except:
                         pass

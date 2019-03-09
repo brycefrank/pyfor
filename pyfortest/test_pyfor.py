@@ -86,6 +86,13 @@ class LASCloudTestCase(unittest.TestCase):
         """Tests if a .las file succesfully loads when cloud.Cloud is called"""
         self.assertEqual(type(self.test_cloud), cloud.Cloud)
 
+        # If las or laz, check these columns
+        if self.test_cloud.extension == '.las' or self.test_cloud.extension == '.laz':
+            self.assertListEqual(list(self.test_cloud.data.points.columns.values),
+                                 ["x", "y", "z", "intensity", "return_num", "classification",
+                                  "flag_byte", "scan_angle_rank", "user_data", "pt_src_id"])
+
+
     def test_ply_load(self):
         cloud.Cloud(os.path.join(data_dir, "test.ply"))
 
@@ -368,51 +375,3 @@ class Zhang2003TestCase(unittest.TestCase):
 
     def test_bem(self):
         self.test_zhang_filter.bem(self.test_cloud)
-
-class LayerStackingTestCase(unittest.TestCase):
-    def setUp(self):
-        self.test_cloud = cloud.Cloud(test_las)
-        self.test_cloud.normalize(3)
-        # Shrink down to a very tiny, sparse cloud for testing individual functions
-        self.test_cloud.filter(min=405000, max=405000+25, dim="x")
-        self.test_cloud.filter(min=3276300, max=3276300+25, dim="y")
-        self.test_filter = detection.Ayrey2017(self.test_cloud)
-
-    def test_top_coordinates(self):
-        self.assertEqual(self.test_filter._top_coordinates.shape[1], 2)
-
-    def test_complete_layers(self):
-        self.test_filter._complete_layers
-
-    def test_get_layer(self):
-        self.test_filter._get_layer(1)
-
-    def test_get_non_veg_indices(self):
-        self.test_filter._get_non_veg_indices(1)
-
-    def test_remove_veg(self):
-        self.test_filter._remove_veg()
-
-    def test_cluster_layer(self):
-        self.test_filter._cluster_layer(1)
-
-    def test_buffer_cluster_layers(self):
-        self.test_filter._buffer_cluster_layers()
-
-    def test_layer_inds_between_pct(self):
-        self.test_filter._layer_inds_between_pct(70, 80)
-
-    def test_construct_layer_weights(self):
-        self.test_filter._construct_layer_weights()
-
-    def test_get_overlap_map(self):
-        self.test_filter.get_overlap_map()
-
-    def test_detect(self):
-        self.test_filter.detect()
-
-
-
-
-
-
