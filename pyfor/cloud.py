@@ -83,29 +83,15 @@ class Cloud:
     """
     def __init__(self, path):
 
-        # If read from file path
         if type(path) == str or type(path) == pathlib.PosixPath:
             self.filepath = path
             self.name = os.path.splitext(os.path.split(path)[1])[0]
             self.extension = os.path.splitext(path)[1]
 
+            # A path to las or laz file
             if self.extension.lower() == '.las' or self.extension.lower() == '.laz':
-                las = laspy.file.File(path)
-
-                # Iterate over point format specification
-                dims = ["x", "y", "z", "intensity", "return_num", "classification", "flag_byte", "scan_angle_rank",
-                        "user_data", "pt_src_id"]
-
-                points = {}
-                for dim in dims:
-                    try:
-                        points[dim] = eval('las.{}'.format(dim))
-                    except:
-                        pass
-                points = pd.DataFrame(points)
-
-                header = las.header
-                self.data = LASData(points, header)
+                las = laspy.file.File(self.filepath)
+                self._get_las_points(las)
 
             elif self.extension.lower() == '.ply':
                 ply = plyfile.PlyData.read(path)
@@ -130,12 +116,39 @@ class Cloud:
             elif self.data.header == 'ply_header':
                 self.data = PLYData(self.data.points, self.data.header)
 
+
+        # A laspy (or laxpy) File object
+        elif path.__class__.__bases__[0] == laspy.file.File or type(path) == laspy.file.File:
+            self._get_las_points(path)
+
         else:
             raise ValueError("Object type not supported, please input either a file path with a supported extension or a CloudData object.")
 
         # We're not sure if this is true or false yet
         self.normalized = None
         self.crs = None
+
+    def _get_las_points(self, las):
+        """
+        Reads points into pandas dataframe.
+
+        :param las: A laspy.file.File (or subclass) object.
+        """
+
+        # Iterate over point format specification
+        dims = ["x", "y", "z", "intensity", "return_num", "classification", "flag_byte", "scan_angle_rank",
+                "user_data", "pt_src_id"]
+
+        points = {}
+        for dim in dims:
+            try:
+                points[dim] = eval('las.{}'.format(dim))
+            except:
+                pass
+        points = pd.DataFrame(points)
+
+        header = las.header
+        self.data = LASData(points, header)
 
     def __str__(self):
         """
