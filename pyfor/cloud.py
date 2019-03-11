@@ -34,7 +34,7 @@ class CloudData:
         Append one CloudData object to another.
         :return:
         """
-        self.points = pd.concat([self.points, other.points])
+        self.points = pd.concat([self.points, other.points], sort=False)
         self._update()
 
 

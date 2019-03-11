@@ -54,30 +54,58 @@ class CloudDataFrame(gpd.GeoDataFrame):
         col_bbox = np.min(minx), np.min(miny), np.max(maxx), np.max(maxy)
         return col_bbox
 
-    def par_apply(self, func, *args):
+    def map_poly(self, las_path, polygon):
+        las = laxpy.IndexedLAS(las_path)
+        las.map_polygon(polygon)
+        print(len(las.points))
+        return las.points
+
+    def construct_tile(self, tile):
+        """
+        For a given tile, clips points from intersecting las files and loads as Cloud object.
+
+        :param tile:
+        :return:
+        """
+
+        # Get header of first tile
+        intersecting = self._get_parents(tile)['las_path']
+
+        for i, las_file in enumerate(self._get_parents(tile)['las_path']):
+            las = laxpy.IndexedLAS(las_file)
+            las.map_polygon(tile)
+
+            if i == 0:
+                out_pc = pyfor.cloud.Cloud(las)
+            else:
+                out_pc.data._append(pyfor.cloud.Cloud(las).data)
+            out_pc = out_pc.clip(tile)
+            out_pc.crs = pyproj.Proj(init='epsg:26910').srs
+            bounds = tile.bounds[0], tile.bounds[2], tile.bounds[1], tile.bounds[3]
+            out_pc.write('/home/bryce/Desktop/pyfor_test_data/{}.las'.format( i))
+            #out_pc.grid(30, force_extent=bounds).raster("max", "z").write('/home/bryce/Desktop/pyfor_test_data/{}_{}.tif'.format(tile, i))
+
+    def par_apply(self, func, indexed=True, *args):
         """
         Apply a function to the point cloud described by each tile in `self.tiles` such that the first argument of the
         function is a :class:`pyfor.cloud.Cloud` object. This is achieved via :class:`joblib.Parallel` and :func:`joblib.delayed`.
 
-        Interested in applying a function to buffered point clouds? That should be implemented with a retiling operation.
+        Interested in applying a function to buffered point clouds? That should be implemented with a retiling operation first
+        and then brought here.
 
         :param func: The user defined function, must accept as its first argument a :class`pyfor.cloud.Cloud` object.
         :param *args: Further arguments to `func`
         """
+        print("Constructing for {} tiles".format(len(self.tiles)))
         from joblib import Parallel, delayed
+        #output = Parallel(n_jobs=self.n_threads)(delayed(func)(plot_path, *args) for plot_path in self[column])
+        #return output
 
-        if buffer_distance > 0:
-            self._buffer(buffer_distance)
-            for i, geom in enumerate(self["bounding_box"]):
-                intersecting = self._get_intersecting(i)
-                clip_geom = self['buffered_bounding_box'].iloc[i]
-                parent_cloud = pyfor.cloud.Cloud(self["las_path"].iloc[i])
-                for path in intersecting["las_path"]:
-                    adjacent_cloud = pyfor.cloud.Cloud(path)
-                    parent_cloud.data._append(adjacent_cloud.data)
+        #[self.construct_tile(tile) for tile in self.tiles]
+        Parallel(n_jobs=self.n_threads)(delayed(self.construct_tile)(tile) for tile in self.tiles)
 
-        output = Parallel(n_jobs=self.n_threads)(delayed(func)(plot_path, *args) for plot_path in self[column])
-        return output
+        #if indexed: # Take advantage of indexed files
+        #    Parallel(n_jobs=self.n_threads)(delayed(self.map_poly)(las_path, tile) for tile in self.tiles for las_path in self._get_parents(tile)['las_path'])
 
     def retile_buffer(self):
         """
@@ -97,6 +125,25 @@ class CloudDataFrame(gpd.GeoDataFrame):
 
         retiler = Retiler(self)
         self.tiles = retiler.retile_raster(cell_size, original_tile_size, buffer)
+
+    def _index_las(self, las_path):
+        """
+        Checks if an equivalent `.lax` file exists. If so, creates a laxpy.IndexedLAS object, otherwise an error is thrown.
+        """
+        lax_path = las_path[:-1] + 'x'
+
+        if os.path.isfile(lax_path):
+            return laxpy.IndexedLAS(las_path)
+        else:
+            raise FileNotFoundError('There is no equivalent .lax file for this .las file.')
+
+    def create_lax(self, verbose = False):
+        """
+        Checks if matching .lax files are available for each file, if not, generates them.
+        """
+        for path in self['las_path']:
+            if not os.path.isfile(path[:-1] + 'x'):
+                laxpy.file.init_lax(path)
 
     def _get_bounding_box(self, las_path):
         """
@@ -139,45 +186,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
         plot = super(CloudDataFrame, self).plot(**kwargs)
         plot.figure.show()
 
-
-
-    def _retile2(self, width, height, dir):
-        """
-        Retiles the collection and writes the new tiles to the directory defined in `dir`.
-
-        :param width: The width of the new tiles.
-        :param height: The height of the new tiles
-        :param dir: The directory to write the new tiles.
-        """
-        # TODO Handle "edge" smaller tiles that straddle more than one larger tile
-        from shapely.geometry import MultiLineString
-        from shapely.ops import polygonize
-        import warnings
-
-        warnings.warn('_retile2 is in development, use at your own risk.', UserWarning)
-
-        colbbox = self.bounding_box
-
-        # TODO adding the constant makes it an inclusive stop, seems sloppy
-        x = np.arange(colbbox[0], colbbox[2] + width, width)
-        y = np.arange(colbbox[1], colbbox[3] + height, height)
-
-        hlines = [((x1, yi), (x2, yi)) for x1, x2 in zip(x[:-1], x[1:]) for yi in y]
-        vlines = [((xi, y1), (xi, y2)) for y1, y2 in zip(y[:-1], y[1:]) for xi in x]
-
-        grids = gpd.GeoSeries(polygonize(MultiLineString(hlines + vlines)))
-        return(grids)
-
-        ## Iterate through each original tile and find the intersecting new tile
-        ## TODO better way for this?
-        #for index, row in self.iterrows():
-        #    # Find the set of smaller tiles that intersect with the larger
-        #    # Load the larger cell into memory
-        #    original_cell = pyfor.cloud.Cloud(row['las_path'])
-        #    for i, new_cell in enumerate(grids[grids.intersects(row['bounding_box'])]):
-        #        pc = original_cell.clip(new_cell)
-        #        pc.write(os.path.join(dir, '{}_{}{}'.format(original_cell.name, i, original_cell.extension)))
-
     def create_index(self):
         """
         For each file in the collection, creates `.lax` files for spatial indexing using the default values.
@@ -185,16 +193,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
         for las_path in self['las_path']:
             laxpy.file.init_lax(las_path)
 
-    def _index_las(self, las_path):
-        """
-        Checks if an equivalent `.lax` file exists. If so, creates a laxpy.IndexedLAS object, otherwise an error is thrown.
-        """
-        lax_path = las_path[:-1] + 'x'
-
-        if os.path.isfile(lax_path):
-            return laxpy.IndexedLAS(las_path)
-        else:
-            raise FileNotFoundError('There is no equivalent .lax file for this .las file.')
 
     def _merge_parents(self, parent_list, func, args):
         """
