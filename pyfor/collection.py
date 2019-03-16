@@ -17,6 +17,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
         super(CloudDataFrame, self).__init__(*args, **kwargs)
         self.n_threads = 1
         self.tiles = None
+        self.crs = None
 
         if "bounding_box" in self.columns.values:
             self.set_geometry("bounding_box", inplace=True)
@@ -60,30 +61,25 @@ class CloudDataFrame(gpd.GeoDataFrame):
         print(len(las.points))
         return las.points
 
-    def construct_tile(self, tile):
+    def construct_tile(self, tile, func, indexed):
         """
         For a given tile, clips points from intersecting las files and loads as Cloud object.
-
-        :param tile:
-        :return:
         """
-
-        # Get header of first tile
-        intersecting = self._get_parents(tile)['las_path']
-
         for i, las_file in enumerate(self._get_parents(tile)['las_path']):
-            las = laxpy.IndexedLAS(las_file)
-            las.map_polygon(tile)
+            if indexed == True:
+                las = laxpy.IndexedLAS(las_file)
+                las.map_polygon(tile)
+            else:
+                las = las_file
 
             if i == 0:
                 out_pc = pyfor.cloud.Cloud(las)
             else:
                 out_pc.data._append(pyfor.cloud.Cloud(las).data)
-            out_pc = out_pc.clip(tile)
-            out_pc.crs = pyproj.Proj(init='epsg:26910').srs
-            bounds = tile.bounds[0], tile.bounds[2], tile.bounds[1], tile.bounds[3]
-            out_pc.write('/home/bryce/Desktop/pyfor_test_data/{}.las'.format( i))
-            #out_pc.grid(30, force_extent=bounds).raster("max", "z").write('/home/bryce/Desktop/pyfor_test_data/{}_{}.tif'.format(tile, i))
+
+        out_pc = out_pc.clip(tile)
+        out_pc.crs = self.crs
+        func(out_pc, tile)
 
     def par_apply(self, func, indexed=True, *args):
         """
@@ -96,16 +92,13 @@ class CloudDataFrame(gpd.GeoDataFrame):
         :param func: The user defined function, must accept as its first argument a :class`pyfor.cloud.Cloud` object.
         :param *args: Further arguments to `func`
         """
-        print("Constructing for {} tiles".format(len(self.tiles)))
         from joblib import Parallel, delayed
-        #output = Parallel(n_jobs=self.n_threads)(delayed(func)(plot_path, *args) for plot_path in self[column])
-        #return output
 
-        #[self.construct_tile(tile) for tile in self.tiles]
-        Parallel(n_jobs=self.n_threads)(delayed(self.construct_tile)(tile) for tile in self.tiles)
+        if indexed:
+            Parallel(n_jobs=self.n_threads)(delayed(self.construct_tile)(tile) for tile in self.tiles)
+        else:
+            Parallel(n_jobs=self.n_threads)(delayed(self.construct_tile)(tile) for tile in self.tiles)
 
-        #if indexed: # Take advantage of indexed files
-        #    Parallel(n_jobs=self.n_threads)(delayed(self.map_poly)(las_path, tile) for tile in self.tiles for las_path in self._get_parents(tile)['las_path'])
 
     def retile_buffer(self):
         """
@@ -136,14 +129,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
             return laxpy.IndexedLAS(las_path)
         else:
             raise FileNotFoundError('There is no equivalent .lax file for this .las file.')
-
-    def create_lax(self, verbose = False):
-        """
-        Checks if matching .lax files are available for each file, if not, generates them.
-        """
-        for path in self['las_path']:
-            if not os.path.isfile(path[:-1] + 'x'):
-                laxpy.file.init_lax(path)
 
     def _get_bounding_box(self, las_path):
         """
@@ -193,199 +178,16 @@ class CloudDataFrame(gpd.GeoDataFrame):
         for las_path in self['las_path']:
             laxpy.file.init_lax(las_path)
 
-
-    def _merge_parents(self, parent_list, func, args):
-        """
-        Used in retiling and project level clipping operations.
-
-        :return:
-        """
-
-        if len(parent_list) > 0:
-            first = pyfor.cloud.Cloud(parent_list[0])
-
-            for parent in parent_list[1:]:
-                pc = pyfor.cloud.Cloud(parent)
-                first.data._append(pc.data)
-
-            func(first, *args)
-
-    def _clip_no_index(self, polygons, func):
-        # TODO clean this function, parallelize, etc.
-        """
-        A very rough way to bypass indexing for clipping, currently in development
-        :param polygons:
-        :return:
-        """
-        from joblib import Parallel, delayed
-
-        # FIXME spatial join would be optimized
-        parents = {}
-        for i, poly in enumerate(polygons):
-            poly_parents = []
-            for ix, row in self.iterrows():
-                if row['bounding_box'].intersects(poly):
-                    poly_parents.append(row['las_path'])
-                parents[i] = poly_parents
-
-        Parallel(n_jobs=self.n_threads)(delayed(self._merge_parents)(parent_list, func, [polygons[poly_index], poly_index]) for poly_index, parent_list in parents.items())
-
-    def _clip_no_index1(self, polygons, func):
-        # TODO clean this function, parallelize, etc.
-        """
-        A very rough way to bypass indexing for clipping, currently in development
-        :param polygons:
-        :return:
-        """
-
-        # TODO make this block its own function
-        intersected_tiles = {}
-        for ix, row in self.iterrows():
-            tile_bbox, las_path = row['bounding_box'], row['las_path']
-            for poly in polygons:
-                if tile_bbox.intersects(poly):
-                    if las_path in intersected_tiles:
-                        intersected_tiles[las_path].append(poly)
-                    else:
-                        intersected_tiles[las_path] = [poly]
-
-
-        # TODO make this block its own function
-        parents = {}
-        for i, poly in enumerate(polygons):
-            poly_parents = []
-            for las_path, poly_list in intersected_tiles.items():
-                if poly in poly_list:
-                    poly_parents.append(las_path)
-                parents[i] = poly_parents
-
-        # For each polygon (i.e. each index in parents) construct the clipped point cloud.
-        # maybe this could just be done in the chunk above?
-        for poly_index, parent_list in parents.items():
-            poly = polygons[poly_index]
-
-            # Load first parent, append to this
-            first = pyfor.cloud.Cloud(parent_list[0])
-            first.normalize(3)
-
-            for parent in parent_list[1:]:
-                pc = pyfor.cloud.Cloud(parent)
-                pc.normalize(3)
-                first.data._append(pc.data)
-
-            first = first.clip(poly)
-
-            func(first)
-
-            first.crs = pyproj.Proj(init='epsg:26910').srs
-            p80 = first.grid(30).raster(lambda z_vec: np.percentile(z_vec, 80), "z")
-            p80.write('/home/bryce/Documents/Dissertation/Chapter3/data/grids/p80_debug/{}_new.tif'.format(poly_index))
-
-    def _write_clip(self, polygon, poly_index, out_path, parent_list):
-        """
-        Internal function that clips an indexed las and writes to file. This is used exclusively by `.clip` and is meant to be parallelized
-
-        :return:
-        """
-        indexed_parents = [self._index_las(parent_path) for parent_path in parent_list]
-        header = indexed_parents[0].header
-
-        parent_points = pd.concat([pd.DataFrame.from_records(parent.query_polygon(polygon, scale=True)) \
-                                   for parent in indexed_parents])
-
-        pc = pyfor.cloud.Cloud(pyfor.cloud.LASData(parent_points, header))
-
-        # TODO generalize to other filetypes
-        pc.write(out_path+'.las')
-
-    def clip(self, polygons, path, poly_names=None, verbose=False):
-        """
-        A collection-level clipping method. This function is meant for efficient querying across the study area using \
-        a set of polygons. This method requires the presence of `.lax` files in the collection directory. To generate \
-        these `.lax` files please use :meth:`.create_index` first. Each polygon will be clipped and written to the \
-        specified `path`.
-
-        :param polygons: Either a list of shapely polygons. If only one polygon is required wrap into a list before hand.
-        :param path: The output path of the clip.
-        :param poly_names: A list of polygon names to use when writing to file.
-        """
-        # TODO currently does not take advantage of multi-threading
-        # TODO also a bit long, may be best to break up
-        head, tail = os.path.split(path)
-
-        # Which tiles do I need to make an index for?
-        # It could  be the case that the input polys intersect with the same tile, but are checked out of order
-        # Building this dict requires a bit of overhead, but is more memory efficient in the worst case
-        from joblib import Parallel, delayed
-
-        intersected_tiles = {}
-        for ix, row in self.iterrows():
-            tile_bbox, las_path = row['bounding_box'], row['las_path']
-            for poly in polygons:
-                if tile_bbox.intersects(poly):
-                    if las_path in intersected_tiles:
-                        intersected_tiles[las_path].append(poly)
-                    else:
-                        intersected_tiles[las_path] = [poly]
-
-        # Which polygons have which parents?
-        parents = {}
-        for i, poly in enumerate(polygons):
-            poly_parents = []
-            for las_path, poly_list in intersected_tiles.items():
-                if poly in poly_list:
-                    poly_parents.append(las_path)
-                parents[i] = poly_parents
-
-        # For each polygon (i.e. each index in parents) construct the clipped point cloud.
-        # maybe this could just be done in the chunk above?
-        for poly_index, parent_list in parents.items():
-            poly = polygons[poly_index]
-            indexed_parents = [self._index_las(parent_path) for parent_path in parent_list]
-            header = indexed_parents[0].header
-            # TODO This is slow, but should be addressed upstream in laxpy, especially _scale_points
-
-
-            parent_points = pd.concat([pd.DataFrame.from_records(parent.query_polygon(poly, scale=True)) for parent in indexed_parents])
-
-            print('Clipping polygon {} of {}'.format(poly_index + 1, len(polygons)))
-            pc = pyfor.cloud.Cloud(pyfor.cloud.LASData(parent_points, header))
-
-            if poly_names is not None:
-                out_path = head + os.path.sep + str(poly_names[poly_index]) + '.las'
-            else:
-                out_path = head + os.path.sep + str(poly_index) + '.las'
-
-            print('Writing to {}'.format(out_path))
-            pc.write(out_path)
-
-        if poly_names is not None:
-            Parallel(n_jobs=self.n_threads)(delayed(self._write_clip)(polygons[poly_index], poly_index, head + os.path.sep + str(poly_names[poly_index]), parent_list) \
-                                            for poly_index, parent_list in parents.items())
-        else:
-            Parallel(n_jobs=self.n_threads)(delayed(self._write_clip)(polygons[poly_index], poly_index, head + os.path.sep + str(poly_index), parent_list) \
-                                            for poly_index, parent_list in parents.items())
+    def clip(self):
+        # TODO 0.3.3 clip was a mess, should be easy to leverage existing tiling functions for this.
+        pass
 
 
     def standard_metrics(self, heightbreak, index=None):
-        """
-        Retrieves a set of 29 standard metrics, including height percentiles and other summaries.
-
-        :param index: An iterable of indices to set as the output dataframe index.
-        :return: A pandas dataframe of standard metrics.
-        """
-        from pyfor.metrics import standard_metrics
-
-        get_metrics = lambda las_path: standard_metrics(pyfor.cloud.Cloud(las_path).data.points, heightbreak=heightbreak)
-        metrics = pd.concat(self.par_apply(get_metrics), sort=False)
-
-        if index:
-            metrics.index = index
-
-        return metrics
+        # TODO some metrics require special handling, may be best to relegate this to .metrics
+        pass
 
 class Retiler:
-
     def __init__(self, cdf):
         """
         Retiles a CloudDataFrame. Generally used to create tiles such that rasters generated from tiles are properly aligned.
