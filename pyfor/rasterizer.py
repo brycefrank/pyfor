@@ -9,7 +9,7 @@ class Grid:
     the Grid object we can derive other useful products, most importantly, :class:`.Raster` objects.
     """
 
-    def __init__(self, cloud, cell_size, force_extent = None):
+    def __init__(self, cloud, cell_size):
         """
         Upon initialization, the parent cloud object's :attr:`data.points` attribute is sorted into bins in place. \ The
         columns 'bins_x' and 'bins_y' are appended. Other useful information, such as the resolution, number of rows \
@@ -18,19 +18,12 @@ class Grid:
         :param cloud: The "parent" cloud object.
         :param cell_size: The size of the cell for sorting in the units of the input cloud object.
         """
-        # TODO remove warning in 0.3.3
-        import warnings
+
         self.cloud = cloud
         self.cell_size = cell_size
 
-        if force_extent:
-            min_x, max_x = force_extent[0], force_extent[1]
-            min_y, max_y = force_extent[2], force_extent[3]
-            self.forced_extent = force_extent
-
-        else:
-            min_x, max_x = self.cloud.data.min[0], self.cloud.data.max[0]
-            min_y, max_y = self.cloud.data.min[1], self.cloud.data.max[1]
+        min_x, max_x = self.cloud.data.min[0], self.cloud.data.max[0]
+        min_y, max_y = self.cloud.data.min[1], self.cloud.data.max[1]
 
         self.m = int(np.ceil((max_y - min_y) / cell_size))
         self.n = int(np.ceil((max_x - min_x) / cell_size))
@@ -43,11 +36,6 @@ class Grid:
 
         self.cloud.data.points["bins_x"] = bins_x
         self.cloud.data.points["bins_y"] = bins_y
-
-        if force_extent: # Remove points that are not in the bins defined by the forced extent
-            self.cloud.data.points = self.cloud.data.points[(self.cloud.data.points['bins_x'] >= 0) & (self.cloud.data.points['bins_x'] <= self.n - 1)]
-            self.cloud.data.points = self.cloud.data.points[(self.cloud.data.points['bins_y'] >= 0) & (self.cloud.data.points['bins_y'] <= self.m - 1)]
-            self.cloud.data._update()
 
         self.cells = self.cloud.data.points.groupby(['bins_x', 'bins_y'])
 
@@ -183,20 +171,13 @@ class ImportedGrid(Grid):
 
 class Raster:
     def __init__(self, array, grid):
-        self.array = array
+        from rasterio.transform import from_origin
+
         self.grid = grid
         self.cell_size = self.grid.cell_size
 
-    @property
-    def _affine(self):
-        """Constructs the affine transformation, used for plotting and exporting polygons and rasters."""
-        from rasterio.transform import from_origin
-        # FIXME broken for forced extent
-        if hasattr(self.grid, 'forced_extent'):
-            affine = from_origin(self.grid.forced_extent[0], self.grid.forced_extent[3], self.grid.cell_size, self.grid.cell_size)
-        else:
-            affine = from_origin(self.grid.cloud.data.min[0], self.grid.cloud.data.max[1], self.grid.cell_size, self.grid.cell_size)
-        return affine
+        self.array = array
+        self._affine = from_origin(self.grid.cloud.data.min[0], self.grid.cloud.data.max[1], self.grid.cell_size, self.grid.cell_size)
 
     @property
     def _convex_hull_mask(self):
@@ -220,6 +201,37 @@ class Raster:
             out_image = mask(rast, features, nodata = np.nan, crop=True)
 
         return out_image[0].data
+
+
+    def force_extent(self, bbox):
+        """
+        Sets `self._affine` and `self.array` to a forced bounding box. Useful for trimming edges off of rasters when
+        processing buffered tiles. This operation is done in place.
+
+        :param bbox: Coordinates of output raster as a tuple (min_x, max_x, min_y, max_y)
+        """
+
+        from rasterio.transform import from_origin
+
+        new_left, new_right, new_bot, new_top = bbox
+        m, n = self.array.shape[0], self.array.shape[1]
+
+        # Handle the affine transformation
+        new_affine = from_origin(new_left, new_top, self.grid.cell_size, self.grid.cell_size)
+
+        # Maniupulate the array to fit the new affine transformation
+        old_left, old_top = self.grid.cloud.data.min[0], self.grid.cloud.data.max[1]
+        old_right, old_bot = old_left + n * self.grid.cell_size, old_top - m * self.grid.cell_size
+
+        left_diff, top_diff, right_diff, bot_diff = old_left - new_left, old_top - new_top, old_right - new_right, old_bot - new_bot
+        left_diff, top_diff, right_diff, bot_diff = int(left_diff / self.cell_size), int(top_diff / self.cell_size), \
+                                                    int(right_diff / self.cell_size), int(bot_diff / self.cell_size)
+
+        if (left_diff > 0 ) or (top_diff < 0) or (right_diff < 0 ) or (bot_diff > 0):
+            raise ValueError('Raster force extent is an expansion rather than a contraction.')
+
+        self.array = self.array[abs(top_diff): m - abs(bot_diff), abs(left_diff): n - abs(right_diff)]
+        self._affine = new_affine
 
     def remove_sparse_cells(self, min_points):
         """

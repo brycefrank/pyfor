@@ -202,7 +202,7 @@ class Cloud:
 
         self.data.points = pd.merge(self.data.points, pre_merge, left_on = 'user_data', right_on = 'unique_id')
 
-    def grid(self, cell_size, force_extent = None):
+    def grid(self, cell_size):
         """
         Generates a :class:`.Grid` object for the parent object given a cell size. \
         See the documentation for :class:`.Grid` for more information.
@@ -210,7 +210,7 @@ class Cloud:
         :param cell_size: The resolution of the plot in the same units as the input file.
         :return: A :class:`.Grid` object.
         """
-        return rasterizer.Grid(self, cell_size, force_extent)
+        return rasterizer.Grid(self, cell_size)
 
     def plot(self, cell_size = 1, cmap = "viridis", return_plot = False, block=False):
         """
@@ -401,7 +401,6 @@ class Cloud:
         hull = ConvexHull(self.data.points[["x", "y"]].values)
 
         return Polygon(hull.points[hull.vertices])
-
 
     def write(self, path):
         """

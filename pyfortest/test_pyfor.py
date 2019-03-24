@@ -314,7 +314,13 @@ class CollectionTestCase(unittest.TestCase):
 
     def test_par_apply(self):
         self.test_col.par_apply(test_func)
-        self.test_col.par_apply(test_func, buffer_distance=2)
+
+    def test_map_polygon(self):
+        pass
+
+class RetileTestCase(unittest.TestCase):
+    def setUp(self):
+        pass
 
 class GISExportTestCase(unittest.TestCase):
     def setUp(self):

@@ -61,14 +61,18 @@ class CloudDataFrame(gpd.GeoDataFrame):
         print(len(las.points))
         return las.points
 
-    def construct_tile(self, tile, func, indexed):
+    def construct_tile(self, func, tile, indexed):
         """
         For a given tile, clips points from intersecting las files and loads as Cloud object.
         """
         for i, las_file in enumerate(self._get_parents(tile)['las_path']):
             if indexed == True:
-                las = laxpy.IndexedLAS(las_file)
-                las.map_polygon(tile)
+                try:
+                    las = laxpy.IndexedLAS(las_file)
+                    las.map_polygon(tile)
+                except ValueError as e:
+                    print(e)
+                    return 0
             else:
                 las = las_file
 
@@ -77,11 +81,14 @@ class CloudDataFrame(gpd.GeoDataFrame):
             else:
                 out_pc.data._append(pyfor.cloud.Cloud(las).data)
 
-        out_pc = out_pc.clip(tile)
-        out_pc.crs = self.crs
-        func(out_pc, tile)
+        try:
+            out_pc = out_pc.clip(tile)
+            out_pc.crs = self.crs
+            func(out_pc, tile)
+        except KeyError:
+            pass
 
-    def par_apply(self, func, indexed=True, *args):
+    def par_apply(self, func, indexed=True, by_file=False, *args):
         """
         Apply a function to the point cloud described by each tile in `self.tiles` such that the first argument of the
         function is a :class:`pyfor.cloud.Cloud` object. This is achieved via :class:`joblib.Parallel` and :func:`joblib.delayed`.
@@ -92,12 +99,13 @@ class CloudDataFrame(gpd.GeoDataFrame):
         :param func: The user defined function, must accept as its first argument a :class`pyfor.cloud.Cloud` object.
         :param *args: Further arguments to `func`
         """
+
         from joblib import Parallel, delayed
 
-        if indexed:
-            Parallel(n_jobs=self.n_threads)(delayed(self.construct_tile)(tile) for tile in self.tiles)
+        if by_file:
+            return Parallel(n_jobs=self.n_threads)(delayed(func)(las_path) for las_path in self['las_path'])
         else:
-            Parallel(n_jobs=self.n_threads)(delayed(self.construct_tile)(tile) for tile in self.tiles)
+            Parallel(n_jobs=self.n_threads)(delayed(self.construct_tile)(func, tile, indexed) for tile in self.tiles)
 
 
     def retile_buffer(self):
@@ -184,8 +192,20 @@ class CloudDataFrame(gpd.GeoDataFrame):
 
 
     def standard_metrics(self, heightbreak, index=None):
-        # TODO some metrics require special handling, may be best to relegate this to .metrics
-        pass
+        """
+        Retrieves a set of 29 standard metrics, including height percentiles and other summaries.
+        :param index: An iterable of indices to set as the output dataframe index.
+        :return: A pandas dataframe of standard metrics.
+        """
+        from pyfor.metrics import standard_metrics
+        get_metrics = lambda las_path: standard_metrics(pyfor.cloud.Cloud(las_path).data.points,
+                                                        heightbreak=heightbreak)
+        metrics = pd.concat(self.par_apply(get_metrics, by_file=True), sort=False)
+
+        if index:
+            metrics.index = index
+
+        return metrics
 
 class Retiler:
     def __init__(self, cdf):
