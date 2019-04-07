@@ -58,7 +58,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
     def map_poly(self, las_path, polygon):
         las = laxpy.IndexedLAS(las_path)
         las.map_polygon(polygon)
-        print(len(las.points))
         return las.points
 
     def construct_tile(self, func, tile, indexed):
@@ -85,21 +84,25 @@ class CloudDataFrame(gpd.GeoDataFrame):
             out_pc = out_pc.clip(tile)
             out_pc.crs = self.crs
             func(out_pc, tile)
-        except KeyError:
+        except KeyError as e:
+            print(e)
             pass
 
-    def par_apply(self, func, indexed=True, by_file=False, *args):
+    def par_apply(self, func, indexed=True, by_file=False):
         """
-        Apply a function to the point cloud described by each tile in `self.tiles` such that the first argument of the
-        function is a :class:`pyfor.cloud.Cloud` object. This is achieved via :class:`joblib.Parallel` and :func:`joblib.delayed`.
+        Apply a function to the collection in parallel. There are two major use cases:
 
-        Interested in applying a function to buffered point clouds? That should be implemented with a retiling operation first
-        and then brought here.
+        1. **Buffered Tiles**: In the case of buffered tiles, the `func` argument should contain a function that takes
+        two arguments, the first being an aggregated `cloud.Cloud` object, and the second being a `shapely.geometry.Polygon`
+        that describes the bounding box of the aggregated tile. For this case, set `by_file` to False (this is the default).
 
-        :param func: The user defined function, must accept as its first argument a :class`pyfor.cloud.Cloud` object.
-        :param *args: Further arguments to `func`
+        2. **Raw Files**: In the case of processing raw tiles in parallel, the `func` argument should contain a function
+        that takes only one argument, the absolute file path to the tile at that iteration. For this case, set `by_file` to True.
+
+        :param func: A function used to process each tile or raw file (see above).
+        :param indexed: Determines if `.lax` files will be leveraged to reduce memory consumption.
+        :param by_file: Forces `par_apply` to operate on raw files only if True.
         """
-
         from joblib import Parallel, delayed
 
         if by_file:
@@ -126,6 +129,9 @@ class CloudDataFrame(gpd.GeoDataFrame):
 
         retiler = Retiler(self)
         self.tiles = retiler.retile_raster(cell_size, original_tile_size, buffer)
+
+    def reset_tiles(self):
+        self._build_polygons()
 
     def _index_las(self, las_path):
         """
@@ -155,7 +161,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
         from shapely.geometry import Polygon
 
         bboxes = [self._get_bounding_box(las_path) for las_path in self['las_path']]
-        print(bboxes)
         self["bounding_box"] = [Polygon(((bbox[0], bbox[2]), (bbox[1], bbox[2]),
                                            (bbox[1], bbox[3]), (bbox[0], bbox[3]))) for bbox in bboxes]
         self.set_geometry("bounding_box", inplace = True)
@@ -183,6 +188,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
         """
         For each file in the collection, creates `.lax` files for spatial indexing using the default values.
         """
+
         for las_path in self['las_path']:
             laxpy.file.init_lax(las_path)
 

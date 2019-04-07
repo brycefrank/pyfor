@@ -6,12 +6,10 @@ import unittest
 import pandas as pd
 import laspy
 import os
-import matplotlib.figure
 import numpy as np
 import geopandas as gpd
 import plyfile
 import matplotlib.pyplot as plt
-import rasterio
 
 """
 Many of these tests currently just run the function. If anyone has any more rigorous ideas, please feel free to \
@@ -305,18 +303,6 @@ class CrownSegmentsTestCase(unittest.TestCase):
     #    plt.close()
 
 
-def test_func(las_path):
-    cloud.Cloud(las_path)
-
-class CollectionTestCase(unittest.TestCase):
-    def setUp(self):
-        self.test_col = collection.from_dir(os.path.join(data_dir, 'mock_collection'))
-
-    def test_par_apply(self):
-        self.test_col.par_apply(test_func)
-
-    def test_map_polygon(self):
-        pass
 
 class RetileTestCase(unittest.TestCase):
     def setUp(self):
