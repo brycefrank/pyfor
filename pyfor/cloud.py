@@ -16,12 +16,8 @@ class CloudData:
     def __init__(self, points, header):
         self.header = header
         self.points = points
-        # TODO are these even used?
-        self.x = self.points["x"]
-        self.y = self.points["y"]
-        self.z = self.points["z"]
-        self.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
-        self.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
+        self.min = [np.min(self.points["x"]), np.min(self.points["y"]), np.min(self.points["z"])]
+        self.max = [np.max(self.points["x"]), np.max(self.points["y"]), np.max(self.points["z"])]
         self.count = np.alen(self.points)
 
     def _update(self):
@@ -222,24 +218,7 @@ class Cloud:
         :param return_plot: If true, returns a matplotlib plt object.
         :return: If return_plot == True, returns matplotlib plt object. Not yet implemented.
         """
-
-        # FIXME this can break other functions and pipelines if a user plots in between calls, it resets the parent cloud bins_x/bins_y column
-        # it may be best to return an entirely new data structure
         rasterizer.Grid(self, cell_size).raster("max", "z").plot(cmap, block = block, return_plot = return_plot)
-
-    def iplot3d(self, max_points=30000, point_size=0.5, dim="z", colorscale="Viridis"):
-        """
-        Plots the 3d point cloud in a compatible version for Jupyter notebooks using Plotly as a backend. If \
-        max_points exceeds 30,000, the point cloud is downsampled using a uniform random distribution by default. \
-        This can be changed using the `max_points` argument.
-
-        :param max_points: The maximum number of points to render.
-        :param point_size: The point size of the rendered point cloud.
-        :param dim: The dimension on which to color (i.e. "z", "intensity", etc.)
-        :param colorscale: The Plotly colorscale with which to color.
-        """
-
-        plot._iplot3d(self.data, max_points, point_size, dim, colorscale)
 
     def plot3d(self, dim = "z", point_size=1, cmap='Spectral_r', max_points=5e5, n_bin=8, plot_trees=False):
         """
