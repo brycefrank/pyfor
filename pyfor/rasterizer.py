@@ -210,27 +210,58 @@ class Raster:
 
         :param bbox: Coordinates of output raster as a tuple (min_x, max_x, min_y, max_y)
         """
-
         from rasterio.transform import from_origin
-
         new_left, new_right, new_bot, new_top = bbox
-        m, n = self.array.shape[0], self.array.shape[1]
 
-        # Handle the affine transformation
-        new_affine = from_origin(new_left, new_top, self.grid.cell_size, self.grid.cell_size)
+        m, n = self.array.shape[0], self.array.shape[1]
 
         # Maniupulate the array to fit the new affine transformation
         old_left, old_top = self.grid.cloud.data.min[0], self.grid.cloud.data.max[1]
         old_right, old_bot = old_left + n * self.grid.cell_size, old_top - m * self.grid.cell_size
 
         left_diff, top_diff, right_diff, bot_diff = old_left - new_left, old_top - new_top, old_right - new_right, old_bot - new_bot
-        left_diff, top_diff, right_diff, bot_diff = int(left_diff / self.cell_size), int(top_diff / self.cell_size), \
-                                                    int(right_diff / self.cell_size), int(bot_diff / self.cell_size)
+        left_diff, top_diff, right_diff, bot_diff = int(np.rint(left_diff / self.cell_size)), int(np.rint(top_diff / self.cell_size)), \
+                                                    int(np.rint(right_diff / self.cell_size)), int(np.rint(bot_diff / self.cell_size))
 
-        if (left_diff > 0 ) or (top_diff < 0) or (right_diff < 0 ) or (bot_diff > 0):
-            raise ValueError('Raster force extent is an expansion rather than a contraction.')
+        if (left_diff > 0 ):
+            # bbox left is outside of raster left, we need to add columns of nans
+            emptys = np.empty((m, left_diff))
+            emptys[:] = np.nan
+            self.array = np.insert(self.array, 0, emptys, axis=1)
+        elif left_diff !=0:
+            # bbox left is inside of raster left, we need to remove left diff columns
+            self.array = self.array[:, abs(left_diff):]
 
-        self.array = self.array[abs(top_diff): m - abs(bot_diff), abs(left_diff): n - abs(right_diff)]
+        if (top_diff < 0):
+            # bbox top is outside of raster top, we need to add rows of nans
+            emptys = np.empty((abs(top_diff), self.array.shape[1]))
+            emptys[:] = np.nan
+            self.array = np.insert(self.array, 0, emptys, axis=0)
+        elif top_diff !=0:
+            # bbox top is inside of raster top, we need to remove rows of nans
+            self.array = self.array[abs(top_diff):, :]
+
+        if (right_diff < 0):
+            # bbox right is outside of raster right, we need to add columns of nans
+            emptys = np.empty((self.array.shape[0], abs(right_diff)))
+            emptys[:] = np.nan
+            self.array = np.append(self.array, emptys, axis=1)
+        elif right_diff !=0:
+            # bbox right is inside raster right, we need to remove columns
+            self.array = self.array[:, :-right_diff]
+
+        if (bot_diff > 0):
+            # bbox bottom is outside of raster bottom, we need to add columns
+            emptys = np.empty((n, abs(bot_diff)))
+            emptys[:] = np.nan
+            self.array = np.append(self.array, emptys, axis=0)
+        elif bot_diff != 0:
+            # bbox bottom is inside of raster bottom, we need to remove columns
+            self.array = self.array[:bot_diff,:]
+
+
+        # Handle the affine transformation
+        new_affine = from_origin(old_left + ((-left_diff) * self.grid.cell_size), old_top - (top_diff * self.grid.cell_size), self.grid.cell_size, self.grid.cell_size)
         self._affine = new_affine
 
     def remove_sparse_cells(self, min_points):

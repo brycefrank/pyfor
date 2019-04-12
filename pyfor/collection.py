@@ -133,6 +133,17 @@ class CloudDataFrame(gpd.GeoDataFrame):
     def reset_tiles(self):
         self._build_polygons()
 
+    @property
+    def indexed(self):
+        """
+        :return: True if all files have an equivalent `.lax` present, otherwise False.
+        """
+        for path in self['las_path'].values:
+            lax_path = path[:-1] + 'x'
+            if not os.path.isfile(lax_path):
+                return False
+        return True
+
     def _index_las(self, las_path):
         """
         Checks if an equivalent `.lax` file exists. If so, creates a laxpy.IndexedLAS object, otherwise an error is thrown.
