@@ -44,7 +44,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
 
         return(cdf)
 
-    def set_index(self, *args):
+    def _set_index(self, *args):
         return CloudDataFrame(super(CloudDataFrame, self).set_index(*args))
 
     @property
@@ -202,11 +202,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
 
         for las_path in self['las_path']:
             laxpy.file.init_lax(las_path)
-
-    def clip(self):
-        # TODO 0.3.3 clip was a mess, should be easy to leverage existing tiling functions for this.
-        pass
-
 
     def standard_metrics(self, heightbreak, index=None):
         """

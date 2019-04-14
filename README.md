@@ -4,7 +4,7 @@
 
 **pyfor** is a Python package that assists in the processing of point cloud data in the context of forest inventory. 
 This includes manipulation of point data, support for analysis, and a
-memory optimized API for managing large collections of point cloud data.
+memory optimized API for managing large collections of tiles.
 
 ## Release Status
 
