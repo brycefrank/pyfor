@@ -47,10 +47,6 @@ class CollectionTestCase(unittest.TestCase):
         self.test_col.retile_raster(10, 50, buffer=10)
         self.test_col.reset_tiles()
 
-    def test_retile_buffer(self):
-        self.test_col.retile_buffer()
-        self.test_col.reset_tiles()
-
     def test_par_apply_buff_index(self):
         # Buffered with index
         self.test_col.retile_raster(10, 50, buffer=10)
