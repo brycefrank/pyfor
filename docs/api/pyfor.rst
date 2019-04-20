@@ -9,10 +9,9 @@ Submodules
    pyfor.clip
    pyfor.cloud
    pyfor.collection
-   pyfor.detection
    pyfor.gisexport
    pyfor.ground_filter
-   pyfor.plot
+   pyfor.metrics
    pyfor.rasterizer
    pyfor.voxelizer
 

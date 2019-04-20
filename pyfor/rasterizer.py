@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from pyfor import gisexport
-from pyfor import plot
 
 class Grid:
     """The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. From \
@@ -19,26 +18,25 @@ class Grid:
         :param cloud: The "parent" cloud object.
         :param cell_size: The size of the cell for sorting in the units of the input cloud object.
         """
-        # TODO remove warning in 0.3.3
-        import warnings
+
         self.cloud = cloud
         self.cell_size = cell_size
 
         min_x, max_x = self.cloud.data.min[0], self.cloud.data.max[0]
         min_y, max_y = self.cloud.data.min[1], self.cloud.data.max[1]
 
-        self.m = int(np.floor((max_y - min_y) / cell_size))
-        self.n = int(np.floor((max_x - min_x) / cell_size))
+        self.m = int(np.ceil((max_y - min_y) / cell_size))
+        self.n = int(np.ceil((max_x - min_x) / cell_size))
 
-        # Create bins
-        x_edges = np.linspace(min_x, max_x, self.n)
-        y_edges = np.linspace(min_y, max_y, self.m)
+        x_edges = np.arange(min_x, max_x, self.cell_size)
+        y_edges = np.arange(min_y, max_y, self.cell_size)
 
         bins_x = np.searchsorted(x_edges,   self.cloud.data.points['x'], side='right') - 1
-        bins_y = np.searchsorted(-y_edges, -self.cloud.data.points['y'], side='right', sorter=(-y_edges).argsort())-1
+        bins_y = np.searchsorted(-y_edges, -self.cloud.data.points['y'], side='left', sorter=(-y_edges).argsort())
 
         self.cloud.data.points["bins_x"] = bins_x
         self.cloud.data.points["bins_y"] = bins_y
+
         self.cells = self.cloud.data.points.groupby(['bins_x', 'bins_y'])
 
     def _update(self):
@@ -56,7 +54,6 @@ class Grid:
         :param dim: A dimension to calculate on.
         :return: A 2D numpy array where the value of each cell is the result of the passed function.
         """
-
         bin_summary = self.cells.agg({dim: func}, **kwargs).reset_index()
         array = np.full((self.m, self.n), np.nan)
         array[bin_summary["bins_y"], bin_summary["bins_x"]] = bin_summary[dim]
@@ -174,16 +171,13 @@ class ImportedGrid(Grid):
 
 class Raster:
     def __init__(self, array, grid):
-        self.array = array
+        from rasterio.transform import from_origin
+
         self.grid = grid
         self.cell_size = self.grid.cell_size
 
-    @property
-    def _affine(self):
-        """Constructs the affine transformation, used for plotting and exporting polygons and rasters."""
-        from rasterio.transform import from_origin
-        affine = from_origin(self.grid.cloud.data.min[0], self.grid.cloud.data.max[1], self.grid.cell_size, self.grid.cell_size)
-        return affine
+        self.array = array
+        self._affine = from_origin(self.grid.cloud.data.min[0], self.grid.cloud.data.max[1], self.grid.cell_size, self.grid.cell_size)
 
     @property
     def _convex_hull_mask(self):
@@ -208,12 +202,85 @@ class Raster:
 
         return out_image[0].data
 
+
+    def force_extent(self, bbox):
+        """
+        Sets `self._affine` and `self.array` to a forced bounding box. Useful for trimming edges off of rasters when
+        processing buffered tiles. This operation is done in place.
+
+        :param bbox: Coordinates of output raster as a tuple (min_x, max_x, min_y, max_y)
+        """
+        from rasterio.transform import from_origin
+        new_left, new_right, new_bot, new_top = bbox
+
+        m, n = self.array.shape[0], self.array.shape[1]
+
+        # Maniupulate the array to fit the new affine transformation
+        old_left, old_top = self.grid.cloud.data.min[0], self.grid.cloud.data.max[1]
+        old_right, old_bot = old_left + n * self.grid.cell_size, old_top - m * self.grid.cell_size
+
+        left_diff, top_diff, right_diff, bot_diff = old_left - new_left, old_top - new_top, old_right - new_right, old_bot - new_bot
+        left_diff, top_diff, right_diff, bot_diff = int(np.rint(left_diff / self.cell_size)), int(np.rint(top_diff / self.cell_size)), \
+                                                    int(np.rint(right_diff / self.cell_size)), int(np.rint(bot_diff / self.cell_size))
+
+        if (left_diff > 0 ):
+            # bbox left is outside of raster left, we need to add columns of nans
+            emptys = np.empty((m, left_diff))
+            emptys[:] = np.nan
+            self.array = np.insert(self.array, 0, emptys, axis=1)
+        elif left_diff !=0:
+            # bbox left is inside of raster left, we need to remove left diff columns
+            self.array = self.array[:, abs(left_diff):]
+
+        if (top_diff < 0):
+            # bbox top is outside of raster top, we need to add rows of nans
+            emptys = np.empty((abs(top_diff), self.array.shape[1]))
+            emptys[:] = np.nan
+            self.array = np.insert(self.array, 0, emptys, axis=0)
+        elif top_diff !=0:
+            # bbox top is inside of raster top, we need to remove rows of nans
+            self.array = self.array[abs(top_diff):, :]
+
+        if (right_diff < 0):
+            # bbox right is outside of raster right, we need to add columns of nans
+            emptys = np.empty((self.array.shape[0], abs(right_diff)))
+            emptys[:] = np.nan
+            self.array = np.append(self.array, emptys, axis=1)
+        elif right_diff !=0:
+            # bbox right is inside raster right, we need to remove columns
+            self.array = self.array[:, :-right_diff]
+
+        if (bot_diff > 0):
+            # bbox bottom is outside of raster bottom, we need to add columns
+            emptys = np.empty((n, abs(bot_diff)))
+            emptys[:] = np.nan
+            self.array = np.append(self.array, emptys, axis=0)
+        elif bot_diff != 0:
+            # bbox bottom is inside of raster bottom, we need to remove columns
+            self.array = self.array[:bot_diff,:]
+
+
+        # Handle the affine transformation
+        new_affine = from_origin(old_left + ((-left_diff) * self.grid.cell_size), old_top - (top_diff * self.grid.cell_size), self.grid.cell_size, self.grid.cell_size)
+        self._affine = new_affine
+
+    def remove_sparse_cells(self, min_points):
+        """
+        Sets sparse cells, i.e. those that have < `min_points` to nan **in place**. This improves the reliability of edge-cells
+        when handling multiple tile rasters.
+
+        :return:
+        """
+
+        with np.errstate(invalid='ignore'):
+            count_array = self.grid.raster("count", "z").array
+            self.array[count_array < min_points] = np.nan
+
     def plot(self, cmap = "viridis", block = False, return_plot = False):
         """
         Default plotting method for the Raster object.
-
-        :param block: An optional parameter, mostly for debugging purposes.
         """
+
         #TODO implement cmap
         fig = plt.figure()
         ax = fig.add_subplot(111)
@@ -235,12 +302,6 @@ class Raster:
         else:
             plt.show(block = block)
 
-    def iplot3d(self, colorscale="Viridis"):
-        """
-        Plots the raster as a surface using Plotly.
-        """
-        plot._iplot3d_surface(self.array, colorscale)
-
     def local_maxima(self, min_distance=2, threshold_abs=2, as_coordinates=False):
         """
         Returns a new Raster object with tops detected using a local maxima filtering method. See
@@ -256,7 +317,6 @@ class Raster:
         from scipy.ndimage import label
         tops = peak_local_max(self.array, indices=False, min_distance=min_distance, threshold_abs=threshold_abs)
         tops = label(tops)[0]
-
 
         # TODO Had to take out corner filter to remove duplicate tops.
         tops_raster = DetectedTops(tops, self.grid, self)
@@ -308,8 +368,7 @@ class Raster:
             from warnings import warn
             warn('No coordinate reference system defined. Please set the .crs attribute of the Cloud object.', UserWarning)
 
-        gisexport.array_to_raster(self.array, self.cell_size, self.grid.cloud.data.min[0], self.grid.cloud.data.max[1],
-                                      self.grid.cloud.crs, path)
+        gisexport.array_to_raster(self.array, self._affine, self.grid.cloud.crs, path)
 
 
 class DetectedTops(Raster):

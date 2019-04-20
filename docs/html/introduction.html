@@ -1,0 +1,270 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Introduction &mdash; pyfor  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="prev" title="pyfor: point cloud analysis for forest inventory" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pyfor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#about-the-author">About the Author</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#package-history">Package History</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#philosophy">Philosophy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics/index.html">The Basics</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyfor</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Introduction</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/introduction.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>Welcome to pyfor, a Python module intended for processing large aerial LiDAR (and phodar)
+acquisitions for the use of large-scale forest inventories. This document serves as a general
+introduction to the package, its philosophy, and a bit of its history. If you would like to
+jump straight into analysis, feel free to skip over this “soft” document.</p>
+<div class="section" id="about-the-author">
+<h2>About the Author<a class="headerlink" href="#about-the-author" title="Permalink to this headline">¶</a></h2>
+<p>I am Bryce Frank, a PhD student at Oregon State University. I work for the Forest Measurements
+and Biometrics Lab, which is run under the guidance of Dr. Temesgen Hailemariam.
+Our work focuses on developing statistical methodology for the analysis of forest resources
+at multiple scales. Some of the lab members work on small-scale issues, like biomass
+and taper modeling. My work, along with others, is focused on producing reliable
+estimates of forest attributes for large scale forest assessment.</p>
+</div>
+<div class="section" id="package-history">
+<h2>Package History<a class="headerlink" href="#package-history" title="Permalink to this headline">¶</a></h2>
+<p>I originally began pyfor as a class project to explore the use of object oriented programming
+in GIS. At the time, I had been programming in Python for about two years, but still struggled
+with some concepts like Classes, object inheritance, and the like. pyfor was a way for me to
+finally learn some of those concepts and implement them in an analysis environment that was
+useful for me. Around the Spring of 2017, I released the package on GitHub. At the time,
+the package was in very rough condition, was very inefficient, and only did a few rudimentary
+tasks.</p>
+<p>Around the Spring of 2018 I found a bit of time to rework the package from the ground up.
+I was deeply inspired by the lidR package, which I used extensively for a few months.
+I think lidR is a great tool, and pyfor is really just an alternative way of doing many of
+the same tasks. However, I prefer to work in Python for many reasons, and I also prefer to
+do my own scripting, so lidR fell by the wayside for me for those reasons. Rather than keep
+my scripts locked up somewhere, I modified the early version of pyfor with my newest
+attempts. I am also indebted to Bob McGaughey’s FUSION, which paved the way in terms
+of these sorts of software, and is still my go-to software package for production work.</p>
+</div>
+<div class="section" id="philosophy">
+<h2>Philosophy<a class="headerlink" href="#philosophy" title="Permalink to this headline">¶</a></h2>
+<p>pyfor started as a means for me to learn OOP, and I think the framework is a very natural
+way to work with LiDAR data from an interactive standpoint. In this way, pyfor is a bit
+of a niche tool that is really designed more for research - being able to quickly change
+parameters on the fly and get quick visual feedback about the results is important for tree
+detection and other tasks. Because I am a bit selfish when I develop, and I am mainly a
+researcher at this point in my career, this will be the main objective for the package
+for the time being.</p>
+<p>However, I completely understand the desire for performant processing. As the structure of
+pyfor beings to solidify, more of my time can be spent on diagnosing performance issues
+within the package and optimizing toward that end. I think Python, specifically scientific
+Python packages, will continue to be a solid platform for developing reasonably performant
+code, if done well. It is unlikely that pyfor will achieve speeds equivalent to raw C++ or
+FORTRAN code, but I do not think it will be orders of magnitude away if functions are
+developed in a way that leverages some of these faster packages. This also comes with
+the benefit of increased maintainability, clarity and usability - goals that I feel
+are often overlooked in the GIS world.</p>
+</div>
+<div class="section" id="acknowledgements">
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>
+<p>A special thank you to Drs. Ben Weinstein, Francisco Mauro-Gutiérrez and Temesgen Hailemariam
+for their continued support and advice as this project matures.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="pyfor: point cloud analysis for forest inventory" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Bryce Frank
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

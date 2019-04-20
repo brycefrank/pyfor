@@ -8,7 +8,6 @@ import pandas as pd
 import matplotlib.cm as cm
 from pyfor import rasterizer
 from pyfor import clip
-from pyfor import plot
 import pathlib
 import warnings
 
@@ -17,17 +16,13 @@ class CloudData:
     def __init__(self, points, header):
         self.header = header
         self.points = points
-        # TODO are these even used?
-        self.x = self.points["x"]
-        self.y = self.points["y"]
-        self.z = self.points["z"]
-        self.min = [np.min(self.x), np.min(self.y), np.min(self.z)]
-        self.max = [np.max(self.x), np.max(self.y), np.max(self.z)]
+        self.min = [np.min(self.points["x"]), np.min(self.points["y"]), np.min(self.points["z"])]
+        self.max = [np.max(self.points["x"]), np.max(self.points["y"]), np.max(self.points["z"])]
         self.count = np.alen(self.points)
 
     def _update(self):
-        self.min = [np.min(self.points['x']), np.min(self.points['y']), np.min(self.points['z'])]
-        self.max = [np.max(self.points['x']), np.max(self.points['y']), np.max(self.points['z'])]
+        self.min = [np.min(self.points["x"]), np.min(self.points["y"]), np.min(self.points["z"])]
+        self.max = [np.max(self.points["x"]), np.max(self.points["y"]), np.max(self.points["z"])]
         self.count = np.alen(self.points)
 
     def _append(self, other):
@@ -35,7 +30,7 @@ class CloudData:
         Append one CloudData object to another.
         :return:
         """
-        self.points = pd.concat([self.points, other.points])
+        self.points = pd.concat([self.points, other.points], sort=False)
         self._update()
 
 
@@ -84,30 +79,15 @@ class Cloud:
     """
     def __init__(self, path):
 
-        # If read from file path
         if type(path) == str or type(path) == pathlib.PosixPath:
             self.filepath = path
             self.name = os.path.splitext(os.path.split(path)[1])[0]
             self.extension = os.path.splitext(path)[1]
 
+            # A path to las or laz file
             if self.extension.lower() == '.las' or self.extension.lower() == '.laz':
-                las = laspy.file.File(path)
-
-                # Iterate over point format specification
-                dims = ["x", "y", "z", "intensity", "return_num", "classification", "flag_byte", "scan_angle_rank",
-                        "user_data", "pt_src_id"]
-
-                points = {}
-                for dim in dims:
-                    try:
-                        print(dim)
-                        points[dim] = eval('las.{}'.format(dim))
-                    except:
-                        pass
-                points = pd.DataFrame(points)
-
-                header = las.header
-                self.data = LASData(points, header)
+                las = laspy.file.File(self.filepath)
+                self._get_las_points(las)
 
             elif self.extension.lower() == '.ply':
                 ply = plyfile.PlyData.read(path)
@@ -132,12 +112,39 @@ class Cloud:
             elif self.data.header == 'ply_header':
                 self.data = PLYData(self.data.points, self.data.header)
 
+
+        # A laspy (or laxpy) File object
+        elif path.__class__.__bases__[0] == laspy.file.File or type(path) == laspy.file.File:
+            self._get_las_points(path)
+
         else:
             raise ValueError("Object type not supported, please input either a file path with a supported extension or a CloudData object.")
 
         # We're not sure if this is true or false yet
         self.normalized = None
         self.crs = None
+
+    def _get_las_points(self, las):
+        """
+        Reads points into pandas dataframe.
+
+        :param las: A laspy.file.File (or subclass) object.
+        """
+
+        # Iterate over point format specification
+        dims = ["x", "y", "z", "intensity", "return_num", "classification", "flag_byte", "scan_angle_rank",
+                "user_data", "pt_src_id"]
+
+        points = {}
+        for dim in dims:
+            try:
+                points[dim] = eval('las.{}'.format(dim))
+            except:
+                pass
+        points = pd.DataFrame(points)
+
+        header = las.header
+        self.data = LASData(points, header)
 
     def __str__(self):
         """
@@ -211,24 +218,7 @@ class Cloud:
         :param return_plot: If true, returns a matplotlib plt object.
         :return: If return_plot == True, returns matplotlib plt object. Not yet implemented.
         """
-
-        # FIXME this can break other functions and pipelines if a user plots in between calls, it resets the parent cloud bins_x/bins_y column
-        # it may be best to return an entirely new data structure
         rasterizer.Grid(self, cell_size).raster("max", "z").plot(cmap, block = block, return_plot = return_plot)
-
-    def iplot3d(self, max_points=30000, point_size=0.5, dim="z", colorscale="Viridis"):
-        """
-        Plots the 3d point cloud in a compatible version for Jupyter notebooks using Plotly as a backend. If \
-        max_points exceeds 30,000, the point cloud is downsampled using a uniform random distribution by default. \
-        This can be changed using the `max_points` argument.
-
-        :param max_points: The maximum number of points to render.
-        :param point_size: The point size of the rendered point cloud.
-        :param dim: The dimension on which to color (i.e. "z", "intensity", etc.)
-        :param colorscale: The Plotly colorscale with which to color.
-        """
-
-        plot._iplot3d(self.data, max_points, point_size, dim, colorscale)
 
     def plot3d(self, dim = "z", point_size=1, cmap='Spectral_r', max_points=5e5, n_bin=8, plot_trees=False):
         """
@@ -390,7 +380,6 @@ class Cloud:
         hull = ConvexHull(self.data.points[["x", "y"]].values)
 
         return Polygon(hull.points[hull.vertices])
-
 
     def write(self, path):
         """

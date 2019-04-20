@@ -1,3 +1,34 @@
+# 0.3.4
+
+Updates between February 10, 2019 and April 20, 2019. 
+
+In addition to the new features below, the documentation and user manual
+have been unified into one website located [here](http://brycefrank.com/pyfor/html/index.html). The `pyfor_manual` 
+repository will be deprecated and deleted in the coming months. All of its content has been transferred to the new
+website.
+
+## Raster
+1. Added `force_extent` function that allows users to force a specific output bounding box for a raster.
+
+## CloudDataFrame
+1. Revamped `par_apply` to take advantage of `.lax` files if they are present.
+2. Added a `.crs` attribute to set a collection level coordinate reference system.
+
+## Retile
+1. Added a class (`collection.Retiler`) and wrapper functions (`CloudDataFrame.retile_raster`, etc) to assist in setting
+tile extents for a particular collection. This allows for flexibility when outputting summary rasters and reduced clutter
+in the `CloudDataFrame` class.
+
+## Other
+1. Removed `plotly` dependencies and functions. These were not essential to the package, and created a lot of dependencies
+for the conda installation that are no longer present.
+2. Removed `detection` module. This module was poorly maintained and implemented an unoptimized tree detection function.
+In the coming months I plan to start implementing detection tasks again, but in a more optimized way.
+
+## Testing Suite
+1. Added tests for new `par_apply`
+2. Testing for commonly loaded `.las` and `.laz` fields.
+
 # 0.3.3
 
 Updates between December 4th, 2018 and February 10, 2019. `0.3.3` implements a few structural changes and bug fixes.

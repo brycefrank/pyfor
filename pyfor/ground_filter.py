@@ -19,8 +19,6 @@ class Zhang2003:
         :param cell_size: The cell_size used to construct the array for filtering, also the output size of the BEM.
         :param interp_method: The interpolation method used to fill nan values in the final BEM.
         """
-        import warnings
-        warnings.warn('Instantiation of ground filters will no longer require a Cloud argument in 0.3.3, it will instead be moved to _filter, bem, ground points and normalize', DeprecationWarning)
         self.n_windows = n_windows
         self.dh_max = dh_max
         self.dh_0 = dh_0
@@ -113,17 +111,17 @@ class Zhang2003:
         B = np.where(flag == 0, A, np.nan)
         return B
 
-    def bem(self, pc):
+    def bem(self, cloud):
         """
         Retrieve the bare earth model (BEM). Unlike :class:`.KrausPfeifer1998`, the cell size is defined upon \
         initialization of the filter, and thus it is not required to retrieve the bare earth model from the filter.
 
-        :param pc: A Cloud object.
+        :param cloud: A Cloud object.
         :return: A :class:`.Raster` object that represents the bare earth model.
         """
         from scipy.interpolate import griddata
         from pyfor.rasterizer import Raster
-        grid = pc.grid(self.cell_size)
+        grid = cloud.grid(self.cell_size)
         B = self._filter(grid)
 
         # Interpolate on our newly found ground cells
@@ -134,18 +132,18 @@ class Zhang2003:
 
         return(Raster(dem_array, grid))
 
-    def normalize(self, pc):
+    def normalize(self, cloud):
         """
         Normalizes the original point cloud **in place**. This creates a BEM as an intermediate product, please see
         `.bem()` to return this directly.
 
         :param cell_size: The cell_size for the intermediate BEM. Values from 0.5 to 3 are common.
         """
-        bem = self.bem(pc)
-        pc.data._update()
+        bem = self.bem(cloud)
+        cloud.data._update()
         df = pd.DataFrame(bem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
-        df = pc.data.points.reset_index().merge(df, how="left").set_index('index')
-        pc.data.points['z'] = df['z'] - df['val']
+        df = cloud.data.points.reset_index().merge(df, how="left").set_index('index')
+        cloud.data.points['z'] = (df['z'] - df['val']).values # For some reason .values is needed to prevent an error
 
 class KrausPfeifer1998:
     """
@@ -164,8 +162,6 @@ class KrausPfeifer1998:
         :param w: The window width from g up considered for weighting.
         :param iterations: The number of iterations, i.e. the number of surfaces constructed.
         """
-        import warnings
-        warnings.warn('Instantiation of ground filters will no longer require a Cloud argument in 0.3.3, it will instead be moved to _filter, bem, ground points and normalize', DeprecationWarning)
         self.cell_size = cell_size
         self.a = a
         self.b = b
@@ -224,41 +220,41 @@ class KrausPfeifer1998:
 
         return grid.cloud.data.points.loc[ix[ground_bins]]
 
-    def ground_points(self, pc):
+    def ground_points(self, cloud):
         """
         Returns a new `Cloud` object that only contains the ground points.
         :return:
         """
         from pyfor.cloud import CloudData, Cloud
-        grid = pc.grid(self.cell_size)
+        grid = cloud.grid(self.cell_size)
         ground = self._filter(grid)
         return Cloud(CloudData(ground, grid.cloud.data.header))
 
-    def bem(self, pc, cell_size):
+    def bem(self, cloud, cell_size):
         """
         Retrieve the bare earth model (BEM).
 
-        :param pc: A cloud object.
+        :param cloud: A cloud object.
         :param cell_size: The cell size of the BEM, this is independent of the cell size used in the intermediate \
         surfaces.
         :return: A `Raster` object that represents the bare earth model.
         """
-        ground_cloud = self.ground_points(pc)
+        ground_cloud = self.ground_points(cloud)
         return ground_cloud.grid(cell_size).interpolate(np.min, "z")
 
 
-    def classify(self, pc, ground_int=2):
+    def classify(self, cloud, ground_int=2):
         """
         Sets the classification of the original input cloud points to ground (default 2 as per las specification). This
         performs the adjustment of the input `Cloud` object **in place**. Only implemented for `.las` files.
 
-        :param pc: A cloud object.
+        :param cloud: A cloud object.
         :param ground_int: The integer to set classified points to, the default is 2 in the las specification for ground
         points.
         """
 
-        if pc.extension == '.las':
-            grid = pc.grid(self.cell_size)
+        if cloud.extension == '.las':
+            grid = cloud.grid(self.cell_size)
             self._filter(grid)
             grid.cloud.data.points["classification"][grid.cloud.data.points['v_i'] <= self.g + self.w] = ground_int
         else:

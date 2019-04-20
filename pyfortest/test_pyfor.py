@@ -6,12 +6,10 @@ import unittest
 import pandas as pd
 import laspy
 import os
-import matplotlib.figure
 import numpy as np
 import geopandas as gpd
 import plyfile
 import matplotlib.pyplot as plt
-import rasterio
 
 """
 Many of these tests currently just run the function. If anyone has any more rigorous ideas, please feel free to \
@@ -86,6 +84,13 @@ class LASCloudTestCase(unittest.TestCase):
         """Tests if a .las file succesfully loads when cloud.Cloud is called"""
         self.assertEqual(type(self.test_cloud), cloud.Cloud)
 
+        # If las or laz, check these columns
+        if self.test_cloud.extension == '.las' or self.test_cloud.extension == '.laz':
+            self.assertListEqual(list(self.test_cloud.data.points.columns.values),
+                                 ["x", "y", "z", "intensity", "return_num", "classification",
+                                  "flag_byte", "scan_angle_rank", "user_data", "pt_src_id"])
+
+
     def test_ply_load(self):
         cloud.Cloud(os.path.join(data_dir, "test.ply"))
 
@@ -119,13 +124,13 @@ class LASCloudTestCase(unittest.TestCase):
         self.test_cloud.plot()
         plt.close()
 
-    def test_plot3d(self):
-        self.test_cloud.plot3d()
-        self.test_cloud.plot3d(dim='user_data')
+    #def test_plot3d(self):
+    #    self.test_cloud.plot3d()
+    #    self.test_cloud.plot3d(dim='user_data')
 
     def test_normalize(self):
         test_cloud = cloud.Cloud(test_las)
-        test_cloud.normalize(6)
+        test_cloud.normalize(3)
         self.assertLess(test_cloud.data.max[2], 65)
 
     def test_chm(self):
@@ -154,8 +159,8 @@ class PLYCloudTestCase(LASCloudTestCase):
     def setUp(self):
         self.test_cloud = cloud.Cloud(test_ply)
 
-    def test_plot3d(self):
-        self.test_cloud.plot3d()
+    #def test_plot3d(self):
+    #    self.test_cloud.plot3d()
 
     def test_convex_hull(self):
         # Fixme, too few points to do this test correctly
@@ -171,26 +176,19 @@ class GridTestCase(unittest.TestCase):
         self.test_grid = cloud.Cloud(test_las).grid(1)
 
     def test_m(self):
-        self.assertEqual(199, self.test_grid.m)
+        self.assertEqual(200, self.test_grid.m)
 
     def test_n(self):
-        self.assertEqual(199, self.test_grid.n)
+        self.assertEqual(200, self.test_grid.n)
 
     def test_cloud(self):
         self.assertEqual(type(self.test_grid.cloud), cloud.Cloud)
 
-    def test_cell_size(self):
-        self.assertEqual(self.test_grid.cell_size, 1)
-
-    #FIXME broken on travis - need to reupdate environment to debug in local
-    #def test_empty_cells(self):
-    #    np.set_printoptions(threshold=np.nan)
-    #    empty = self.test_grid.empty_cells
-    #    # Check that there are the correct number
-    #    self.assertEqual(empty.shape, (687, 2))
-
-    #    # Check the 18th empty is the same as expected
-     #   np.testing.assert_array_equal(empty[18,:], np.array([3, 56]))
+    def test_empty_cells(self):
+        np.set_printoptions(threshold=np.nan)
+        empty = self.test_grid.empty_cells
+        # Check that there are the correct number
+        self.assertEqual(empty.shape, (291, 2))
 
     def test_raster(self):
         raster = self.test_grid.raster("max", "z")
@@ -240,14 +238,6 @@ class RasterTestCase(unittest.TestCase):
         self.assertEqual(affine[5], 3276499.9900000002)
         self.assertEqual(affine[6], 0)
 
-    # TODO fix for 0.3.1
-    #def test_watershed_seg(self):
-    #    tops = self.test_raster.watershed_seg()
-    #    self.assertEqual(type(tops), gpd.GeoDataFrame)
-    #    self.assertEqual(len(tops), 289)
-    #    self.test_raster.watershed_seg(classify=True)
-    #    self.test_raster.watershed_seg(plot=True)
-
     def test_array_oriented_correctly(self):
         """
         Tests if the index [0,0] refers to the top left corner of the image. That is, if I were to plot the raster
@@ -261,12 +251,6 @@ class RasterTestCase(unittest.TestCase):
     def test_plot(self):
         self.test_raster.plot()
         self.test_raster.plot(return_plot=True)
-
-    def test_local_maxima(self):
-        self.test_raster.local_maxima()
-
-    def test_local_maxima_oriented_correctly(self):
-        self.assertEqual(self.test_raster.local_maxima().array[15,3], 39)
 
     def test_write_with_crs(self):
         self.test_raster.write("./temp_tif.tif")
@@ -282,39 +266,33 @@ class RasterTestCase(unittest.TestCase):
     #        self.assertEqual(array[0, 0], 45.11)
 
 
-class DetectedTopsTestCase(unittest.TestCase):
+#class DetectedTopsTestCase(unittest.TestCase):
+#    def setUp(self):
+#        self.test_detect = cloud.Cloud(test_las).chm(1, interp_method='nearest').local_maxima()
+#
+#    def test_plot(self):
+#        self.test_detect.plot()
+#        plt.close()
+#
+#class CrownSegmentsTestCase(unittest.TestCase):
+#    def setUp(self):
+#        self.test_segs = cloud.Cloud(test_las).chm(1, interp_method='nearest').watershed_seg()
+#
+#    def test_projected_segments(self):
+#        # Test with affine (i.e. crs)
+#        first_coord = list(self.test_segs.segments.iloc[0]['geometry'].exterior.coords)[0]
+#        self.assertEqual(first_coord, (405000.01, 3276499.99))
+#
+   # TODO Broken on travis
+   #def test_plot(self):
+   #    self.test_segs.plot()
+   #    plt.close()
+
+
+
+class RetileTestCase(unittest.TestCase):
     def setUp(self):
-        self.test_detect = cloud.Cloud(test_las).chm(1, interp_method='nearest').local_maxima()
-
-    def test_plot(self):
-        self.test_detect.plot()
-        plt.close()
-
-class CrownSegmentsTestCase(unittest.TestCase):
-    def setUp(self):
-        self.test_segs = cloud.Cloud(test_las).chm(1, interp_method='nearest').watershed_seg()
-
-    def test_projected_segments(self):
-        # Test with affine (i.e. crs)
-        first_coord = list(self.test_segs.segments.iloc[0]['geometry'].exterior.coords)[0]
-        self.assertEqual(first_coord, (405000.01, 3276499.99))
-
-    # TODO Broken on travis
-    #def test_plot(self):
-    #    self.test_segs.plot()
-    #    plt.close()
-
-
-def test_func(las_path):
-    cloud.Cloud(las_path)
-
-class CollectionTestCase(unittest.TestCase):
-    def setUp(self):
-        self.test_col = collection.from_dir(os.path.join(data_dir, 'mock_collection'))
-
-    def test_par_apply(self):
-        self.test_col.par_apply(test_func)
-        self.test_col.par_apply(test_func, buffer_distance=2)
+        pass
 
 class GISExportTestCase(unittest.TestCase):
     def setUp(self):
@@ -333,9 +311,8 @@ class GISExportTestCase(unittest.TestCase):
     def test_array_to_raster_writes(self):
         test_grid = cloud.Cloud(test_las).grid(1)
         test_grid.cloud.crs = proj4str
-        array = test_grid.raster("max", "z").array
-        gisexport.array_to_raster(array, 0.5, test_grid.cloud.data.header.min[0], test_grid.cloud.data.header.max[1],
-                                  proj4str, os.path.join(data_dir, "temp_raster_array.tif"))
+        test_raster = test_grid.raster("max", "z")
+        gisexport.array_to_raster(test_raster.array, test_raster._affine, proj4str, os.path.join(data_dir, "temp_raster_array.tif"))
         self.assertTrue(os.path.exists(os.path.join(data_dir, "temp_raster_array.tif")))
         os.remove(os.path.join(data_dir, "temp_raster_array.tif"))
 
@@ -376,51 +353,3 @@ class Zhang2003TestCase(unittest.TestCase):
 
     def test_bem(self):
         self.test_zhang_filter.bem(self.test_cloud)
-
-class LayerStackingTestCase(unittest.TestCase):
-    def setUp(self):
-        self.test_cloud = cloud.Cloud(test_las)
-        self.test_cloud.normalize(3)
-        # Shrink down to a very tiny, sparse cloud for testing individual functions
-        self.test_cloud.filter(min=405000, max=405000+25, dim="x")
-        self.test_cloud.filter(min=3276300, max=3276300+25, dim="y")
-        self.test_filter = detection.Ayrey2017(self.test_cloud)
-
-    def test_top_coordinates(self):
-        self.assertEqual(self.test_filter._top_coordinates.shape[1], 2)
-
-    def test_complete_layers(self):
-        self.test_filter._complete_layers
-
-    def test_get_layer(self):
-        self.test_filter._get_layer(1)
-
-    def test_get_non_veg_indices(self):
-        self.test_filter._get_non_veg_indices(1)
-
-    def test_remove_veg(self):
-        self.test_filter._remove_veg()
-
-    def test_cluster_layer(self):
-        self.test_filter._cluster_layer(1)
-
-    def test_buffer_cluster_layers(self):
-        self.test_filter._buffer_cluster_layers()
-
-    def test_layer_inds_between_pct(self):
-        self.test_filter._layer_inds_between_pct(70, 80)
-
-    def test_construct_layer_weights(self):
-        self.test_filter._construct_layer_weights()
-
-    def test_get_overlap_map(self):
-        self.test_filter.get_overlap_map()
-
-    def test_detect(self):
-        self.test_filter.detect()
-
-
-
-
-
-

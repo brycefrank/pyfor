@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyfor package &mdash; pyfor 0.3.2 documentation</title>
+  <title>pyfor package &mdash; pyfor  documentation</title>
   
 
   
@@ -17,32 +17,34 @@
   
 
   
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -56,7 +58,7 @@
             
             
               <div class="version">
-                0.3
+                0.3.4
               </div>
             
           
@@ -81,15 +83,10 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.clip.html">pyfor.clip module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.cloud.html">pyfor.cloud module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.collection.html">pyfor.collection module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.detection.html">pyfor.detection module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.gisexport.html">pyfor.gisexport module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.ground_filter.html">pyfor.ground_filter module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.plot.html">pyfor.plot module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.rasterizer.html">pyfor.rasterizer module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.voxelizer.html">pyfor.voxelizer module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../topics/index.html">The Basics</a></li>
 </ul>
 
             
@@ -158,19 +155,1129 @@
 <h1>pyfor package<a class="headerlink" href="#pyfor-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.clip.html">pyfor.clip module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.cloud.html">pyfor.cloud module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.collection.html">pyfor.collection module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.detection.html">pyfor.detection module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.gisexport.html">pyfor.gisexport module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.ground_filter.html">pyfor.ground_filter module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.plot.html">pyfor.plot module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.rasterizer.html">pyfor.rasterizer module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pyfor.voxelizer.html">pyfor.voxelizer module</a></li>
-</ul>
 </div>
+<div class="section" id="module-pyfor.clip">
+<span id="pyfor-clip-module"></span><h2>pyfor.clip module<a class="headerlink" href="#module-pyfor.clip" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="pyfor.clip.poly_clip">
+<code class="descclassname">pyfor.clip.</code><code class="descname">poly_clip</code><span class="sig-paren">(</span><em>points</em>, <em>poly</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip.poly_clip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the indices of <cite>points</cite> that are within a given polygon. This differs from <a class="reference internal" href="#pyfor.clip.ray_trace" title="pyfor.clip.ray_trace"><code class="xref py py-func docutils literal notranslate"><span class="pre">ray_trace()</span></code></a>     in that it enforces a small “pre-clip” optimization by first clipping to the polygon bounding box. This function     is directly called by <a class="reference internal" href="#pyfor.cloud.Cloud.clip" title="pyfor.cloud.Cloud.clip"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Cloud.clip()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cloud</strong> – A cloud object.</li>
+<li><strong>poly</strong> – A shapely Polygon, with coordinates in the same CRS as the point cloud.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A 1D numpy array of indices corresponding to points within the given polygon.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfor.clip.ray_trace">
+<code class="descclassname">pyfor.clip.</code><code class="descname">ray_trace</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>poly</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip.ray_trace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines for some set of x and y coordinates, which of those coordinates is within <cite>poly</cite>. Ray trace is     generally called as an internal function, see <a class="reference internal" href="#pyfor.clip.poly_clip" title="pyfor.clip.poly_clip"><code class="xref py py-func docutils literal notranslate"><span class="pre">poly_clip()</span></code></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> – A 1D numpy array of x coordinates.</li>
+<li><strong>y</strong> – A 1D numpy array of y coordinates.</li>
+<li><strong>poly</strong> – The coordinates of a polygon as a numpy array (i.e. from geo_json[‘coordinates’]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A 1D boolean numpy array, true values are those points that are within <cite>poly</cite>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfor.clip.square_clip">
+<code class="descclassname">pyfor.clip.</code><code class="descname">square_clip</code><span class="sig-paren">(</span><em>points</em>, <em>bounds</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip.square_clip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clips a square from a tuple describing the position of the square.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>points</strong> – A N x 2 numpy array of x and y coordinates, where x is in column 0</li>
+<li><strong>bounds</strong> – A tuple of length 4, min y and max y coordinates of the square.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A boolean mask, true is within the square, false is outside of the square.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyfor.cloud">
+<span id="pyfor-cloud-module"></span><h2>pyfor.cloud module<a class="headerlink" href="#module-pyfor.cloud" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pyfor.cloud.Cloud">
+<em class="property">class </em><code class="descclassname">pyfor.cloud.</code><code class="descname">Cloud</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The cloud object is an API for interacting with <cite>.las</cite>, <cite>.laz</cite>, and <cite>.ply</cite> files in memory, and is generally     the starting point for any analysis with <cite>pyfor</cite>. For a more qualitative assessment of getting started with     <a class="reference internal" href="#pyfor.cloud.Cloud" title="pyfor.cloud.Cloud"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cloud</span></code></a> please see the     <a class="reference external" href="https://github.com/brycefrank/pyfor_manual/blob/master/notebooks/2-ImportsExports.ipynb">user manual</a>.</p>
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.chm">
+<code class="descname">chm</code><span class="sig-paren">(</span><em>cell_size</em>, <em>interp_method=None</em>, <em>pit_filter=None</em>, <em>kernel_size=3</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.chm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a <a class="reference internal" href="#pyfor.rasterizer.Raster" title="pyfor.rasterizer.Raster"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raster</span></code></a> object of the maximum z value in each cell, with optional interpolation          (i.e. nan-filling) and pit filter parameters. Currently, only a median pit filter is implemented.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cell_size</strong> – The cell size for the returned raster in the same units as the parent Cloud or las file.</li>
+<li><strong>interp_method</strong> – The interpolation method as a string to fill in NA values of the produced canopy height          model, one of either “nearest”, “cubic”, or “linear”. This is an argument to <cite>scipy.interpolate.griddata</cite>.</li>
+<li><strong>pit_filter</strong> – If “median” passes a median filter over the produced canopy height model.</li>
+<li><strong>kernel_size</strong> – The kernel size of the median filter, must be an odd integer.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A <a class="reference internal" href="#pyfor.rasterizer.Raster" title="pyfor.rasterizer.Raster"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raster</span></code></a> object of the canopy height model.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.clip">
+<code class="descname">clip</code><span class="sig-paren">(</span><em>polygon</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.clip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clips the point cloud to the provided shapely polygon using a ray casting algorithm. This method calls         <a class="reference internal" href="#pyfor.clip.poly_clip" title="pyfor.clip.poly_clip"><code class="xref py py-func docutils literal notranslate"><span class="pre">clip.poly_clip()</span></code></a> directly. This returns a new <a class="reference internal" href="#pyfor.cloud.Cloud" title="pyfor.cloud.Cloud"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cloud</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>polygon</strong> – A <code class="xref py py-class docutils literal notranslate"><span class="pre">shapely.geometry.Polygon</span></code> in the same CRS as the Cloud.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A new :class:.`Cloud` object clipped to the provided polygon.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyfor.cloud.Cloud.convex_hull">
+<code class="descname">convex_hull</code><a class="headerlink" href="#pyfor.cloud.Cloud.convex_hull" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the convex hull of the cloud projected onto a 2d plane, a wrapper for          <code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.spatial.ConvexHull()</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A <code class="xref py py-class docutils literal notranslate"><span class="pre">shapely.geometry.Polygon</span></code> of the convex hull.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.filter">
+<code class="descname">filter</code><span class="sig-paren">(</span><em>min</em>, <em>max</em>, <em>dim</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters a cloud object for a given dimension <strong>in place</strong>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>min</strong> – Minimum dimension to retain.</li>
+<li><strong>max</strong> – Maximum dimension to retain.</li>
+<li><strong>dim</strong> – The dimension of interest as a string. For example “z”. This corresponds to a column label in         <code class="xref py py-attr docutils literal notranslate"><span class="pre">self.data.points</span></code>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.grid">
+<code class="descname">grid</code><span class="sig-paren">(</span><em>cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a <a class="reference internal" href="#pyfor.rasterizer.Grid" title="pyfor.rasterizer.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a> object for the parent object given a cell size.         See the documentation for <a class="reference internal" href="#pyfor.rasterizer.Grid" title="pyfor.rasterizer.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a> for more information.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cell_size</strong> – The resolution of the plot in the same units as the input file.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A <a class="reference internal" href="#pyfor.rasterizer.Grid" title="pyfor.rasterizer.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a> object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.normalize">
+<code class="descname">normalize</code><span class="sig-paren">(</span><em>cell_size</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize the cloud using the default Zhang et al. (2003) progressive morphological ground filter. Please see         the documentation in <a class="reference internal" href="#pyfor.ground_filter.Zhang2003" title="pyfor.ground_filter.Zhang2003"><code class="xref py py-class docutils literal notranslate"><span class="pre">ground_filter.Zhang2003</span></code></a> for more information and keyword argument definitions.         If you want to use a pre-computed DEM to normalize, please see <a class="reference internal" href="#pyfor.cloud.Cloud.subtract" title="pyfor.cloud.Cloud.subtract"><code class="xref py py-meth docutils literal notranslate"><span class="pre">subtract()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>cell_size=1</em>, <em>cmap='viridis'</em>, <em>return_plot=False</em>, <em>block=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots a basic canopy height model of the Cloud object. This is mainly a convenience function for         <code class="xref py py-class docutils literal notranslate"><span class="pre">Raster.plot</span></code>. More robust methods exist for dealing with canopy height models. Please see the         <a class="reference external" href="https://github.com/brycefrank/pyfor_manual/blob/master/notebooks/3-CanopyHeightModel.ipynb">user manual</a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>clip_size</strong> – The resolution of the plot in the same units as the input file.</li>
+<li><strong>return_plot</strong> – If true, returns a matplotlib plt object.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">If return_plot == True, returns matplotlib plt object. Not yet implemented.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.plot3d">
+<code class="descname">plot3d</code><span class="sig-paren">(</span><em>dim='z'</em>, <em>point_size=1</em>, <em>cmap='Spectral_r'</em>, <em>max_points=500000.0</em>, <em>n_bin=8</em>, <em>plot_trees=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.plot3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the three dimensional point cloud using a <cite>Qt</cite> backend. By default, if the point cloud exceeds 5e5          points, then it is downsampled using a uniform random distribution. This is for performance purposes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>point_size</strong> – The size of the rendered points.</li>
+<li><strong>dim</strong> – The dimension upon which to color (i.e. “z”, “intensity”, etc.)</li>
+<li><strong>cmap</strong> – The matplotlib color map used to color the height distribution.</li>
+<li><strong>max_points</strong> – The maximum number of points to render.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.subtract">
+<code class="descname">subtract</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.subtract" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize using a pre-computed raster file, i.e. “subtract” the heights from the input raster <strong>in place</strong>.         This assumes the raster and the point cloud are in the same coordinate system.
+:param path: The path to the raster file, must be in a format supported by <cite>rasterio</cite>.
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.cloud.Cloud.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write to file. The precise mechanisms of this writing will depend on the file input type. For <cite>.las</cite> files         this will be handled by <a class="reference internal" href="#pyfor.cloud.LASData.write" title="pyfor.cloud.LASData.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">LASData.write()</span></code></a>, for <cite>.ply</cite> files this will be handled by <a class="reference internal" href="#pyfor.cloud.PLYData.write" title="pyfor.cloud.PLYData.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PLYData.write()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> – The path of the output file.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyfor.cloud.CloudData">
+<em class="property">class </em><code class="descclassname">pyfor.cloud.</code><code class="descname">CloudData</code><span class="sig-paren">(</span><em>points</em>, <em>header</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.CloudData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="pyfor.cloud.CloudData.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>points</em>, <em>header</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.CloudData.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyfor.cloud.LASData">
+<em class="property">class </em><code class="descclassname">pyfor.cloud.</code><code class="descname">LASData</code><span class="sig-paren">(</span><em>points</em>, <em>header</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.LASData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyfor.cloud.CloudData" title="pyfor.cloud.CloudData"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyfor.cloud.CloudData</span></code></a></p>
+<dl class="method">
+<dt id="pyfor.cloud.LASData.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.LASData.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the object to file. This is a wrapper for <code class="xref py py-func docutils literal notranslate"><span class="pre">laspy.file.File()</span></code></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> – The path of the ouput file.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyfor.cloud.PLYData">
+<em class="property">class </em><code class="descclassname">pyfor.cloud.</code><code class="descname">PLYData</code><span class="sig-paren">(</span><em>points</em>, <em>header</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.PLYData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyfor.cloud.CloudData" title="pyfor.cloud.CloudData"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyfor.cloud.CloudData</span></code></a></p>
+<dl class="method">
+<dt id="pyfor.cloud.PLYData.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.PLYData.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the object to file. This is a wrapper for <code class="xref py py-func docutils literal notranslate"><span class="pre">plyfile.PlyData.write()</span></code></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> – The path of the ouput file.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyfor.collection">
+<span id="pyfor-collection-module"></span><h2>pyfor.collection module<a class="headerlink" href="#module-pyfor.collection" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pyfor.collection.CloudDataFrame">
+<em class="property">class </em><code class="descclassname">pyfor.collection.</code><code class="descname">CloudDataFrame</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">geopandas.geodataframe.GeoDataFrame</span></code></p>
+<p>Implements a data frame structure for processing and managing multiple <a class="reference internal" href="#pyfor.cloud.Cloud" title="pyfor.cloud.Cloud"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cloud</span></code></a> objects. It is recommended     to initialize using the <a class="reference internal" href="#pyfor.collection.from_dir" title="pyfor.collection.from_dir"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_dir()</span></code></a> function.</p>
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyfor.collection.CloudDataFrame.bounding_box">
+<code class="descname">bounding_box</code><a class="headerlink" href="#pyfor.collection.CloudDataFrame.bounding_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the bounding box for the entire collection. As a tuple (minx, miny, maxx, maxy).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.create_index">
+<code class="descname">create_index</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.create_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each file in the collection, creates <cite>.lax</cite> files for spatial indexing using the default values.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyfor.collection.CloudDataFrame.indexed">
+<code class="descname">indexed</code><a class="headerlink" href="#pyfor.collection.CloudDataFrame.indexed" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if all files have an equivalent <cite>.lax</cite> present, otherwise False.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.map_poly">
+<code class="descname">map_poly</code><span class="sig-paren">(</span><em>las_path</em>, <em>polygon</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.map_poly" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.par_apply">
+<code class="descname">par_apply</code><span class="sig-paren">(</span><em>func</em>, <em>indexed=True</em>, <em>by_file=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.par_apply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply a function to the collection in parallel. There are two major use cases:</p>
+<p>1. <strong>Buffered Tiles</strong>: In the case of buffered tiles, the <cite>func</cite> argument should contain a function that takes
+two arguments, the first being an aggregated <cite>cloud.Cloud</cite> object, and the second being a <cite>shapely.geometry.Polygon</cite>
+that describes the bounding box of the aggregated tile. For this case, set <cite>by_file</cite> to False (this is the default).</p>
+<p>2. <strong>Raw Files</strong>: In the case of processing raw tiles in parallel, the <cite>func</cite> argument should contain a function
+that takes only one argument, the absolute file path to the tile at that iteration. For this case, set <cite>by_file</cite> to True.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>func</strong> – A function used to process each tile or raw file (see above).</li>
+<li><strong>indexed</strong> – Determines if <cite>.lax</cite> files will be leveraged to reduce memory consumption.</li>
+<li><strong>by_file</strong> – Forces <cite>par_apply</cite> to operate on raw files only if True.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the bounding boxes of the Cloud objects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>**kwargs</strong> – <p>Keyword arguments to <code class="xref py py-meth docutils literal notranslate"><span class="pre">geopandas.GeoDataFrame.plot()</span></code>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.reset_tiles">
+<code class="descname">reset_tiles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.reset_tiles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.retile_buffer">
+<code class="descname">retile_buffer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.retile_buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A basic retiling operation that buffers the current <cite>self.tiles</cite> using a square buffer.
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.retile_raster">
+<code class="descname">retile_raster</code><span class="sig-paren">(</span><em>cell_size</em>, <em>original_tile_size</em>, <em>buffer=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.retile_raster" title="Permalink to this definition">¶</a></dt>
+<dd><p>A retiling operation that creates raster-compatible sized tiles. Important for creating project-level rasters.
+Changes <cite>self.tiles</cite> <strong>in place</strong></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>buffer</strong> – Buffer the raster-compatible tiles.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.standard_metrics">
+<code class="descname">standard_metrics</code><span class="sig-paren">(</span><em>heightbreak</em>, <em>index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.standard_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves a set of 29 standard metrics, including height percentiles and other summaries.
+:param index: An iterable of indices to set as the output dataframe index.
+:return: A pandas dataframe of standard metrics.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyfor.collection.Retiler">
+<em class="property">class </em><code class="descclassname">pyfor.collection.</code><code class="descname">Retiler</code><span class="sig-paren">(</span><em>cdf</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.Retiler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="pyfor.collection.Retiler.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>cdf</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.Retiler.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retiles a CloudDataFrame. Generally used to create tiles such that rasters generated from tiles are properly aligned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.Retiler.retile_buffer">
+<code class="descname">retile_buffer</code><span class="sig-paren">(</span><em>tiles</em>, <em>buffer</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.Retiler.retile_buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple buffering operation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A list of buffered shapely polygons.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.Retiler.retile_quadrant">
+<code class="descname">retile_quadrant</code><span class="sig-paren">(</span><em>tiles</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.Retiler.retile_quadrant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Splits input tiles into quadrants. An efficient retiling method when particular retiling geometries are not
+necessary.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.Retiler.retile_raster">
+<code class="descname">retile_raster</code><span class="sig-paren">(</span><em>target_cell_size</em>, <em>original_tile_size</em>, <em>buffer=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.Retiler.retile_raster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a retiling grid for a specified target cell size. This creates a list of polygons such that if a raster
+is constructed from a polygon it will exactly fit inside given the specified target cell size. Useful for creating
+project level rasters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>target_cell_size</strong> – The desired output cell size</li>
+<li><strong>original_tile_size</strong> – The original tile size of the project</li>
+<li><strong>buffer</strong> – The distance to buffer each new tile to prevent edge effects.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of shapely polygons that correspond to the new grid.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfor.collection.from_dir">
+<code class="descclassname">pyfor.collection.</code><code class="descname">from_dir</code><span class="sig-paren">(</span><em>las_dir</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.from_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a CloudDataFrame from a directory of las files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>las_dir</strong> – The directory of las files.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A CloudDataFrame constructed from the directory of las files.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyfor.gisexport">
+<span id="pyfor-gisexport-module"></span><h2>pyfor.gisexport module<a class="headerlink" href="#module-pyfor.gisexport" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="pyfor.gisexport.array_to_polygons">
+<code class="descclassname">pyfor.gisexport.</code><code class="descname">array_to_polygons</code><span class="sig-paren">(</span><em>array</em>, <em>affine=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.gisexport.array_to_polygons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a geopandas dataframe of polygons as deduced from an array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>array</strong> – The 2D numpy array to polygonize.</li>
+<li><strong>affine</strong> – The affine transformation.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfor.gisexport.array_to_raster">
+<code class="descclassname">pyfor.gisexport.</code><code class="descname">array_to_raster</code><span class="sig-paren">(</span><em>array</em>, <em>affine</em>, <em>wkt</em>, <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.gisexport.array_to_raster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a GeoTIFF raster from a numpy array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>array</strong> – 2D numpy array of cell values</li>
+<li><strong>pixel_size</strong> – – Desired resolution of the output raster, in same units as wkt projection.</li>
+<li><strong>x_min</strong> – Minimum x coordinate (top left corner of raster)</li>
+<li><strong>y_max</strong> – Maximum y coordinate</li>
+<li><strong>wkt</strong> – The wkt string with desired projection</li>
+<li><strong>path</strong> – The output bath of the GeoTIFF</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfor.gisexport.get_las_crs">
+<code class="descclassname">pyfor.gisexport.</code><code class="descname">get_las_crs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.gisexport.get_las_crs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempts to retrive CRS information from an input <cite>laspy.file.File</cite> object.
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfor.gisexport.polygons_to_raster">
+<code class="descclassname">pyfor.gisexport.</code><code class="descname">polygons_to_raster</code><span class="sig-paren">(</span><em>polygons</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.gisexport.polygons_to_raster" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyfor.gisexport.project_indices">
+<code class="descclassname">pyfor.gisexport.</code><code class="descname">project_indices</code><span class="sig-paren">(</span><em>indices</em>, <em>raster</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.gisexport.project_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts indices of an array (for example, those indices that describe the location of a local maxima) to the
+same space as the input cloud object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>indices</strong> – The indices to project, an Nx2 matrix of indices where the first column are the rows (Y) and</td>
+</tr>
+</tbody>
+</table>
+<p>the second column is the columns (X)
+:param raster: An object of type pyfor.rasterizer.Raster
+:return:</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyfor.ground_filter">
+<span id="pyfor-ground-filter-module"></span><h2>pyfor.ground_filter module<a class="headerlink" href="#module-pyfor.ground_filter" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pyfor.ground_filter.GroundFilter">
+<em class="property">class </em><code class="descclassname">pyfor.ground_filter.</code><code class="descname">GroundFilter</code><a class="headerlink" href="#pyfor.ground_filter.GroundFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pyfor.ground_filter.KrausPfeifer1998">
+<em class="property">class </em><code class="descclassname">pyfor.ground_filter.</code><code class="descname">KrausPfeifer1998</code><span class="sig-paren">(</span><em>cell_size</em>, <em>a=1</em>, <em>b=4</em>, <em>g=-2</em>, <em>w=2.5</em>, <em>iterations=5</em>, <em>tolerance=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.KrausPfeifer1998" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Holds functions and data for implementing Kraus and Pfeifer (1998) ground filter. The Kraus and Pfeifer ground filter
+is a simple filter that uses interpolation of errors and an iteratively constructed surface to filter ground points.
+This filter is used in FUSION software, and the same default values for the parameters are used in this implementation.</p>
+<dl class="method">
+<dt id="pyfor.ground_filter.KrausPfeifer1998.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>cell_size</em>, <em>a=1</em>, <em>b=4</em>, <em>g=-2</em>, <em>w=2.5</em>, <em>iterations=5</em>, <em>tolerance=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.KrausPfeifer1998.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cell_size</strong> – The cell size of the intermediate surface used in filtering in the same units as the input         cloud. Values from 1 to 40 are common, depending on the units in which the original point cloud is projected.</li>
+<li><strong>a</strong> – A steepness parameter for the interpolating function.</li>
+<li><strong>b</strong> – A steepness parameter for the interpolating function.</li>
+<li><strong>g</strong> – The distance from the surface under which all points are given a weight of 1.</li>
+<li><strong>w</strong> – The window width from g up considered for weighting.</li>
+<li><strong>iterations</strong> – The number of iterations, i.e. the number of surfaces constructed.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.ground_filter.KrausPfeifer1998.bem">
+<code class="descname">bem</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.KrausPfeifer1998.bem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the bare earth model (BEM).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cloud</strong> – A cloud object.</li>
+<li><strong>cell_size</strong> – The cell size of the BEM, this is independent of the cell size used in the intermediate         surfaces.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A <cite>Raster</cite> object that represents the bare earth model.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.ground_filter.KrausPfeifer1998.classify">
+<code class="descname">classify</code><span class="sig-paren">(</span><em>cloud</em>, <em>ground_int=2</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.KrausPfeifer1998.classify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the classification of the original input cloud points to ground (default 2 as per las specification). This
+performs the adjustment of the input <cite>Cloud</cite> object <strong>in place</strong>. Only implemented for <cite>.las</cite> files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cloud</strong> – A cloud object.</li>
+<li><strong>ground_int</strong> – The integer to set classified points to, the default is 2 in the las specification for ground</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>points.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.ground_filter.KrausPfeifer1998.ground_points">
+<code class="descname">ground_points</code><span class="sig-paren">(</span><em>cloud</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.KrausPfeifer1998.ground_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a new <cite>Cloud</cite> object that only contains the ground points.
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.ground_filter.KrausPfeifer1998.normalize">
+<code class="descname">normalize</code><span class="sig-paren">(</span><em>pc</em>, <em>cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.KrausPfeifer1998.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalizes the original point cloud <strong>in place</strong>. This creates a BEM as an intermediate product, please see
+<cite>.bem()</cite> to return this directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>pc</strong> – A cloud object.</li>
+<li><strong>cell_size</strong> – The cell_size for the intermediate BEM. Values from 1 to 6 are common.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyfor.ground_filter.Zhang2003">
+<em class="property">class </em><code class="descclassname">pyfor.ground_filter.</code><code class="descname">Zhang2003</code><span class="sig-paren">(</span><em>cell_size</em>, <em>n_windows=5</em>, <em>dh_max=2</em>, <em>dh_0=1</em>, <em>b=2</em>, <em>interp_method='nearest'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.Zhang2003" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Implements Zhang et. al (2003), a progressive morphological ground filter. This filter uses an opening operation
+combined with progressively larger filtering windows to remove features that are ‘too steep’. This particular
+implementation interacts only with a raster, so the output resolution will be dictated by the <cite>cell_size</cite> argument.</p>
+<dl class="method">
+<dt id="pyfor.ground_filter.Zhang2003.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>cell_size</em>, <em>n_windows=5</em>, <em>dh_max=2</em>, <em>dh_0=1</em>, <em>b=2</em>, <em>interp_method='nearest'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.Zhang2003.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cloud</strong> – The input cloud object.</li>
+<li><strong>n_windows</strong> – The number of windows to construct for filtering.</li>
+<li><strong>dh_max</strong> – The maximum height threshold.</li>
+<li><strong>dh_0</strong> – The starting null height threshold.</li>
+<li><strong>cell_size</strong> – The cell_size used to construct the array for filtering, also the output size of the BEM.</li>
+<li><strong>interp_method</strong> – The interpolation method used to fill nan values in the final BEM.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.ground_filter.Zhang2003.bem">
+<code class="descname">bem</code><span class="sig-paren">(</span><em>cloud</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.Zhang2003.bem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the bare earth model (BEM). Unlike <a class="reference internal" href="#pyfor.ground_filter.KrausPfeifer1998" title="pyfor.ground_filter.KrausPfeifer1998"><code class="xref py py-class docutils literal notranslate"><span class="pre">KrausPfeifer1998</span></code></a>, the cell size is defined upon         initialization of the filter, and thus it is not required to retrieve the bare earth model from the filter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cloud</strong> – A Cloud object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A <a class="reference internal" href="#pyfor.rasterizer.Raster" title="pyfor.rasterizer.Raster"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raster</span></code></a> object that represents the bare earth model.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.ground_filter.Zhang2003.normalize">
+<code class="descname">normalize</code><span class="sig-paren">(</span><em>cloud</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.Zhang2003.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalizes the original point cloud <strong>in place</strong>. This creates a BEM as an intermediate product, please see
+<cite>.bem()</cite> to return this directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cell_size</strong> – The cell_size for the intermediate BEM. Values from 0.5 to 3 are common.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyfor.metrics">
+<span id="pyfor-metrics-module"></span><h2>pyfor.metrics module<a class="headerlink" href="#module-pyfor.metrics" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="pyfor.metrics.make_percentile_funcs">
+<code class="descclassname">pyfor.metrics.</code><code class="descname">make_percentile_funcs</code><span class="sig-paren">(</span><em>percentiles</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.make_percentile_funcs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of lambda percentile functions</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfor.metrics.make_standard_funcs">
+<code class="descclassname">pyfor.metrics.</code><code class="descname">make_standard_funcs</code><span class="sig-paren">(</span><em>percentiles</em>, <em>heightbreak</em>, <em>return_nums</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.make_standard_funcs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of standard metrics functions, such that each function takes as its first argument a vector of values.
+:param percentiles:
+:param heightbreak:
+:param return_nums: A vector of all possible return number values</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfor.metrics.standard_metrics">
+<code class="descclassname">pyfor.metrics.</code><code class="descname">standard_metrics</code><span class="sig-paren">(</span><em>points</em>, <em>heightbreak=6</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.standard_metrics" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyfor.metrics.summarize_percentiles">
+<code class="descclassname">pyfor.metrics.</code><code class="descname">summarize_percentiles</code><span class="sig-paren">(</span><em>z</em>, <em>pct=(1</em>, <em>5</em>, <em>10</em>, <em>20</em>, <em>25</em>, <em>30</em>, <em>40</em>, <em>50</em>, <em>60</em>, <em>70</em>, <em>75</em>, <em>80</em>, <em>90</em>, <em>95</em>, <em>99)</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.summarize_percentiles" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>z</strong> – A <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code> of z values.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfor.metrics.summarize_return_num">
+<code class="descclassname">pyfor.metrics.</code><code class="descname">summarize_return_num</code><span class="sig-paren">(</span><em>return_nums</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.summarize_return_num" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the number of returns by return number.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>return_nums</strong> – A <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code> of return number that describes the return number of each point.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code> of return number counts by return number.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyfor.rasterizer">
+<span id="pyfor-rasterizer-module"></span><h2>pyfor.rasterizer module<a class="headerlink" href="#module-pyfor.rasterizer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pyfor.rasterizer.CrownSegments">
+<em class="property">class </em><code class="descclassname">pyfor.rasterizer.</code><code class="descname">CrownSegments</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em>, <em>min_distance</em>, <em>threshold_abs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.CrownSegments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyfor.rasterizer.Raster" title="pyfor.rasterizer.Raster"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyfor.rasterizer.Raster</span></code></a></p>
+<p>This class is for visualization of detected crown segments with a raster object.</p>
+<dl class="method">
+<dt id="pyfor.rasterizer.CrownSegments.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em>, <em>min_distance</em>, <em>threshold_abs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.CrownSegments.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.CrownSegments.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.CrownSegments.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default plotting method for the Raster object.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyfor.rasterizer.CrownSegments.segments">
+<code class="descname">segments</code><a class="headerlink" href="#pyfor.rasterizer.CrownSegments.segments" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyfor.rasterizer.DetectedTops">
+<em class="property">class </em><code class="descclassname">pyfor.rasterizer.</code><code class="descname">DetectedTops</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em>, <em>chm</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.DetectedTops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyfor.rasterizer.Raster" title="pyfor.rasterizer.Raster"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyfor.rasterizer.Raster</span></code></a></p>
+<p>This class is for visualization of detected tops with a raster object. Generally created internally via
+Raster.local_maxima</p>
+<dl class="method">
+<dt id="pyfor.rasterizer.DetectedTops.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em>, <em>chm</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.DetectedTops.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.DetectedTops.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.DetectedTops.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the detected tops against the original input raster.
+# <a class="reference external" href="https://matplotlib.org/gallery/images_contours_and_fields/image_transparency_blend.html">https://matplotlib.org/gallery/images_contours_and_fields/image_transparency_blend.html</a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyfor.rasterizer.DetectedTops.points">
+<code class="descname">points</code><a class="headerlink" href="#pyfor.rasterizer.DetectedTops.points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an Nx2 numpy array of detected top locations projected to the input Cloud space.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyfor.rasterizer.DetectedTops.tops_binary">
+<code class="descname">tops_binary</code><a class="headerlink" href="#pyfor.rasterizer.DetectedTops.tops_binary" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A binary array, where 1 indicates a detected top, 0 otherwise</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyfor.rasterizer.Grid">
+<em class="property">class </em><code class="descclassname">pyfor.rasterizer.</code><code class="descname">Grid</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. From     the Grid object we can derive other useful products, most importantly, <a class="reference internal" href="#pyfor.rasterizer.Raster" title="pyfor.rasterizer.Raster"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raster</span></code></a> objects.</p>
+<dl class="method">
+<dt id="pyfor.rasterizer.Grid.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upon initialization, the parent cloud object’s <code class="xref py py-attr docutils literal notranslate"><span class="pre">data.points</span></code> attribute is sorted into bins in place. The
+columns ‘bins_x’ and ‘bins_y’ are appended. Other useful information, such as the resolution, number of rows         and columns are also stored.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cloud</strong> – The “parent” cloud object.</li>
+<li><strong>cell_size</strong> – The size of the cell for sorting in the units of the input cloud object.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyfor.rasterizer.Grid.empty_cells">
+<code class="descname">empty_cells</code><a class="headerlink" href="#pyfor.rasterizer.Grid.empty_cells" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the cells with no returns in self.data</p>
+<p>return: An N x 2 numpy array where each row cooresponds to the [y x] coordinate of the empty cell.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Grid.interpolate">
+<code class="descname">interpolate</code><span class="sig-paren">(</span><em>func</em>, <em>dim</em>, <em>interp_method='nearest'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.interpolate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolates missing cells in the grid. This function uses scipy.griddata as a backend. Please see         documentation for that function for more details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>func</strong> – The function (or function string) to calculate an array on the gridded data.</li>
+<li><strong>dim</strong> – The dimension (i.e. column name of self.cells) to cast func onto.</li>
+<li><strong>interp_method</strong> – The interpolation method call for scipy.griddata, one of any: “nearest”, “cubic”,         “linear”</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">An interpolated array.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Grid.metrics">
+<code class="descname">metrics</code><span class="sig-paren">(</span><em>func_dict</em>, <em>as_raster=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates summary statistics for each grid cell in the Grid.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func_dict</strong> – A dictionary containing keys corresponding to the columns of self.data and values that         correspond to the functions to be  called on those columns.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A pandas dataframe with the aggregated metrics.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Grid.raster">
+<code class="descname">raster</code><span class="sig-paren">(</span><em>func</em>, <em>dim</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.raster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates an m x n matrix with values as calculated for each cell in func. This is a raw array without         missing cells interpolated. See self.interpolate for interpolation methods.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>func</strong> – A function string, i.e. “max” or a function itself, i.e. <code class="xref py py-func docutils literal notranslate"><span class="pre">np.max()</span></code>. This function must be         able to take a 1D array of the given dimension as an input and produce a single value as an output. This         single value will become the value of each cell in the array.</li>
+<li><strong>dim</strong> – A dimension to calculate on.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A 2D numpy array where the value of each cell is the result of the passed function.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyfor.rasterizer.ImportedGrid">
+<em class="property">class </em><code class="descclassname">pyfor.rasterizer.</code><code class="descname">ImportedGrid</code><span class="sig-paren">(</span><em>path</em>, <em>cloud</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.ImportedGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyfor.rasterizer.Grid" title="pyfor.rasterizer.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyfor.rasterizer.Grid</span></code></a></p>
+<p>ImportedGrid is used to normalize a parent cloud object with an arbitrary raster file.</p>
+<dl class="method">
+<dt id="pyfor.rasterizer.ImportedGrid.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>path</em>, <em>cloud</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.ImportedGrid.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upon initialization, the parent cloud object’s <code class="xref py py-attr docutils literal notranslate"><span class="pre">data.points</span></code> attribute is sorted into bins in place. The
+columns ‘bins_x’ and ‘bins_y’ are appended. Other useful information, such as the resolution, number of rows         and columns are also stored.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cloud</strong> – The “parent” cloud object.</li>
+<li><strong>cell_size</strong> – The size of the cell for sorting in the units of the input cloud object.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyfor.rasterizer.Raster">
+<em class="property">class </em><code class="descclassname">pyfor.rasterizer.</code><code class="descname">Raster</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="pyfor.rasterizer.Raster.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Raster.force_extent">
+<code class="descname">force_extent</code><span class="sig-paren">(</span><em>bbox</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.force_extent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets <cite>self._affine</cite> and <cite>self.array</cite> to a forced bounding box. Useful for trimming edges off of rasters when
+processing buffered tiles. This operation is done in place.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>bbox</strong> – Coordinates of output raster as a tuple (min_x, max_x, min_y, max_y)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Raster.local_maxima">
+<code class="descname">local_maxima</code><span class="sig-paren">(</span><em>min_distance=2</em>, <em>threshold_abs=2</em>, <em>as_coordinates=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.local_maxima" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a new Raster object with tops detected using a local maxima filtering method. See
+skimage.feature.peak_local_maxima for more information on the filter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>min_distance</strong> – </li>
+<li><strong>threshold_abs</strong> – </li>
+<li><strong>multi_top</strong> – If multi_top is true, a top can consist of more than one pixel.</li>
+<li><strong>as_coordinates</strong> – Not yet implemented</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Raster.pit_filter">
+<code class="descname">pit_filter</code><span class="sig-paren">(</span><em>kernel_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.pit_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters pits in the raster. Intended for use with canopy height models (i.e. grid(0.5).interpolate(“max”, “z”).
+This function modifies the raster array <strong>in place</strong>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kernel_size</strong> – The size of the kernel window to pass over the array. For example 3 -&gt; 3x3 kernel window.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Raster.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>cmap='viridis'</em>, <em>block=False</em>, <em>return_plot=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default plotting method for the Raster object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Raster.remove_sparse_cells">
+<code class="descname">remove_sparse_cells</code><span class="sig-paren">(</span><em>min_points</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.remove_sparse_cells" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets sparse cells, i.e. those that have &lt; <cite>min_points</cite> to nan <strong>in place</strong>. This improves the reliability of edge-cells
+when handling multiple tile rasters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Raster.watershed_seg">
+<code class="descname">watershed_seg</code><span class="sig-paren">(</span><em>min_distance=2</em>, <em>threshold_abs=2</em>, <em>classify=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.watershed_seg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the watershed segmentation of the Raster as a geopandas dataframe.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>min_distance</strong> – The minimum distance between local height maxima in the same units as the input point         cloud.</li>
+<li><strong>threshold_abs</strong> – The minimum threshold needed to be called a peak in peak_local_max.</li>
+<li><strong>classify</strong> – If true, sets the <cite>user_data</cite> of the original point cloud data to the segment ID. The         segment ID is an arbitrary identification number generated by the labels function. This can be useful for         plotting point clouds where each segment color is unique.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A geopandas data frame, each record is a crown segment.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Raster.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the raster to a geotiff. Requires the Cloud.crs attribute to be filled by a projection string (ideally         wkt or proj4).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> – The path to write to.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyfor.voxelizer">
+<span id="pyfor-voxelizer-module"></span><h2>pyfor.voxelizer module<a class="headerlink" href="#module-pyfor.voxelizer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pyfor.voxelizer.VoxelGrid">
+<em class="property">class </em><code class="descclassname">pyfor.voxelizer.</code><code class="descname">VoxelGrid</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.voxelizer.VoxelGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A 3 dimensional grid representation of a point cloud. This is analagous to the rasterizer.Grid class, but
+with three axes instead of two. VoxelGrids are generally used to produce VoxelRaster objects.</p>
+<dl class="method">
+<dt id="pyfor.voxelizer.VoxelGrid.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.voxelizer.VoxelGrid.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.voxelizer.VoxelGrid.voxel_raster">
+<code class="descname">voxel_raster</code><span class="sig-paren">(</span><em>func</em>, <em>dim</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.voxelizer.VoxelGrid.voxel_raster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a 3 dimensional voxel raster, analagous to rasterizer.Grid.raster.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>func</strong> – The function to summarize within each voxel.</li>
+<li><strong>dim</strong> – The dimension upon which to summarize (i.e. “z”, “intensity”, etc.)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-pyfor">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyfor" title="Permalink to this headline">¶</a></h2>
@@ -188,7 +1295,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Bryce Frank.
+        &copy; Copyright 2019, Bryce Frank
 
     </p>
   </div>
@@ -205,33 +1312,16 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'0.3.2',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="../_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

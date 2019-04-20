@@ -1,7 +1,7 @@
-pyfor.plot module
+pyfor.clip module
 =================
 
-.. automodule:: pyfor.plot
+.. automodule:: pyfor.clip
     :members:
     :undoc-members:
     :show-inheritance:
