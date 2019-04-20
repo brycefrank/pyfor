@@ -5,7 +5,6 @@ import pyfor
 import geopandas as gpd
 import pandas as pd
 import laxpy
-import pyproj
 from shapely.geometry import Polygon
 
 class CloudDataFrame(gpd.GeoDataFrame):
@@ -49,7 +48,9 @@ class CloudDataFrame(gpd.GeoDataFrame):
 
     @property
     def bounding_box(self):
-        """Retrieves the bounding box for the entire collection. As a tuple (minx, muny, maxx, maxy)"""
+        """
+        :return: A tuple (minx, miny, maxx, maxy) of the bounding box for the entire collection.
+        """
         minx, miny, maxx, maxy = [i.bounds[0] for i in self['bounding_box']], [i.bounds[1] for i in self['bounding_box']], \
                                  [i.bounds[2] for i in self['bounding_box']], [i.bounds[3] for i in self['bounding_box']]
         col_bbox = np.min(minx), np.min(miny), np.max(maxx), np.max(maxy)
@@ -60,9 +61,13 @@ class CloudDataFrame(gpd.GeoDataFrame):
         las.map_polygon(polygon)
         return las.points
 
-    def construct_tile(self, func, tile, indexed):
+    def _construct_tile(self, func, tile, indexed):
         """
         For a given tile, clips points from intersecting las files and loads as Cloud object.
+
+        :param func: The function to process the input tile.
+        :param tile: Tile the tile to process
+        :param indexed: A boolean indicating whether or not to leverage a `.lax` file.
         """
         for i, las_file in enumerate(self._get_parents(tile)['las_path']):
             if indexed == True:
@@ -108,29 +113,26 @@ class CloudDataFrame(gpd.GeoDataFrame):
         if by_file:
             return Parallel(n_jobs=self.n_threads)(delayed(func)(las_path) for las_path in self['las_path'])
         else:
-            Parallel(n_jobs=self.n_threads)(delayed(self.construct_tile)(func, tile, indexed) for tile in self.tiles)
-
-
-    def retile_buffer(self):
-        """
-        A basic retiling operation that buffers the current `self.tiles` using a square buffer.
-        :return:
-        """
-
-        pass
+            Parallel(n_jobs=self.n_threads)(delayed(self._construct_tile)(func, tile, indexed) for tile in self.tiles)
 
     def retile_raster(self, cell_size, original_tile_size, buffer=0):
         """
         A retiling operation that creates raster-compatible sized tiles. Important for creating project-level rasters.
         Changes `self.tiles` **in place**
 
-        :param buffer: Buffer the raster-compatible tiles.
+        :param cell_size: The target cell size of the output raster.
+        :param original_tile_size: The original tile size of the acquisition.
+        :param buffer: The amount to buffer each input tile.
         """
 
         retiler = Retiler(self)
         self.tiles = retiler.retile_raster(cell_size, original_tile_size, buffer)
 
     def reset_tiles(self):
+        """
+        Reset the tiles to describe the bounding boxes of each `.las` file **in place**.
+        """
+
         self._build_polygons()
 
     @property
@@ -158,8 +160,9 @@ class CloudDataFrame(gpd.GeoDataFrame):
     def _get_bounding_box(self, las_path):
         """
         Vectorized function to get a bounding box from an individual las path.
-        :param las_path:
-        :return:
+
+        :param las_path: The path of the las file to retrieve a bounding box from.
+        :return: A tuple (minx, maxx, miny, maxy) of bounding box coordinates.
         """
         # segmentation of point clouds
         pc = laspy.file.File(las_path)
@@ -181,9 +184,10 @@ class CloudDataFrame(gpd.GeoDataFrame):
         """
         For a given input polygon, finds the files whose bounding boxes intersect with that polygon.
 
-        :param polygon:
+        :param polygon: A shapely.geometry.Polygon
         :return: A GeoDataFrame of intersecting file bounding boxes.
         """
+
         return self[self['bounding_box'].intersects(polygon)]
 
     def plot(self, **kwargs):
@@ -203,9 +207,10 @@ class CloudDataFrame(gpd.GeoDataFrame):
         for las_path in self['las_path']:
             laxpy.file.init_lax(las_path)
 
-    def standard_metrics(self, heightbreak, index=None):
+    def plot_metrics(self, heightbreak, index=None):
         """
-        Retrieves a set of 29 standard metrics, including height percentiles and other summaries.
+        Retrieves a set of 29 standard metrics, including height percentiles and other summaries. Intended for use on
+        plot-level point clouds.
         :param index: An iterable of indices to set as the output dataframe index.
         :return: A pandas dataframe of standard metrics.
         """
