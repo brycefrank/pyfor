@@ -86,6 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../topics/index.html">The Basics</a></li>
 </ul>
 
             
@@ -160,7 +161,7 @@
 <dl class="function">
 <dt id="pyfor.clip.poly_clip">
 <code class="descclassname">pyfor.clip.</code><code class="descname">poly_clip</code><span class="sig-paren">(</span><em>points</em>, <em>poly</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip.poly_clip" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the indices of <cite>points</cite> that are within a given polygon. This differs from <a class="reference internal" href="pyfor.clip.html#pyfor.clip.ray_trace" title="pyfor.clip.ray_trace"><code class="xref py py-func docutils literal notranslate"><span class="pre">ray_trace()</span></code></a>     in that it enforces a small “pre-clip” optimization by first clipping to the polygon bounding box. This function     is directly called by <a class="reference internal" href="#pyfor.cloud.Cloud.clip" title="pyfor.cloud.Cloud.clip"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Cloud.clip()</span></code></a>.</p>
+<dd><p>Returns the indices of <cite>points</cite> that are within a given polygon. This differs from <a class="reference internal" href="#pyfor.clip.ray_trace" title="pyfor.clip.ray_trace"><code class="xref py py-func docutils literal notranslate"><span class="pre">ray_trace()</span></code></a>     in that it enforces a small “pre-clip” optimization by first clipping to the polygon bounding box. This function     is directly called by <a class="reference internal" href="#pyfor.cloud.Cloud.clip" title="pyfor.cloud.Cloud.clip"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Cloud.clip()</span></code></a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -181,7 +182,7 @@
 <dl class="function">
 <dt id="pyfor.clip.ray_trace">
 <code class="descclassname">pyfor.clip.</code><code class="descname">ray_trace</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>poly</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip.ray_trace" title="Permalink to this definition">¶</a></dt>
-<dd><p>Determines for some set of x and y coordinates, which of those coordinates is within <cite>poly</cite>. Ray trace is     generally called as an internal function, see <a class="reference internal" href="pyfor.clip.html#pyfor.clip.poly_clip" title="pyfor.clip.poly_clip"><code class="xref py py-func docutils literal notranslate"><span class="pre">poly_clip()</span></code></a></p>
+<dd><p>Determines for some set of x and y coordinates, which of those coordinates is within <cite>poly</cite>. Ray trace is     generally called as an internal function, see <a class="reference internal" href="#pyfor.clip.poly_clip" title="pyfor.clip.poly_clip"><code class="xref py py-func docutils literal notranslate"><span class="pre">poly_clip()</span></code></a></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -261,7 +262,7 @@
 <dl class="method">
 <dt id="pyfor.cloud.Cloud.clip">
 <code class="descname">clip</code><span class="sig-paren">(</span><em>polygon</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.clip" title="Permalink to this definition">¶</a></dt>
-<dd><p>Clips the point cloud to the provided shapely polygon using a ray casting algorithm. This method calls         <a class="reference internal" href="pyfor.clip.html#pyfor.clip.poly_clip" title="pyfor.clip.poly_clip"><code class="xref py py-func docutils literal notranslate"><span class="pre">clip.poly_clip()</span></code></a> directly. This returns a new <a class="reference internal" href="#pyfor.cloud.Cloud" title="pyfor.cloud.Cloud"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cloud</span></code></a>.</p>
+<dd><p>Clips the point cloud to the provided shapely polygon using a ray casting algorithm. This method calls         <a class="reference internal" href="#pyfor.clip.poly_clip" title="pyfor.clip.poly_clip"><code class="xref py py-func docutils literal notranslate"><span class="pre">clip.poly_clip()</span></code></a> directly. This returns a new <a class="reference internal" href="#pyfor.cloud.Cloud" title="pyfor.cloud.Cloud"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cloud</span></code></a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

@@ -33,6 +33,7 @@ The above example only scratches the surface. Please see the Installation and Ge
    introduction
    installation
    gettingstarted
+   topics/index
 
 Indices and Tables
 ==================

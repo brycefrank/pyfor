@@ -44,6 +44,7 @@ Sometimes it is interesting to view the raw points. For a `Cloud` object, these 
 pandas dataframe in the `.data.points` attribute:
 
 .. code-block:: python
+
     tile.data.points.head()
 
 Direct modifications to the raw points should be done with caution, but is as simple as
@@ -51,8 +52,22 @@ over-writing this dataframe. For example, to remove all points with an x dimensi
 405120:
 
 .. code-block:: python
+
     tile.data.points = tile.data.points[tile.data.points["x"] < 405120]
 
+Plotting
+--------
+
+For quick visual inspection, a simple plotting method is available that uses `matplotlib` as a
+backend:
+
+.. code-block:: python
+
+    tile.plot()
+
+.. image:: img/simple_plot.png
+    :scale: 50%
+    :align: center
 
 Writing Points
 ---------------
@@ -60,5 +75,6 @@ Writing Points
 Finally, we can write our point cloud out to a new file:
 
 .. code-block:: python
+
     tile.write('my_new_tile.las')
 
