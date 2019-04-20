@@ -1,6 +1,6 @@
 # 0.3.4
 
-Updates between February 10, 2019 and []. 
+Updates between February 10, 2019 and April 20, 2019. 
 
 In addition to the new features below, the documentation and user manual
 have been unified into one website located [here](http://brycefrank.com/pyfor/html/index.html). The `pyfor_manual` 

@@ -1,0 +1,226 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>The structure of pyfor &mdash; pyfor  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pyfor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics/index.html">The Basics</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyfor</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>The structure of pyfor</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/structure.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="the-structure-of-pyfor">
+<h1>The structure of pyfor<a class="headerlink" href="#the-structure-of-pyfor" title="Permalink to this headline">¶</a></h1>
+<p>This document provides an in-depth discussion of the structure of pyfor.</p>
+</div>
+<div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>pyfor is unique from other forest inventory LiDAR processing packages in that it is built on top of an object oriented (OOP) framework. Python is not stricly an OOP programming language, but allows for its implementation in a flexible way. pyfor takes advantage of this attractive feature of Python to offer a natural way of thinking about LiDAR as a collection of objects. Each object flows into the other through the process of LiDAR data analysis. Using pyfor means being comfortable with this framework and knowledgeable about what each of the following objects can do. This document is a primer on grasping this philosophy.</p>
+<p>There are four main classes that define pyfor. They are:</p>
+<ol class="arabic simple">
+<li>Cloud</li>
+<li>CloudDataFrame</li>
+<li>Grid</li>
+<li>Raster</li>
+</ol>
+<div class="section" id="cloud">
+<h2>Cloud<a class="headerlink" href="#cloud" title="Permalink to this headline">¶</a></h2>
+<p>The Cloud class represents the point cloud data in its raw format, a list of x, y and z coordinates (and some other fields like intensity and the like). The Cloud object can be plotted in a variety of ways, including 2D and 3D plots (see .plot, .plot3d, .iplot3d). The Cloud is generally considered the starting point of LiDAR analysis, from this object we can produce other objects, specifically the Raster and Grid.</p>
+</div>
+<div class="section" id="grid">
+<h2>Grid<a class="headerlink" href="#grid" title="Permalink to this headline">¶</a></h2>
+<p>The Grid can be considered the next step in producing products from our Cloud. The Grid assigns each point of the Cloud to a grid cell. This process allows us to summarize information about the points in each grid cell.</p>
+</div>
+<div class="section" id="raster">
+<h2>Raster<a class="headerlink" href="#raster" title="Permalink to this headline">¶</a></h2>
+<p>Once we have decided how to summarize our grid cells, we produce a Raster. The Raster is a geo-referenced numpy array where the value of each cell is some summarization of the points within that cell. The most common implementation of a Raster is the canopy height model (CHM) that is a summary of the highest points within each grid cell, but other types are possible, such as bare earth models (BEM) and grid metrics. We can write Rasters to a GeoTIFF format using Raster.write().</p>
+</div>
+<div class="section" id="clouddataframe">
+<h2>CloudDataFrame<a class="headerlink" href="#clouddataframe" title="Permalink to this headline">¶</a></h2>
+<p>At some point we will want to interact with our LiDAR tiles in toto. CloudDataFrame is a collection of Cloud objects that allows for efficient analysis and manupulation of many Cloud objects. Because Cloud is considered the most base of all classes in pyfor, CloudDataFrame is our portal to all the products we desire on a mass scale.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Bryce Frank
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
