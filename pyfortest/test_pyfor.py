@@ -252,12 +252,6 @@ class RasterTestCase(unittest.TestCase):
         self.test_raster.plot()
         self.test_raster.plot(return_plot=True)
 
-    def test_local_maxima(self):
-        self.test_raster.local_maxima()
-
-    def test_local_maxima_oriented_correctly(self):
-        self.assertEqual(self.test_raster.local_maxima().array[24, 27], 71)
-
     def test_write_with_crs(self):
         self.test_raster.write("./temp_tif.tif")
 
