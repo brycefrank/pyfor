@@ -1,5 +1,0 @@
-laspy
-laxpy
-sphinx_rtd_theme
-python-coveralls
-plyfile

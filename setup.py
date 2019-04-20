@@ -10,4 +10,10 @@ setup(
     url='https://github.com/brycefrank/pyfor',
     license='LICENSE.txt',
     description='Tools for forest resource point cloud analysis.',
+    install_requires = [ # Dependencies from pip
+        'laspy',
+        'laxpy',
+        'python-coveralls',
+        ''
+    ]
 )
