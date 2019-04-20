@@ -34,7 +34,6 @@ def make_test_collection():
         out = cloud.LASData(points, pc.data.header)
         out.write(os.path.join(data_dir, 'mock_collection', '{}.las'.format(i)))
 
-make_test_collection()
 
 class CollectionTestCase(unittest.TestCase):
     def setUp(self):
