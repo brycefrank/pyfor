@@ -133,6 +133,11 @@ class LASCloudTestCase(unittest.TestCase):
         test_cloud.normalize(3)
         self.assertLess(test_cloud.data.max[2], 65)
 
+    def test_normalize_classified(self):
+        test_cloud = cloud.Cloud(test_las)
+        test_cloud.normalize(3, classified=True)
+        self.assertLess(test_cloud.data.max[2], 65)
+
     def test_chm(self):
         self.test_cloud.chm(0.5, interp_method="nearest", pit_filter="median")
 

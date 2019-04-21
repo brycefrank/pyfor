@@ -34,8 +34,8 @@ class Grid:
         bins_x = np.searchsorted(x_edges,   self.cloud.data.points['x'], side='right') - 1
         bins_y = np.searchsorted(-y_edges, -self.cloud.data.points['y'], side='left', sorter=(-y_edges).argsort())
 
-        self.cloud.data.points["bins_x"] = bins_x
-        self.cloud.data.points["bins_y"] = bins_y
+        self.cloud.data.points.loc[:, "bins_x"] = bins_x
+        self.cloud.data.points.loc[:, "bins_y"] = bins_y
 
         self.cells = self.cloud.data.points.groupby(['bins_x', 'bins_y'])
 

@@ -1,3 +1,13 @@
+# 0.4.0
+
+Updates between April 20, 2019 and []
+
+This update was for small enhancements and improvements to packaging in preparation for a Journal of Open Source 
+Software submission.
+
+## Cloud
+1. `.normalize` wrapper now allows for using already classified ground points with the `classified` argument.
+
 # 0.3.4
 
 Updates between February 10, 2019 and April 20, 2019. 

@@ -281,16 +281,26 @@ class Cloud:
         #return(view.opts)
         view.show()
 
-    def normalize(self, cell_size, **kwargs):
+    def normalize(self, cell_size, classified=False, **kwargs):
         """
         Normalize the cloud using the default Zhang et al. (2003) progressive morphological ground filter. Please see \
         the documentation in :class:`.ground_filter.Zhang2003` for more information and keyword argument definitions. \
         If you want to use a pre-computed DEM to normalize, please see :meth:`.subtract`.
+
+        :param cell_size: The resolution of the intermediate bare earth model.
+        :param classified: If True and file type is `.las` or `.laz`, uses the points classified as ground (i.e. 2) to \
+        construct the intermediate bare earth model.
         """
 
         from pyfor.ground_filter import Zhang2003
-        filter = Zhang2003(cell_size, **kwargs)
-        filter.normalize(self)
+
+        filter = Zhang2003(cell_size)
+
+        if classified:
+            filter.bem(self, classified = classified)
+            filter.normalize(self)
+        else:
+            filter.normalize(self)
 
     def subtract(self, path):
         """
