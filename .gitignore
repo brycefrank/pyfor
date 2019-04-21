@@ -1,5 +1,6 @@
 # Sphinx Build files
 docs/_build/*
+docs/doctrees
 # Environments
 venv/*
 venv/

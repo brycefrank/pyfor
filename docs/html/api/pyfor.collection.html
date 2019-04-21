@@ -1,0 +1,411 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyfor.collection module &mdash; pyfor  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyfor.gisexport module" href="pyfor.gisexport.html" />
+    <link rel="prev" title="pyfor.cloud module" href="pyfor.cloud.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pyfor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../topics/index.html">The Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyfor</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="pyfor.html">pyfor package</a> &raquo;</li>
+        
+      <li>pyfor.collection module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/pyfor.collection.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pyfor.collection">
+<span id="pyfor-collection-module"></span><h1>pyfor.collection module<a class="headerlink" href="#module-pyfor.collection" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pyfor.collection.CloudDataFrame">
+<em class="property">class </em><code class="descclassname">pyfor.collection.</code><code class="descname">CloudDataFrame</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">geopandas.geodataframe.GeoDataFrame</span></code></p>
+<p>Implements a data frame structure for processing and managing multiple <a class="reference internal" href="pyfor.cloud.html#pyfor.cloud.Cloud" title="pyfor.cloud.Cloud"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cloud</span></code></a> objects. It is recommended     to initialize using the <a class="reference internal" href="#pyfor.collection.from_dir" title="pyfor.collection.from_dir"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_dir()</span></code></a> function.</p>
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyfor.collection.CloudDataFrame.bounding_box">
+<code class="descname">bounding_box</code><a class="headerlink" href="#pyfor.collection.CloudDataFrame.bounding_box" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A tuple (minx, miny, maxx, maxy) of the bounding box for the entire collection.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.create_index">
+<code class="descname">create_index</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.create_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each file in the collection, creates <cite>.lax</cite> files for spatial indexing using the default values.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyfor.collection.CloudDataFrame.indexed">
+<code class="descname">indexed</code><a class="headerlink" href="#pyfor.collection.CloudDataFrame.indexed" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if all files have an equivalent <cite>.lax</cite> present, otherwise False.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.map_poly">
+<code class="descname">map_poly</code><span class="sig-paren">(</span><em>las_path</em>, <em>polygon</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.map_poly" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.par_apply">
+<code class="descname">par_apply</code><span class="sig-paren">(</span><em>func</em>, <em>indexed=True</em>, <em>by_file=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.par_apply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply a function to the collection in parallel. There are two major use cases:</p>
+<p>1. <strong>Buffered Tiles</strong>: In the case of buffered tiles, the <cite>func</cite> argument should contain a function that takes
+two arguments, the first being an aggregated <cite>cloud.Cloud</cite> object, and the second being a <cite>shapely.geometry.Polygon</cite>
+that describes the bounding box of the aggregated tile. For this case, set <cite>by_file</cite> to False (this is the default).</p>
+<p>2. <strong>Raw Files</strong>: In the case of processing raw tiles in parallel, the <cite>func</cite> argument should contain a function
+that takes only one argument, the absolute file path to the tile at that iteration. For this case, set <cite>by_file</cite> to True.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>func</strong> – A function used to process each tile or raw file (see above).</li>
+<li><strong>indexed</strong> – Determines if <cite>.lax</cite> files will be leveraged to reduce memory consumption.</li>
+<li><strong>by_file</strong> – Forces <cite>par_apply</cite> to operate on raw files only if True.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the bounding boxes of the Cloud objects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>**kwargs</strong> – <p>Keyword arguments to <code class="xref py py-meth docutils literal notranslate"><span class="pre">geopandas.GeoDataFrame.plot()</span></code>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.plot_metrics">
+<code class="descname">plot_metrics</code><span class="sig-paren">(</span><em>heightbreak</em>, <em>index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.plot_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves a set of 29 standard metrics, including height percentiles and other summaries. Intended for use on
+plot-level point clouds.
+:param index: An iterable of indices to set as the output dataframe index.
+:return: A pandas dataframe of standard metrics.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.reset_tiles">
+<code class="descname">reset_tiles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.reset_tiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the tiles to describe the bounding boxes of each <cite>.las</cite> file <strong>in place</strong>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.CloudDataFrame.retile_raster">
+<code class="descname">retile_raster</code><span class="sig-paren">(</span><em>cell_size</em>, <em>original_tile_size</em>, <em>buffer=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.retile_raster" title="Permalink to this definition">¶</a></dt>
+<dd><p>A retiling operation that creates raster-compatible sized tiles. Important for creating project-level rasters.
+Changes <cite>self.tiles</cite> <strong>in place</strong></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cell_size</strong> – The target cell size of the output raster.</li>
+<li><strong>original_tile_size</strong> – The original tile size of the acquisition.</li>
+<li><strong>buffer</strong> – The amount to buffer each input tile.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyfor.collection.Retiler">
+<em class="property">class </em><code class="descclassname">pyfor.collection.</code><code class="descname">Retiler</code><span class="sig-paren">(</span><em>cdf</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.Retiler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="pyfor.collection.Retiler.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>cdf</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.Retiler.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retiles a CloudDataFrame. Generally used to create tiles such that rasters generated from tiles are properly aligned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.Retiler.retile_buffer">
+<code class="descname">retile_buffer</code><span class="sig-paren">(</span><em>tiles</em>, <em>buffer</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.Retiler.retile_buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple buffering operation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A list of buffered shapely polygons.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.Retiler.retile_quadrant">
+<code class="descname">retile_quadrant</code><span class="sig-paren">(</span><em>tiles</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.Retiler.retile_quadrant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Splits input tiles into quadrants. An efficient retiling method when particular retiling geometries are not
+necessary.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.collection.Retiler.retile_raster">
+<code class="descname">retile_raster</code><span class="sig-paren">(</span><em>target_cell_size</em>, <em>original_tile_size</em>, <em>buffer=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.Retiler.retile_raster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a retiling grid for a specified target cell size. This creates a list of polygons such that if a raster
+is constructed from a polygon it will exactly fit inside given the specified target cell size. Useful for creating
+project level rasters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>target_cell_size</strong> – The desired output cell size</li>
+<li><strong>original_tile_size</strong> – The original tile size of the project</li>
+<li><strong>buffer</strong> – The distance to buffer each new tile to prevent edge effects.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of shapely polygons that correspond to the new grid.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfor.collection.from_dir">
+<code class="descclassname">pyfor.collection.</code><code class="descname">from_dir</code><span class="sig-paren">(</span><em>las_dir</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.from_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a CloudDataFrame from a directory of las files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>las_dir</strong> – The directory of las files.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A CloudDataFrame constructed from the directory of las files.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pyfor.gisexport.html" class="btn btn-neutral float-right" title="pyfor.gisexport module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pyfor.cloud.html" class="btn btn-neutral float-left" title="pyfor.cloud module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Bryce Frank
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
