@@ -319,7 +319,7 @@ class Cloud:
         # Create copy to avoid warnings
         keep_points = self.data.points.iloc[keep].copy()
         new_cloud = Cloud(CloudData(keep_points, self.data.header))
-        new_cloud.data.points = new_cloud.data.points.reset_index()
+        new_cloud.data.points = new_cloud.data.points.reset_index(drop=True)
         new_cloud.data._update()
 
         #Warn user if the resulting cloud has no points.

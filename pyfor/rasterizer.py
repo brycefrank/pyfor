@@ -227,7 +227,7 @@ class Raster:
             # bbox left is outside of raster left, we need to add columns of nans
             emptys = np.empty((m, left_diff))
             emptys[:] = np.nan
-            self.array = np.insert(self.array, 0, emptys, axis=1)
+            self.array = np.insert(self.array, 0, np.transpose(emptys), axis=1)
         elif left_diff !=0:
             # bbox left is inside of raster left, we need to remove left diff columns
             self.array = self.array[:, abs(left_diff):]
@@ -251,8 +251,8 @@ class Raster:
             self.array = self.array[:, :-right_diff]
 
         if (bot_diff > 0):
-            # bbox bottom is outside of raster bottom, we need to add columns
-            emptys = np.empty((n, abs(bot_diff)))
+            # bbox bottom is outside of raster bottom, we need to add rows of nans
+            emptys = np.empty((abs(bot_diff), self.array.shape[1]))
             emptys[:] = np.nan
             self.array = np.append(self.array, emptys, axis=0)
         elif bot_diff != 0:

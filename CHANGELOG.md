@@ -1,3 +1,15 @@
+# 0.3.4 - Hotfixes
+
+Hotixes applied directly to `master` between April 20, 2019 and 0.4.0 release.
+
+## Raster
+
+1. Fixed bug in `force_extent` when appending empty arrays to bottom or top dimensions (May 3, 2019)
+
+## Collection
+
+1. Restructured `_construct_tile`
+
 # 0.3.4
 
 Updates between February 10, 2019 and April 20, 2019. 
