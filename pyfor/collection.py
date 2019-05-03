@@ -316,7 +316,6 @@ class Retiler:
                 # Only append if there are any original tiles touching
                 if len(self.cdf._get_parents(new_tile)) > 0:
                     new_tiles.append(new_tile)
-        print(len(new_tiles))
         return new_tiles
 
     def retile_buffer(self, tiles, buffer):
