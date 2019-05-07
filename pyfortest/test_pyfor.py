@@ -186,7 +186,6 @@ class GridTestCase(unittest.TestCase):
         self.assertEqual(type(self.test_grid.cloud), cloud.Cloud)
 
     def test_empty_cells(self):
-        np.set_printoptions(threshold=np.nan)
         empty = self.test_grid.empty_cells
         # Check that there are the correct number
         self.assertEqual(empty.shape, (291, 2))
