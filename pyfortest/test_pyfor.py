@@ -121,9 +121,9 @@ class LASCloudTestCase(unittest.TestCase):
         self.test_cloud.clip(poly)
 
     # TODO broken on travis
-    #def test_plot(self):
-    #    self.test_cloud.plot()
-    #    plt.close()
+    def test_plot(self):
+        self.test_cloud.plot()
+        plt.close()
 
     #def test_plot3d(self):
     #    self.test_cloud.plot3d()
