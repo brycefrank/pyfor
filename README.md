@@ -14,6 +14,14 @@ Release Date: April 20, 2019
 
 Release Status: 0.3 is an adolescent LiDAR data processing package adequate for single tile processing and large acqusitions.
 
+## What Does `pyfor` Do?
+
+- [Normalization](http://brycefrank.com/pyfor/html/topics/normalization.html)
+- [Canopy Height Models](http://brycefrank.com/pyfor/html/topics/canopyheightmodel.html)
+- [Ground Filtering](http://brycefrank.com/pyfor/html/api/pyfor.ground_filter.html)
+- [Clipping](/home/bryce/Programming/pyfor/README.md)
+- [Large Acquisition Processing]()
+
 ## Installation
 
 [miniconda](https://conda.io/miniconda.html) or Anaconda is required for your system before beginning. pyfor depends on many packages that are otherwise tricky and difficult to install (especially gdal and its bindings), and conda provides a quick and easy way to manage many different Python environments on your system simultaneously.
