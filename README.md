@@ -20,7 +20,7 @@ Release Status: 0.3 is an adolescent LiDAR data processing package adequate for 
 - [Canopy Height Models](http://brycefrank.com/pyfor/html/topics/canopyheightmodel.html)
 - [Ground Filtering](http://brycefrank.com/pyfor/html/api/pyfor.ground_filter.html)
 - [Clipping](http://brycefrank.com/pyfor/html/topics/clipping.html)
-- [Large Acquisition Processing](brycefrank.com/pyfor/html/advanced/handlinglargeacquisitions.html)
+- [Large Acquisition Processing](http://brycefrank.com/pyfor/html/advanced/handlinglargeacquisitions.html)
 
 and many other tasks. See the [documentation](http://brycefrank.com/pyfor) for examples and applications.
 
