@@ -14,13 +14,18 @@ Release Date: April 20, 2019
 
 Release Status: 0.3 is an adolescent LiDAR data processing package adequate for single tile processing and large acqusitions.
 
-## What Does `pyfor` Do?
+## What Does pyfor Do?
 
 - [Normalization](http://brycefrank.com/pyfor/html/topics/normalization.html)
 - [Canopy Height Models](http://brycefrank.com/pyfor/html/topics/canopyheightmodel.html)
 - [Ground Filtering](http://brycefrank.com/pyfor/html/api/pyfor.ground_filter.html)
-- [Clipping](/home/bryce/Programming/pyfor/README.md)
-- [Large Acquisition Processing]()
+- [Clipping](http://brycefrank.com/pyfor/html/topics/clipping.html)
+- [Large Acquisition Processing](brycefrank.com/pyfor/html/advanced/handlinglargeacquisitions.html)
+
+and many other tasks. See the [documentation](http://brycefrank.com/pyfor) for examples and applications.
+
+What about tree segmentation? Please see pyfor's sister package [`treeseg`](https://github.com/brycefrank/treeseg) which
+is a standalone package for tree segmentation and detection.
 
 ## Installation
 
