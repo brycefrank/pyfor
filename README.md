@@ -5,7 +5,7 @@
   <a href="https://github.com/brycefrank/pyfor/blob/master/CHANGELOG.md">Changelog</a> |
   <a href="https://github.com/brycefrank/pyfor/issues/new">Request a Feature</a> |
   <a href="https://github.com/brycefrank/pyfor/projects/12">Road Map</a>
-  <br><br>
+  <br>
   <img src="https://camo.githubusercontent.com/033f1149793306148313011a8777f72724800836/68747470733a2f2f7472617669732d63692e6f72672f62727963656672616e6b2f7079666f722e7376673f6272616e63683d6d6173746572">
   <img src="https://coveralls.io/repos/github/brycefrank/pyfor/badge.svg?branch=master">
 </p>
