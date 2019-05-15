@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/logo.png" width="250">
+  <img src="docs/logo.png" width="250"><br><br>
   <a href="http://brycefrank.com/pyfor">Documentation</a> |
   <a href="https://github.com/brycefrank/pyfor/blob/master/CHANGELOG.md">Changelog</a> |
   <a href="https://github.com/brycefrank/pyfor/issues/new">Request a Feature</a> |
