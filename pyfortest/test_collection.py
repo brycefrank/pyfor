@@ -52,7 +52,7 @@ class CollectionTestCase(unittest.TestCase):
         self.test_col.retile_raster(10, 50, buffer=10)
         self.test_col.par_apply(test_buffered_func, indexed=True)
 
-    def test_par_apply_buf_noindex(self):
+    def test_par_apply_buff_noindex(self):
         # Buffered without index
         self.test_col.par_apply(test_buffered_func, indexed=False)
 

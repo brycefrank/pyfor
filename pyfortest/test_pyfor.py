@@ -120,6 +120,7 @@ class LASCloudTestCase(unittest.TestCase):
         poly = gpd.read_file(test_shp)['geometry'][0]
         self.test_cloud.clip(poly)
 
+    # TODO broken on travis
     def test_plot(self):
         self.test_cloud.plot()
         plt.close()
@@ -190,7 +191,6 @@ class GridTestCase(unittest.TestCase):
         self.assertEqual(type(self.test_grid.cloud), cloud.Cloud)
 
     def test_empty_cells(self):
-        np.set_printoptions(threshold=np.nan)
         empty = self.test_grid.empty_cells
         # Check that there are the correct number
         self.assertEqual(empty.shape, (291, 2))

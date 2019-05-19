@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>&lt;no title&gt; &mdash; pyfor  documentation</title>
+  <title>Handling Large Acquisitions &mdash; pyfor  documentation</title>
   
 
   
@@ -17,34 +17,32 @@
   
 
   
-  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -133,7 +131,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>&lt;no title&gt;</li>
+      <li>Handling Large Acquisitions</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -152,7 +150,73 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  
+  <div class="section" id="handling-large-acquisitions">
+<h1>Handling Large Acquisitions<a class="headerlink" href="#handling-large-acquisitions" title="Permalink to this headline">¶</a></h1>
+<p>The pyfor <code class="docutils literal notranslate"><span class="pre">collections</span></code> module allows for efficient handling of large acquisitions with paralell
+processing of user-define functions. This document presents a couple examples of large acquisition
+processing.</p>
+<div class="section" id="creating-project-level-canopy-height-models">
+<h2>Creating Project-Level Canopy Height Models<a class="headerlink" href="#creating-project-level-canopy-height-models" title="Permalink to this headline">¶</a></h2>
+<p>A <code class="docutils literal notranslate"><span class="pre">CloudDataFrame</span></code> is the integral part of managing large point cloud acquisitions. It is initialized
+by passing a directory that contains <code class="docutils literal notranslate"><span class="pre">.las</span></code> or <code class="docutils literal notranslate"><span class="pre">.laz</span></code> files:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyfor</span>
+<span class="n">my_collection</span> <span class="o">=</span> <span class="n">pyfor</span><span class="o">.</span><span class="n">collection</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span><span class="s2">&quot;my_collection_dir&quot;</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here we have instantiated a collection such that the processing function will be done in parallel across
+three cores.</p>
+<p>It will be useful to set the coordinate reference system for the project. This is done via the <code class="docutils literal notranslate"><span class="pre">.crs</span></code> attribute:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyproj</span>
+<span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">proj</span><span class="p">({</span><span class="s1">&#39;init&#39;</span><span class="p">:</span> <span class="s1">&#39;epsg:26910&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">srs</span>
+<span class="n">my_collection</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">crs</span>
+</pre></div>
+</div>
+<p>Here we must grapple with a few things. First, we will want to process buffered tiles to eliminate edge effects from
+normalization. This requires defining a few things for the collection.</p>
+<p>First, we want to set the collection tiles such
+that the output rasters will be consistent for a specified grid cell size. This is done by manipulating the internal
+geometries stored in <code class="docutils literal notranslate"><span class="pre">my_collection.tiles</span></code>. By default, these describe the <code class="docutils literal notranslate"><span class="pre">.las/z</span></code> bounding boxes, but we want to
+ensure the output rasters are exactly the correct size so that they line up correctly. We can do this easily with the
+<code class="docutils literal notranslate"><span class="pre">.retile_raster</span></code> helper function. This is done <strong>in place</strong> for the collection.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_collection</span><span class="o">.</span><span class="n">retile_raster</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="nb">buffer</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The first argument is the desired resolution of the output raster. The second argument is the resolution of the new
+tile sets. <code class="docutils literal notranslate"><span class="pre">500</span></code> means they will be processed in 500m x 500m chunks. Finally <code class="docutils literal notranslate"><span class="pre">buffer=20</span></code> means that each tile will
+be buffered by 20 meters, such that we can process a large buffered tile to eliminate edge effects.</p>
+<p>Next, we want to define a function to process each buffered tile. This is where the flexibility of the collection
+enters in.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">my_process_func</span><span class="p">(</span><span class="n">buffered_cloud</span><span class="p">,</span> <span class="n">tile</span><span class="p">):</span>
+    <span class="n">buffer_dist</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">buffered_cloud</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Generate CHM of buffered cloud</span>
+    <span class="n">chm</span> <span class="o">=</span> <span class="n">buffered_cloud</span><span class="o">.</span><span class="n">chm</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">interp_method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="n">pit_filter</span><span class="o">=</span><span class="s2">&quot;median&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Define output bounding box (remove the buffered part)</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">tile</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+    <span class="n">bbox</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">buffer_dist</span><span class="p">,</span> <span class="n">coords</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">buffer_dist</span><span class="p">,</span> <span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">buffer_dist</span><span class="p">,</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span>
+        <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">buffer_dist</span>
+    <span class="n">chm</span><span class="o">.</span><span class="n">force_extent</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span>
+
+    <span class="c1"># Make a readable name for this particular tile</span>
+    <span class="n">flat_coords</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">coord</span><span class="p">))</span> <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">bbox</span><span class="p">]</span>
+    <span class="n">tile_str</span> <span class="o">=</span> <span class="s1">&#39;{}_{}_{}_{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">flat_coords</span><span class="p">)</span>
+
+    <span class="c1"># Write out the canopy height model</span>
+    <span class="n">chm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;{}.tif&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tile_str</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The above function is lengthy, but really quite simple. First, we normalize and create a canopy height model for some
+given buffered point cloud. Then, we restrict its output to remove the buffer using <code class="docutils literal notranslate"><span class="pre">.force_extent</span></code>. Finally, we write
+out the canopy height model to file with a nicely formatted name.</p>
+<p>Finally, we can execute the processing job with the following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_collection</span><span class="o">.</span><span class="n">par_apply</span><span class="p">(</span><span class="n">my_process_func</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
 
            </div>
            
@@ -164,7 +228,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Bryce Frank
+        &copy; Copyright 2019, Bryce Frank.
 
     </p>
   </div>
@@ -181,27 +245,33 @@
   
 
 
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-  
- 
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-138257649-2"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'UA-138257649-2');
-</script>
-
+  </script> 
 
 </body>
 </html>

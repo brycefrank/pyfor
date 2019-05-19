@@ -1,6 +1,14 @@
-[Documentation](http://brycefrank.com/pyfor) | [Changelog](https://github.com/brycefrank/pyfor/blob/master/CHANGELOG.md) | [Request a Feature](https://github.com/brycefrank/pyfor/issues/new) | [Road Map](https://github.com/brycefrank/pyfor/projects/12)
-
-[![Build Status](https://travis-ci.org/brycefrank/pyfor.svg?branch=master)](https://travis-ci.org/brycefrank/pyfor)[![Coverage Status](https://coveralls.io/repos/github/brycefrank/pyfor/badge.svg?branch=master)](https://coveralls.io/github/brycefrank/pyfor?branch=master)[![Gitter](https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg)](https://gitter.im/pyfor-gh/Lobby?source=orgpage)[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=6VGXC3S5RVSPN&lc=US&item_name=Bryce%20Frank&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted)
+<p align="center">
+  <img src="docs/logo.png" width="100"><br>
+  <b>pyfor</b><br><br>
+  <a href="http://brycefrank.com/pyfor">Documentation</a> |
+  <a href="https://github.com/brycefrank/pyfor/blob/master/CHANGELOG.md">Changelog</a> |
+  <a href="https://github.com/brycefrank/pyfor/issues/new">Request a Feature</a> |
+  <a href="https://github.com/brycefrank/pyfor/projects/12">Road Map</a>
+  <br>
+  <img src="https://camo.githubusercontent.com/033f1149793306148313011a8777f72724800836/68747470733a2f2f7472617669732d63692e6f72672f62727963656672616e6b2f7079666f722e7376673f6272616e63683d6d6173746572">
+  <img src="https://coveralls.io/repos/github/brycefrank/pyfor/badge.svg?branch=master">
+</p>
 
 **pyfor** is a Python package that assists in the processing of point cloud data in the context of forest inventory. 
 This includes manipulation of point data, support for analysis, and a
@@ -13,6 +21,19 @@ Current Release: 0.3.4
 Release Date: April 20, 2019
 
 Release Status: 0.3 is an adolescent LiDAR data processing package adequate for single tile processing and large acqusitions.
+
+## What Does pyfor Do?
+
+- [Normalization](http://brycefrank.com/pyfor/html/topics/normalization.html)
+- [Canopy Height Models](http://brycefrank.com/pyfor/html/topics/canopyheightmodel.html)
+- [Ground Filtering](http://brycefrank.com/pyfor/html/api/pyfor.ground_filter.html)
+- [Clipping](http://brycefrank.com/pyfor/html/topics/clipping.html)
+- [Large Acquisition Processing](http://brycefrank.com/pyfor/html/advanced/handlinglargeacquisitions.html)
+
+and many other tasks. See the [documentation](http://brycefrank.com/pyfor) for examples and applications.
+
+What about tree segmentation? Please see pyfor's sister package [`treeseg`](https://github.com/brycefrank/treeseg) which
+is a standalone package for tree segmentation and detection.
 
 ## Installation
 

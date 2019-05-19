@@ -61,37 +61,56 @@ class CloudDataFrame(gpd.GeoDataFrame):
         las.map_polygon(polygon)
         return las.points
 
-    def _construct_tile(self, func, tile, indexed):
+    def _construct_tile_indexed(self, func, tile):
         """
         For a given tile, clips points from intersecting las files and loads as Cloud object.
 
         :param func: The function to process the input tile.
         :param tile: Tile the tile to process
-        :param indexed: A boolean indicating whether or not to leverage a `.lax` file.
         """
-        for i, las_file in enumerate(self._get_parents(tile)['las_path']):
-            if indexed == True:
-                try:
-                    las = laxpy.IndexedLAS(las_file)
-                    las.map_polygon(tile)
-                except ValueError as e:
-                    print(e)
-                    return 0
-            else:
-                las = las_file
+        i = 0
+        for las_file in self._get_parents(tile)['las_path']:
+            # Map the index (clip)
+            las = laxpy.IndexedLAS(las_file)
+            las.map_polygon(tile)
 
-            if i == 0:
-                out_pc = pyfor.cloud.Cloud(las)
-            else:
-                out_pc.data._append(pyfor.cloud.Cloud(las).data)
+            if len(las.x) > 0:
+                if i == 0:
+                    out_pc = pyfor.cloud.Cloud(las)
+                else:
+                    out_pc.data._append(pyfor.cloud.Cloud(las).data)
 
-        try:
-            out_pc = out_pc.clip(tile)
-            out_pc.crs = self.crs
+                out_pc = out_pc.clip(tile)
+                out_pc.crs = self.crs
+                i += 1
+
+            else:
+                pass
+
+        if out_pc.data.points.shape[0] > 0:
             func(out_pc, tile)
-        except KeyError as e:
-            print(e)
-            pass
+
+    def _construct_tile_no_index(self, func, tile):
+        i = 0
+        for las_file in self._get_parents(tile)['las_path']:
+            cloud = pyfor.cloud.Cloud(las_file)
+
+            if len(cloud.data.points.x) > 0:
+                if i == 0:
+                    out_pc = cloud
+                else:
+                    out_pc.data._append(cloud.data)
+
+                out_pc = out_pc.clip(tile)
+                out_pc.crs = self.crs
+                i += 1
+
+            else:
+                pass
+
+        if out_pc.data.points.shape[0] > 0:
+            func(out_pc, tile)
+
 
     def par_apply(self, func, indexed=True, by_file=False):
         """
@@ -113,7 +132,10 @@ class CloudDataFrame(gpd.GeoDataFrame):
         if by_file:
             return Parallel(n_jobs=self.n_threads)(delayed(func)(las_path) for las_path in self['las_path'])
         else:
-            Parallel(n_jobs=self.n_threads)(delayed(self._construct_tile)(func, tile, indexed) for tile in self.tiles)
+            if indexed == True:
+                Parallel(n_jobs=self.n_threads)(delayed(self._construct_tile_indexed)(func, tile) for tile in self.tiles)
+            else:
+                Parallel(n_jobs=self.n_threads)(delayed(self._construct_tile_no_index)(func, tile) for tile in self.tiles)
 
     def retile_raster(self, cell_size, original_tile_size, buffer=0):
         """
@@ -275,6 +297,7 @@ class Retiler:
         num_x = int(np.ceil(project_width / new_tile_size))
         num_y = int(np.ceil(project_height / new_tile_size))
 
+
         new_tiles = []
         for i in range(num_x):
             for j in range(num_y):
@@ -293,7 +316,6 @@ class Retiler:
                 # Only append if there are any original tiles touching
                 if len(self.cdf._get_parents(new_tile)) > 0:
                     new_tiles.append(new_tile)
-
         return new_tiles
 
     def retile_buffer(self, tiles, buffer):

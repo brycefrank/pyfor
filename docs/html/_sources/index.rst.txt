@@ -34,6 +34,7 @@ The above example only scratches the surface. Please see the Installation and Ge
    installation
    gettingstarted
    topics/index
+   advanced/index
    api/index
 
 Indices and Tables

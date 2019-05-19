@@ -1,3 +1,4 @@
+dist: xenial
 language: python
 branch:
   only:
@@ -20,10 +21,8 @@ install:
   - source activate pyfor_env
   - pip install coveralls
   - pip install .
-before_script: # configure a headless display to test plot generation
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 3
+services:
+  - xvfb
 script:
   - coverage run --source pyfor setup.py test
 after_success:
