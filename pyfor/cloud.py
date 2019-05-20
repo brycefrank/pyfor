@@ -68,7 +68,6 @@ class LASData(CloudData):
             writer.close()
         else:
             raise ValueError('There is no data contained in this Cloud object, it is impossible to write.')
-            print('No data to write.')
 
 class Cloud:
     """

@@ -1,12 +1,7 @@
 dist: xenial
 language: python
-branch:
-  only:
-    - master
-    - 0.2.1
-    - 0.3.0
 python:
-  - "3.6"
+  - "3.7"
 install:
   - sudo apt-get update
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
