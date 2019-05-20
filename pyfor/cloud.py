@@ -92,16 +92,12 @@ class Cloud:
                 ply = plyfile.PlyData.read(path)
                 ply_points = ply.elements[0].data
                 points = pd.DataFrame({"x": ply_points["x"], "y": ply_points["y"], "z": ply_points["z"]})
-
-                # ply headers are very basic, this is set here for compatibility with modifications to the header downstream (for now)
-                # TODO handle ply headers
                 header = 'ply_header'
                 self.data = PLYData(points , header)
 
             else:
                 raise ValueError('File extension not supported, please input either a las, laz, ply or CloudData object.')
 
-        # If imported from a CloudData object
         elif type(path) == CloudData or isinstance(path, CloudData):
             self.data = path
 
@@ -111,8 +107,6 @@ class Cloud:
             elif self.data.header == 'ply_header':
                 self.data = PLYData(self.data.points, self.data.header)
 
-
-        # A laspy (or laxpy) File object
         elif path.__class__.__bases__[0] == laspy.file.File or type(path) == laspy.file.File:
             self._get_las_points(path)
 
@@ -171,32 +165,6 @@ class Cloud:
 
         return out
 
-
-
-    def _discrete_cmap(self, n_bin, base_cmap=None):
-        """Create an N-bin discrete colormap from the specified input map"""
-        import matplotlib.pyplot as plt
-        from matplotlib.colors import LinearSegmentedColormap
-
-        base = plt.cm.get_cmap(base_cmap)
-        color_list = base(np.linspace(0, 1, n_bin))
-        cmap_name = base.name + str(n_bin)
-        return LinearSegmentedColormap.from_list(cmap_name, color_list, n_bin)
-
-    def _set_discrete_color(self, n_bin, series):
-        """Adds a column 'random_id' to Cloud.las.points that reduces the 'user_data' column to a fewer number of random
-        integers. Used to produce clearer 3d visualizations of detected trees.
-
-        :param n_bin: Number of bins to reduce to.
-        :param series: The pandas series to reduce, usually 'user_data' which is set to a unique tree ID after detection.
-        """
-
-        random_ints = np.random.randint(1, n_bin + 1, size = len(np.unique(series)))
-        pre_merge = pd.DataFrame({'unique_id': series.unique(), 'random_id': random_ints})
-
-
-        self.data.points = pd.merge(self.data.points, pre_merge, left_on = 'user_data', right_on = 'unique_id')
-
     def grid(self, cell_size):
         """
         Generates a :class:`.Grid` object for the parent object given a cell size. \
@@ -233,12 +201,6 @@ class Cloud:
         import pyqtgraph as pg
         import pyqtgraph.opengl as gl
 
-        # Randomly sample down if too large
-        if dim == 'user_data' and plot_trees:
-            dim = 'random_id'
-            self._set_discrete_color(n_bin, self.data.points['user_data'])
-            cmap = self._discrete_cmap(n_bin, base_cmap=cmap)
-
         if self.data.count > max_points:
                 sample_mask = np.random.randint(self.data.count,
                                                 size = int(max_points))
@@ -251,13 +213,9 @@ class Cloud:
             color_dim = np.copy(self.data.points[dim].values)
 
         # If dim is user data (probably TREE ID or some such thing) then we want a discrete colormap
-        if dim != 'random_id':
-            color_dim = (color_dim - np.min(color_dim)) / (np.max(color_dim) - np.min(color_dim))
-            cmap = cm.get_cmap(cmap)
-            colors = cmap(color_dim)
-
-        else:
-            colors = cmap(color_dim)
+        color_dim = (color_dim - np.min(color_dim)) / (np.max(color_dim) - np.min(color_dim))
+        cmap = cm.get_cmap(cmap)
+        colors = cmap(color_dim)
 
         # Start Qt app and widget
         pg.mkQApp()

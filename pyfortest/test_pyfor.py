@@ -122,9 +122,9 @@ class LASCloudTestCase(unittest.TestCase, CloudTestCase):
     def test_plot(self):
         self.test_cloud.plot()
 
-    #def test_plot3d(self):
-    #    self.test_cloud.plot3d()
-    #    self.test_cloud.plot3d(dim='user_data')
+    def test_plot3d(self):
+        self.test_cloud.plot3d()
+        self.test_cloud.plot3d(dim='user_data')
 
     def test_normalize(self):
         self.test_cloud.normalize(3)
@@ -185,7 +185,6 @@ class GridTestCase(unittest.TestCase):
     def test_raster(self):
         raster = self.test_grid.raster("max", "z")
         self.assertEqual(type(raster), rasterizer.Raster)
-        raster.grid.cloud.data.header.reader.close()
 
     def test_interpolate(self):
         self.test_grid.interpolate("max", "z")
