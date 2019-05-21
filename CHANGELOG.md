@@ -8,6 +8,13 @@ Software submission.
 ## Cloud
 1. `.normalize` wrapper now allows for using already classified ground points with the `classified` argument.
 
+## Raster
+1. `.watershed_seg` and `.local_maxima` were removed. Please see [treeseg](https://github.com/brycefrank/treeseg) for 
+new implementations of these methods.
+
+## Testing Suite
+1. Added tests for `Cloud.subtract`, `Raster.force_extent`.
+
 # 0.3.4 - Hotfixes
 
 Hotixes applied directly to `master` between April 20, 2019 and 0.4.0 release.
