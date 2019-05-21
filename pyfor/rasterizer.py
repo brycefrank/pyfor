@@ -172,6 +172,10 @@ class Raster:
         self.array = array
         self._affine = from_origin(self.grid.cloud.data.min[0], self.grid.cloud.data.max[1], self.grid.cell_size, self.grid.cell_size)
 
+    @classmethod
+    def from_rasterio(cls):
+        pass
+
     def force_extent(self, bbox):
         """
         Sets `self._affine` and `self.array` to a forced bounding box. Useful for trimming edges off of rasters when
@@ -231,18 +235,6 @@ class Raster:
         # Handle the affine transformation
         new_affine = from_origin(old_left + ((-left_diff) * self.grid.cell_size), old_top - (top_diff * self.grid.cell_size), self.grid.cell_size, self.grid.cell_size)
         self._affine = new_affine
-
-    def remove_sparse_cells(self, min_points):
-        """
-        Sets sparse cells, i.e. those that have < `min_points` to nan **in place**. This improves the reliability of edge-cells
-        when handling multiple tile rasters.
-
-        :return:
-        """
-
-        with np.errstate(invalid='ignore'):
-            count_array = self.grid.raster("count", "z").array
-            self.array[count_array < min_points] = np.nan
 
     def plot(self, cmap="viridis", block = False, return_plot = False):
         """

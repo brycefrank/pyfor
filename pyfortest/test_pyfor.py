@@ -134,6 +134,23 @@ class LASCloudTestCase(unittest.TestCase, CloudTestCase):
         self.test_cloud.normalize(3, classified=True)
         self.assertLess(self.test_cloud.data.max[2], 65)
 
+    def test_subtract(self):
+        zf = ground_filter.Zhang2003(1)
+        bem = zf.bem(self.test_cloud)
+        bem.write('./temp_bem.tif')
+        self.test_cloud.subtract('./temp_bem.tif')
+
+        # In theory this should equal the z column from a regular normalization, do this on a separate cloud
+        pc = cloud.Cloud(test_las)
+        pc.normalize(1)
+        normalize_z = pc.data.points['z']
+        subtracted_z = self.test_cloud.data.points['z']
+
+        # Allow a tolerance of 0.005 meters
+        self.assertLess(np.mean(normalize_z.values) - np.mean(subtracted_z.values), 0.005)
+
+        os.remove('./temp_bem.tif')
+
     def test_chm(self):
         self.test_cloud.chm(0.5, interp_method="nearest", pit_filter="median")
 
@@ -240,6 +257,32 @@ class RasterTestCase(unittest.TestCase):
     def test_plot(self):
         self.test_raster.plot()
         self.test_raster.plot(return_plot=True)
+
+    def test_force_extent_contract(self):
+        min_x, min_y = self.test_raster.grid.cloud.data.header.min[0:2]
+        max_x, max_y = self.test_raster.grid.cloud.data.header.max[0:2]
+
+        # Test buffering in 10 meters
+        buffer = 10
+        bbox = (min_x + buffer, max_x - buffer, min_y + buffer, max_y - buffer)
+
+        self.test_raster.force_extent(bbox)
+        self.assertEqual(self.test_raster.array.shape, (180, 180))
+        self.assertEqual(self.test_raster._affine[2], min_x + buffer)
+        self.assertEqual(self.test_raster._affine[5], max_y - buffer)
+
+    def test_force_extent_expand(self):
+        min_x, min_y = self.test_raster.grid.cloud.data.header.min[0:2]
+        max_x, max_y = self.test_raster.grid.cloud.data.header.max[0:2]
+
+        # Test buffering out 10 meters
+        buffer = 10
+        bbox = (min_x - buffer, max_x + buffer, min_y - buffer, max_y + buffer)
+
+        self.test_raster.force_extent(bbox)
+        self.assertEqual(self.test_raster.array.shape, (220, 220))
+        self.assertEqual(self.test_raster._affine[2], min_x - buffer)
+        self.assertEqual(self.test_raster._affine[5], max_y + buffer)
 
     def test_write_with_crs(self):
         self.test_raster.write("./temp_tif.tif")
