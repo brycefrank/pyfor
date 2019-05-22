@@ -87,6 +87,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../topics/index.html">The Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced/index.html">Advanced</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html">API Reference</a></li>
 </ul>
 
@@ -291,7 +292,7 @@ implementation interacts only with a raster, so the output resolution will be di
 
 <dl class="method">
 <dt id="pyfor.ground_filter.Zhang2003.bem">
-<code class="descname">bem</code><span class="sig-paren">(</span><em>cloud</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.Zhang2003.bem" title="Permalink to this definition">¶</a></dt>
+<code class="descname">bem</code><span class="sig-paren">(</span><em>cloud</em>, <em>classified=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.Zhang2003.bem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Retrieve the bare earth model (BEM). Unlike <a class="reference internal" href="#pyfor.ground_filter.KrausPfeifer1998" title="pyfor.ground_filter.KrausPfeifer1998"><code class="xref py py-class docutils literal notranslate"><span class="pre">KrausPfeifer1998</span></code></a>, the cell size is defined upon         initialization of the filter, and thus it is not required to retrieve the bare earth model from the filter.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -314,7 +315,7 @@ implementation interacts only with a raster, so the output resolution will be di
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cell_size</strong> – The cell_size for the intermediate BEM. Values from 0.5 to 3 are common.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cloud</strong> – The input cloud object to normalize.</td>
 </tr>
 </tbody>
 </table>

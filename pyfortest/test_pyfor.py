@@ -293,7 +293,16 @@ class RasterTestCase(unittest.TestCase):
 
 class RetileTestCase(unittest.TestCase):
     def setUp(self):
-        pass
+        cdf = collection.from_dir(os.path.join(data_dir, 'mock_collection'))
+        self.retiler = collection.Retiler(cdf)
+
+    def test_retile_raster(self):
+        self.retiler.retile_raster(10, 100)
+        self.retiler.retile_raster(10, 100, 10)
+
+    def test_retile_buffer(self):
+        self.retiler.retile_buffer(10)
+
 
 class GISExportTestCase(unittest.TestCase):
     def setUp(self):

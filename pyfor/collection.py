@@ -105,6 +105,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
                 out_pc.crs = self.crs
                 i += 1
 
+
             else:
                 pass
 
@@ -190,6 +191,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
         pc = laspy.file.File(las_path)
         min_x, max_x = pc.header.min[0], pc.header.max[0]
         min_y, max_y = pc.header.min[1], pc.header.max[1]
+        pc.header.reader.close()
         return((min_x, max_x, min_y, max_y))
 
     def _build_polygons(self):
@@ -318,40 +320,14 @@ class Retiler:
                     new_tiles.append(new_tile)
         return new_tiles
 
-    def retile_buffer(self, tiles, buffer):
+    def retile_buffer(self, buffer):
         """
         A simple buffering operation.
 
         :return: A list of buffered shapely polygons.
         """
 
-        return [self._square_buffer(tile, buffer) for tile in tiles]
-
-
-    def retile_quadrant(self, tiles):
-        """
-        Splits input tiles into quadrants. An efficient retiling method when particular retiling geometries are not
-        necessary.
-        """
-
-        new_tiles = []
-        for tile in tiles:
-            # Build the quadrant geometries, this is defined by the following six values
-            x0, y0 = tile[0], tile[1]
-            x2, y2 = tile[2], tile[3]
-            x1 = ((tile[2] - tile[0]) / 2) + x0
-            y1 = ((tile[3] - tile[1]) / 2) + y0
-
-            # Create the geometries
-            bottom_left = Polygon([(x0, y0), (x0, y1), (x1, y1), (x1, y0)])
-            bottom_right = Polygon([(x1, y0), (x1, y1), (x2, y1), (x2, y0)])
-            top_left = Polygon([(x0, y1), (x0, y2), (x1, y2), (x1, y1)])
-            top_right = Polygon([(x1, y1), (x1, y2), (x2, y2), (x2, y1)])
-
-            quadrants = [bottom_left, bottom_right, top_left, top_right]
-            new_tiles.append(quadrants)
-
-        return [quadrant for sublist in new_tiles for quadrant in sublist]
+        return [self._square_buffer(tile, buffer) for tile in self.cdf.tiles]
 
 def from_dir(las_dir, **kwargs):
     """

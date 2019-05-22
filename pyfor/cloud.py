@@ -145,25 +145,21 @@ class Cloud:
         """
         from os.path import getsize
 
-        # Format max and min
-        min =  [float('{0:.2f}'.format(elem)) for elem in self.data.min]
-        max =  [float('{0:.2f}'.format(elem)) for elem in self.data.max]
-
-        # TODO: Incorporate this in CloudData somehow, messy!
+        summary = {}
+        summary['Minimum (x y z)'] = [float('{0:.2f}'.format(elem)) for elem in self.data.min]
+        summary['Maximum (x y z)'] = [float('{0:.2f}'.format(elem)) for elem in self.data.max]
+        summary['Number of Points'] = len(self.data.points)
         if hasattr(self, 'extension'):
+            summary['File Size'] = getsize(self.filepath)
+
             if self.extension.lower() == '.las' or self.extension.lower() == '.laz':
-                filesize = getsize(self.filepath)
-                las_version = self.data.header.version
-                out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}\nLas Version: {}
+                summary['LAS Specification'] = self.data.header.version
 
-                """.format(self.filepath, filesize, self.data.count, min, max, las_version)
-            elif self.extension.lower() == '.ply':
-                filesize = getsize(self.filepath)
-                out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}""".format(self.filepath, filesize, self.data.count, min, max)
-        else:
-            out = """Number of Points: {}\nMinimum(x y z): {}\nMaximum (x y z): {}""".format(self.data.count, min, max)
+        if self.crs is not None:
+            summary['CRS'] = self.crs
 
-        return out
+        string_list = [key + ': ' + str(val)+'\n' for key, val in summary.items()]
+        return "".join(str(x) for x in string_list)
 
     def grid(self, cell_size):
         """

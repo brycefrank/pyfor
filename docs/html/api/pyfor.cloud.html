@@ -87,6 +87,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../topics/index.html">The Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced/index.html">Advanced</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html">API Reference</a></li>
 </ul>
 
@@ -259,8 +260,20 @@
 
 <dl class="method">
 <dt id="pyfor.cloud.Cloud.normalize">
-<code class="descname">normalize</code><span class="sig-paren">(</span><em>cell_size</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.normalize" title="Permalink to this definition">¶</a></dt>
+<code class="descname">normalize</code><span class="sig-paren">(</span><em>cell_size</em>, <em>classified=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.cloud.Cloud.normalize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Normalize the cloud using the default Zhang et al. (2003) progressive morphological ground filter. Please see         the documentation in <a class="reference internal" href="pyfor.ground_filter.html#pyfor.ground_filter.Zhang2003" title="pyfor.ground_filter.Zhang2003"><code class="xref py py-class docutils literal notranslate"><span class="pre">ground_filter.Zhang2003</span></code></a> for more information and keyword argument definitions.         If you want to use a pre-computed DEM to normalize, please see <a class="reference internal" href="#pyfor.cloud.Cloud.subtract" title="pyfor.cloud.Cloud.subtract"><code class="xref py py-meth docutils literal notranslate"><span class="pre">subtract()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cell_size</strong> – The resolution of the intermediate bare earth model.</li>
+<li><strong>classified</strong> – If True and file type is <cite>.las</cite> or <cite>.laz</cite>, uses the points classified as ground (i.e. 2) to         construct the intermediate bare earth model.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">

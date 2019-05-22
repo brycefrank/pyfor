@@ -87,6 +87,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../topics/index.html">The Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced/index.html">Advanced</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html">API Reference</a></li>
 </ul>
 
@@ -158,70 +159,6 @@
             
   <div class="section" id="module-pyfor.rasterizer">
 <span id="pyfor-rasterizer-module"></span><h1>pyfor.rasterizer module<a class="headerlink" href="#module-pyfor.rasterizer" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="pyfor.rasterizer.CrownSegments">
-<em class="property">class </em><code class="descclassname">pyfor.rasterizer.</code><code class="descname">CrownSegments</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em>, <em>min_distance</em>, <em>threshold_abs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.CrownSegments" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyfor.rasterizer.Raster" title="pyfor.rasterizer.Raster"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyfor.rasterizer.Raster</span></code></a></p>
-<p>This class is for visualization of detected crown segments with a raster object.</p>
-<dl class="method">
-<dt id="pyfor.rasterizer.CrownSegments.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em>, <em>min_distance</em>, <em>threshold_abs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.CrownSegments.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyfor.rasterizer.CrownSegments.plot">
-<code class="descname">plot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.CrownSegments.plot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Default plotting method for the Raster object.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="pyfor.rasterizer.CrownSegments.segments">
-<code class="descname">segments</code><a class="headerlink" href="#pyfor.rasterizer.CrownSegments.segments" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="pyfor.rasterizer.DetectedTops">
-<em class="property">class </em><code class="descclassname">pyfor.rasterizer.</code><code class="descname">DetectedTops</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em>, <em>chm</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.DetectedTops" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyfor.rasterizer.Raster" title="pyfor.rasterizer.Raster"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyfor.rasterizer.Raster</span></code></a></p>
-<p>This class is for visualization of detected tops with a raster object. Generally created internally via
-Raster.local_maxima</p>
-<dl class="method">
-<dt id="pyfor.rasterizer.DetectedTops.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>array</em>, <em>grid</em>, <em>chm</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.DetectedTops.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyfor.rasterizer.DetectedTops.plot">
-<code class="descname">plot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.DetectedTops.plot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots the detected tops against the original input raster.
-# <a class="reference external" href="https://matplotlib.org/gallery/images_contours_and_fields/image_transparency_blend.html">https://matplotlib.org/gallery/images_contours_and_fields/image_transparency_blend.html</a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="pyfor.rasterizer.DetectedTops.points">
-<code class="descname">points</code><a class="headerlink" href="#pyfor.rasterizer.DetectedTops.points" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns an Nx2 numpy array of detected top locations projected to the input Cloud space.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="pyfor.rasterizer.DetectedTops.tops_binary">
-<code class="descname">tops_binary</code><a class="headerlink" href="#pyfor.rasterizer.DetectedTops.tops_binary" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A binary array, where 1 indicates a detected top, 0 otherwise</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
 <dl class="class">
 <dt id="pyfor.rasterizer.Grid">
 <em class="property">class </em><code class="descclassname">pyfor.rasterizer.</code><code class="descname">Grid</code><span class="sig-paren">(</span><em>cloud</em>, <em>cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid" title="Permalink to this definition">¶</a></dt>
@@ -366,30 +303,6 @@ processing buffered tiles. This operation is done in place.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyfor.rasterizer.Raster.local_maxima">
-<code class="descname">local_maxima</code><span class="sig-paren">(</span><em>min_distance=2</em>, <em>threshold_abs=2</em>, <em>as_coordinates=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.local_maxima" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a new Raster object with tops detected using a local maxima filtering method. See
-skimage.feature.peak_local_maxima for more information on the filter.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>min_distance</strong> – </li>
-<li><strong>threshold_abs</strong> – </li>
-<li><strong>multi_top</strong> – If multi_top is true, a top can consist of more than one pixel.</li>
-<li><strong>as_coordinates</strong> – Not yet implemented</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="pyfor.rasterizer.Raster.pit_filter">
 <code class="descname">pit_filter</code><span class="sig-paren">(</span><em>kernel_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.pit_filter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Filters pits in the raster. Intended for use with canopy height models (i.e. grid(0.5).interpolate(“max”, “z”).
@@ -420,28 +333,6 @@ when handling multiple tile rasters.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyfor.rasterizer.Raster.watershed_seg">
-<code class="descname">watershed_seg</code><span class="sig-paren">(</span><em>min_distance=2</em>, <em>threshold_abs=2</em>, <em>classify=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.watershed_seg" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the watershed segmentation of the Raster as a geopandas dataframe.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>min_distance</strong> – The minimum distance between local height maxima in the same units as the input point         cloud.</li>
-<li><strong>threshold_abs</strong> – The minimum threshold needed to be called a peak in peak_local_max.</li>
-<li><strong>classify</strong> – If true, sets the <cite>user_data</cite> of the original point cloud data to the segment ID. The         segment ID is an arbitrary identification number generated by the labels function. This can be useful for         plotting point clouds where each segment color is unique.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A geopandas data frame, each record is a crown segment.</p>
-</td>
 </tr>
 </tbody>
 </table>

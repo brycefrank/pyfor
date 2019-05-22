@@ -16,11 +16,11 @@ memory optimized API for managing large collections of tiles.
 
 ## Release Status
 
-Current Release: 0.3.4
+Current Release: 0.4.0
 
-Release Date: April 20, 2019
+Release Date: []
 
-Release Status: 0.3 is an adolescent LiDAR data processing package adequate for single tile processing and large acqusitions.
+Release Status: 0.4 is an adolescent LiDAR data processing package adequate for single tile processing and large acqusitions.
 
 ## What Does pyfor Do?
 
