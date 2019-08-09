@@ -329,6 +329,10 @@ class Cloud:
         else:
             return self.grid(cell_size).interpolate("max", "z", interp_method)
 
+    def standard_metrics(self, heightbreak=0):
+        from pyfor.metrics import standard_metrics_cloud
+        return standard_metrics_cloud(self.data.points)
+
     @property
     def convex_hull(self):
         """

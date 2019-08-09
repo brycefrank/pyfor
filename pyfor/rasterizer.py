@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from pyfor import gisexport
+import pyfor.metrics
 
 class Grid:
     """The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. From \
@@ -89,9 +90,6 @@ class Grid:
 
         points = cell_values[['bins_x', 'bins_y']].values
         values = cell_values[dim].values
-
-        # https://stackoverflow.com/questions/12864445/numpy-meshgrid-points
-        # TODO assumes a raster occupies a square/rectangular space. Is it possible to not assume this and increase performance?
         X, Y = np.mgrid[1:self.n+1, 1:self.m+1]
 
         # TODO generally a slow approach
@@ -123,6 +121,9 @@ class Grid:
             # Get list of metric names
             metrics = [tup[1] for tup in list(aggregate)]
             return pd.DataFrame({'dim': dims, 'metric': metrics, 'raster': rasters}).set_index(['dim', 'metric'])
+
+    def standard_metrics(self, heightbreak=0):
+        return pyfor.metrics.standard_metrics_grid(self, heightbreak=heightbreak)
 
 class ImportedGrid(Grid):
     """
