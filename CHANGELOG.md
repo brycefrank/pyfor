@@ -8,12 +8,19 @@ Software submission.
 ## Cloud
 1. `.normalize` wrapper now allows for using already classified ground points with the `classified` argument.
 
+## Metrics
+1. Added metrics computations for `grid` objects
+2. Finalized the standard set of metrics for both `cloud` and `grid` objects via `standard_metrics_grid` and 
+`standard_metrics_cloud`
+
 ## Raster
 1. `.watershed_seg` and `.local_maxima` were removed. Please see [treeseg](https://github.com/brycefrank/treeseg) for 
 new implementations of these methods.
 
 ## Testing Suite
 1. Added tests for `Cloud.subtract`, `Raster.force_extent`.
+
+
 
 # 0.3.4 - Hotfixes
 

@@ -37,8 +37,8 @@ def pct_above_heightbreak(grid, r=0, heightbreak="mean"):
         # Compute mean z in each cell
         mean_z = grid.cells.agg({'z': np.mean})
         mean_z = mean_z.rename(columns={'z': 'mean_z'})
-        grid.cloud.data.points = pd.merge(grid.cloud.data.points, mean_z, on=['bins_x', 'bins_y'])
-        is_above = grid.cloud.data.points['z'] > grid.cloud.data.points['mean_z']
+        mean_z = pd.merge(grid.cloud.data.points, mean_z, on=['bins_x', 'bins_y'])['mean_z']
+        is_above = grid.cloud.data.points['z'] > mean_z
     else:
         is_above = grid.cloud.data.points['z'] > heightbreak
 
@@ -119,7 +119,7 @@ def vol_cov(grid, r, heightbreak):
     Calculates the volume covariate (percentage first returns above two meters times mean z)
     """
 
-    pct_r_above_hb = pct_r_above_heightbreak(grid, r, heightbreak)
+    pct_r_above_hb = pct_above_heightbreak(grid, r, heightbreak)
     mean_z = grid.raster(np.mean, "z")
     # Overwrite pct_r1_above_2m array (to save memory)
     pct_r_above_hb.array = pct_r_above_hb.array * mean_z.array
@@ -167,13 +167,7 @@ def total_returns(grid):
 
 
 def standard_metrics_grid(grid, heightbreak):
-    # TODO all aboves
     metrics_dict = {}
-
-    for pct in all_pct:
-        metrics_dict['p_' + str(pct)] = grid_percentile(grid, pct)
-
-
     metrics_dict['max_z'] = z_max(grid)
     metrics_dict['min_z'] = z_min(grid)
     metrics_dict['mean_z'] = z_mean(grid)
@@ -181,8 +175,14 @@ def standard_metrics_grid(grid, heightbreak):
     metrics_dict['var_z'] = z_var(grid)
     metrics_dict['canopy_relief_ratio'] = canopy_relief_ratio(grid, metrics_dict['mean_z'].array,
                                                          metrics_dict['min_z'].array, metrics_dict['max_z'].array)
-    metrics_dict['pct_r_1_above_{}'.format(heightbreak)] = pct_r_above_heightbreak(grid, 1, heightbreak)
-    metrics_dict['pct_r_1_above_mean'.format(heightbreak)] = pct_r_above_mean(grid, 1)
+
+    for pct in all_pct:
+        metrics_dict['p_' + str(pct)] = grid_percentile(grid, pct)
+
+    metrics_dict['pct_r_1_above_{}'.format(heightbreak)] = pct_above_heightbreak(grid, 1, heightbreak)
+    metrics_dict['pct_r_1_above_mean'.format(heightbreak)] = pct_above_heightbreak(grid, 1, "mean")
+    metrics_dict['pct_all_above_{}'.format(heightbreak)] = pct_above_heightbreak(grid, 0, heightbreak)
+    metrics_dict['pct_all_above_mean'.format(heightbreak)] = pct_above_heightbreak(grid, 0, "mean")
     return(metrics_dict)
 
 
