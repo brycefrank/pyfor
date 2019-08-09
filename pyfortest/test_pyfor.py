@@ -246,7 +246,13 @@ class GridMetricsTestCase(unittest.TestCase):
 
     def test_standard_metrics(self):
         metrics_dict = metrics.standard_metrics_grid(self.test_grid, 2)
-        print(metrics_dict)
+
+class CloudMetrcsTestCase(unittest.TestCase):
+    def setUp(self):
+        self.test_cloud = cloud.Cloud(test_las)
+
+    def test_standard_metrics(self):
+        metrics.standard_metrics_cloud(self.test_cloud.data.points, 2)
 
 class RasterTestCase(unittest.TestCase):
     def setUp(self):
