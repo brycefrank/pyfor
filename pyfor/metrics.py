@@ -19,64 +19,51 @@ def summarize_percentiles(z, pct = all_pct):
     """
     return (np.percentile(z, pct), pct)
 
-def pct_r_above_mean(grid, r):
+def pct_above_heightbreak(grid, r=0, heightbreak="mean"):
     """
     Calculates the percentage of first returns above the mean. This needs its own function because it summarizes
     multiple columns of the point cloud, and is therefore more complex than typical summarizations
     (i.e. percentiles). This returns a `pyfor.rasterizer.Raster` object.
+
+    :param grid: A `pyfor.rasterizer.Grid` object
+    :param r: The return number to constrain to. Must be a positive integer. If r=0, all points will be considered
+    (this is the default behavior).
+    :param heightbreak: The height at which to summarize. If a number is given, this will be interpreted as the height
+    at which points will be considered "above". If the string "mean" is given (this is the default), will use the mean
+    height of that cell, for example, to construct the "pct_above_mean" metric.
     """
 
-    # Compute mean z in each cell
-    mean_z = grid.cells.agg({'z': np.mean})
-    mean_z = mean_z.rename(columns={'z': 'mean_z'})
+    if heightbreak == "mean":
+        # Compute mean z in each cell
+        mean_z = grid.cells.agg({'z': np.mean})
+        mean_z = mean_z.rename(columns={'z': 'mean_z'})
+        grid.cloud.data.points = pd.merge(grid.cloud.data.points, mean_z, on=['bins_x', 'bins_y'])
+        is_above = grid.cloud.data.points['z'] > grid.cloud.data.points['mean_z']
+    else:
+        is_above = grid.cloud.data.points['z'] > heightbreak
 
-    # Redistribute mean z back to points
-    grid.cloud.data.points = pd.merge(grid.cloud.data.points, mean_z, on=['bins_x', 'bins_y'])
+    if r > 0:
+        out_col = 'pct_r{}_above_{}'.format(r, heightbreak)
+        grid.cloud.data.points['is_r'] = grid.cloud.data.points['return_num'] == r
+        grid.cloud.data.points['is_r_above'] = grid.cloud.data.points['is_r'] & is_above
+        cells = grid.cloud.grid(grid.cell_size).cells
 
-    # Find each point that is a first
-    grid.cloud.data.points['r{}_bool'.format(r)] = (grid.cloud.data.points['return_num'] == r)
-    grid.cloud.data.points['r{}_above_mean_bool'.format(r)] = (grid.cloud.data.points['z'] >
-                                                         grid.cloud.data.points['mean_z']) & (
-                                                                    grid.cloud.data.points['return_num'] == r)
+        summary = cells.agg({'is_r': np.sum, 'is_r_above': np.sum}).reset_index()
+        summary['bins_y'] = summary['bins_y']
+        summary[out_col] = summary['is_r_above'] / summary['is_r']
 
-    # Now, reaggregate to needed stats
-    cells = grid.cloud.grid(grid.cell_size).cells
+    else:
+        out_col = 'pct_all_above_{}'.format(heightbreak)
+        grid.cloud.data.points['is_above'] = is_above
+        cells = grid.cloud.grid(grid.cell_size).cells
+        summary = cells.agg({'x': "count", 'is_above': np.sum}).reset_index()
+        summary[out_col] = summary['is_above'] / summary['x']
 
-    summary = cells.agg({'r{}_bool'.format(r): np.sum, 'r{}_above_mean_bool'.format(r): np.sum}).reset_index()
-    summary['bins_y'] = summary['bins_y']
-    summary['pct_r{}_above_mean'.format(r)] = summary['r{}_above_mean_bool'.format(r)] / summary['r{}_bool'.format(r)]
 
-    # Lastly, we need to remerge into a raster and write
     array = np.full((grid.m, grid.n), np.nan)
-    array[summary["bins_y"], summary["bins_x"]] = summary['pct_r{}_above_mean'.format(r)]
-
+    array[summary["bins_y"], summary["bins_x"]] = summary[out_col]
     return pyfor.rasterizer.Raster(array, grid)
 
-def pct_r_above_heightbreak(grid, r, heightbreak):
-    """
-    Calculates the percentage of first returns above two meters. This needs its own function because it summarizes multiple
-    columns of the point cloud, and is therefore more complex than typical summarizations (i.e. percentiles). This returns
-    a `pyfor.rasterizer.Raster` object.
-    """
-
-    # Find each point that is a first return and above heightbreak
-    bool_tag = 'r{}_bool'.format(r)
-    count_tag = 'r{}_above_mean_bool'.format(r)
-    pct_tag = 'pct_r{}_above_mean'.format(r)
-    grid.cloud.data.points[bool_tag] = (grid.cloud.data.points['return_num'] == 1)
-    grid.cloud.data.points[count_tag] = (grid.cloud.data.points['z'] > heightbreak) & (grid.cloud.data.points['return_num'] == 1)
-
-    # Now, reaggregate to needed stats
-    cells = grid.cloud.grid(grid.cell_size).cells
-
-    summary = cells.agg({bool_tag: np.sum, count_tag: np.sum}).reset_index()
-    summary[pct_tag] = summary[count_tag] / summary[bool_tag]
-
-    # Lastly, we need to remerge into a raster and write
-    array = np.full((grid.m, grid.n), np.nan)
-    array[summary["bins_y"], summary["bins_x"]] = summary[pct_tag]
-
-    return pyfor.rasterizer.Raster(array, grid)
 
 def grid_percentile(grid, percentile):
     """
