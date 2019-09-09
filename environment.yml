@@ -1,9 +1,6 @@
 name: pyfor_env
 
-channels:
-  - conda-forge
 dependencies:
-  - poppler
   - python=3.7
   - numpy
   - gdal
@@ -19,7 +16,8 @@ dependencies:
   - libkml
   - geopandas
   - joblib
-  - lastools
+  - conda-forge::poppler
+  - conda-forge::lastools
   - pip:
       - laspy
       - laxpy
