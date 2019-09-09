@@ -1,9 +1,8 @@
-# 0.4.0
+# 0.3.5
 
-Updates between April 20, 2019 and []
+Updates between April 20, 2019 and September 9, 2019
 
-This update was for small enhancements and improvements to packaging in preparation for a Journal of Open Source 
-Software submission.
+A few small maintenance updates and implementation of `metrics`.
 
 ## Cloud
 1. `.normalize` wrapper now allows for using already classified ground points with the `classified` argument.
@@ -19,8 +18,6 @@ new implementations of these methods.
 
 ## Testing Suite
 1. Added tests for `Cloud.subtract`, `Raster.force_extent`.
-
-
 
 # 0.3.4 - Hotfixes
 
