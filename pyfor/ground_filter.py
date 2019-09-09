@@ -111,7 +111,7 @@ class Zhang2003:
         B = np.where(flag == 0, A, np.nan)
         return B
 
-    def bem(self, cloud):
+    def bem(self, cloud, classified = False):
         """
         Retrieve the bare earth model (BEM). Unlike :class:`.KrausPfeifer1998`, the cell size is defined upon \
         initialization of the filter, and thus it is not required to retrieve the bare earth model from the filter.
@@ -121,24 +121,34 @@ class Zhang2003:
         """
         from scipy.interpolate import griddata
         from pyfor.rasterizer import Raster
-        grid = cloud.grid(self.cell_size)
-        B = self._filter(grid)
+        from pyfor.cloud import Cloud, LASData
 
-        # Interpolate on our newly found ground cells
-        X, Y = np.mgrid[0:grid.m, 0:grid.n]
-        C = np.where(np.isfinite(B) == True)
-        vals = B[C[0], C[1]]
-        dem_array = griddata(np.stack((C[0], C[1]), axis = 1), vals, (X, Y), method=self.interp_method)
+        if classified:
+            sub = Cloud(LASData(cloud.data.points[cloud.data.points['classification'] == 2].copy(), cloud.data.header))
+            grid = sub.grid(self.cell_size)
+            bem = grid.interpolate(np.min, "z", interp_method=self.interp_method)
+            return(bem)
 
-        return(Raster(dem_array, grid))
+        else:
+            grid = cloud.grid(self.cell_size)
+            B = self._filter(grid)
+
+            # Interpolate on our newly found ground cells
+            X, Y = np.mgrid[0:grid.m, 0:grid.n]
+            C = np.where(np.isfinite(B) == True)
+            vals = B[C[0], C[1]]
+            dem_array = griddata(np.stack((C[0], C[1]), axis = 1), vals, (X, Y), method=self.interp_method)
+
+            return(Raster(dem_array, grid))
 
     def normalize(self, cloud):
         """
         Normalizes the original point cloud **in place**. This creates a BEM as an intermediate product, please see
         `.bem()` to return this directly.
 
-        :param cell_size: The cell_size for the intermediate BEM. Values from 0.5 to 3 are common.
+        :param cloud: The input cloud object to normalize.
         """
+
         bem = self.bem(cloud)
         cloud.data._update()
         df = pd.DataFrame(bem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')

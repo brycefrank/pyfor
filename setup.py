@@ -14,6 +14,5 @@ setup(
         'laspy',
         'laxpy',
         'python-coveralls',
-        ''
     ]
 )

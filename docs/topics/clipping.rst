@@ -12,6 +12,12 @@ for Python, to provide a way to clip point clouds.
 
     # Load point cloud
     pc = pyfor.cloud.Cloud("../data/test.las")
+    pc.plot3d()
+
+
+.. image:: ../img/unclipped.png
+    :scale: 80%
+    :align: center
 
 As input to the clipping function we need any `shapely.geometry.Polygon` our heart desires, as
 long as its coordinates correspond to the same physical space as the `Cloud` object. Here I extract
@@ -29,3 +35,9 @@ Finally, pass the `Polygon` to the clipping function. This function returns a ne
 
     # Load point cloud
     clipped = pc.clip(poly)
+    clipped.plot3d()
+
+
+.. image:: ../img/clipped.png
+    :scale: 80%
+    :align: center

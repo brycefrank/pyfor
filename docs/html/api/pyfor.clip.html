@@ -17,34 +17,36 @@
   
 
   
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="pyfor.cloud module" href="pyfor.cloud.html" />
     <link rel="prev" title="pyfor package" href="pyfor.html" /> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -58,7 +60,7 @@
             
             
               <div class="version">
-                0.3.4
+                0.3.5
               </div>
             
           
@@ -87,6 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../topics/index.html">The Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced/index.html">Advanced</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html">API Reference</a></li>
 </ul>
 
@@ -160,66 +163,54 @@
 <span id="pyfor-clip-module"></span><h1>pyfor.clip module<a class="headerlink" href="#module-pyfor.clip" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyfor.clip.poly_clip">
-<code class="descclassname">pyfor.clip.</code><code class="descname">poly_clip</code><span class="sig-paren">(</span><em>points</em>, <em>poly</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip.poly_clip" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the indices of <cite>points</cite> that are within a given polygon. This differs from <a class="reference internal" href="../source/pyfor.clip.html#pyfor.clip.ray_trace" title="pyfor.clip.ray_trace"><code class="xref py py-func docutils literal notranslate"><span class="pre">ray_trace()</span></code></a>     in that it enforces a small “pre-clip” optimization by first clipping to the polygon bounding box. This function     is directly called by <a class="reference internal" href="pyfor.cloud.html#pyfor.cloud.Cloud.clip" title="pyfor.cloud.Cloud.clip"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Cloud.clip()</span></code></a>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>cloud</strong> – A cloud object.</li>
-<li><strong>poly</strong> – A shapely Polygon, with coordinates in the same CRS as the point cloud.</li>
+<code class="sig-prename descclassname">pyfor.clip.</code><code class="sig-name descname">poly_clip</code><span class="sig-paren">(</span><em class="sig-param">points</em>, <em class="sig-param">poly</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip.poly_clip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the indices of <cite>points</cite> that are within a given polygon. This differs from <a class="reference internal" href="#pyfor.clip.ray_trace" title="pyfor.clip.ray_trace"><code class="xref py py-func docutils literal notranslate"><span class="pre">ray_trace()</span></code></a>     in that it enforces a small “pre-clip” optimization by first clipping to the polygon bounding box. This function     is directly called by <a class="reference internal" href="pyfor.cloud.html#pyfor.cloud.Cloud.clip" title="pyfor.cloud.Cloud.clip"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Cloud.clip()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cloud</strong> – A cloud object.</p></li>
+<li><p><strong>poly</strong> – A shapely Polygon, with coordinates in the same CRS as the point cloud.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A 1D numpy array of indices corresponding to points within the given polygon.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 1D numpy array of indices corresponding to points within the given polygon.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="pyfor.clip.ray_trace">
-<code class="descclassname">pyfor.clip.</code><code class="descname">ray_trace</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>poly</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip.ray_trace" title="Permalink to this definition">¶</a></dt>
-<dd><p>Determines for some set of x and y coordinates, which of those coordinates is within <cite>poly</cite>. Ray trace is     generally called as an internal function, see <a class="reference internal" href="../source/pyfor.clip.html#pyfor.clip.poly_clip" title="pyfor.clip.poly_clip"><code class="xref py py-func docutils literal notranslate"><span class="pre">poly_clip()</span></code></a></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> – A 1D numpy array of x coordinates.</li>
-<li><strong>y</strong> – A 1D numpy array of y coordinates.</li>
-<li><strong>poly</strong> – The coordinates of a polygon as a numpy array (i.e. from geo_json[‘coordinates’]</li>
+<code class="sig-prename descclassname">pyfor.clip.</code><code class="sig-name descname">ray_trace</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">poly</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip.ray_trace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines for some set of x and y coordinates, which of those coordinates is within <cite>poly</cite>. Ray trace is     generally called as an internal function, see <a class="reference internal" href="#pyfor.clip.poly_clip" title="pyfor.clip.poly_clip"><code class="xref py py-func docutils literal notranslate"><span class="pre">poly_clip()</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – A 1D numpy array of x coordinates.</p></li>
+<li><p><strong>y</strong> – A 1D numpy array of y coordinates.</p></li>
+<li><p><strong>poly</strong> – The coordinates of a polygon as a numpy array (i.e. from geo_json[‘coordinates’]</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A 1D boolean numpy array, true values are those points that are within <cite>poly</cite>.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 1D boolean numpy array, true values are those points that are within <cite>poly</cite>.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="pyfor.clip.square_clip">
-<code class="descclassname">pyfor.clip.</code><code class="descname">square_clip</code><span class="sig-paren">(</span><em>points</em>, <em>bounds</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip.square_clip" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyfor.clip.</code><code class="sig-name descname">square_clip</code><span class="sig-paren">(</span><em class="sig-param">points</em>, <em class="sig-param">bounds</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip.square_clip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clips a square from a tuple describing the position of the square.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>points</strong> – A N x 2 numpy array of x and y coordinates, where x is in column 0</li>
-<li><strong>bounds</strong> – A tuple of length 4, min y and max y coordinates of the square.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points</strong> – A N x 2 numpy array of x and y coordinates, where x is in column 0</p></li>
+<li><p><strong>bounds</strong> – A tuple of length 4, min y and max y coordinates of the square.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A boolean mask, true is within the square, false is outside of the square.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A boolean mask, true is within the square, false is outside of the square.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -235,7 +226,7 @@
         <a href="pyfor.cloud.html" class="btn btn-neutral float-right" title="pyfor.cloud module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="pyfor.html" class="btn btn-neutral" title="pyfor package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="pyfor.html" class="btn btn-neutral float-left" title="pyfor package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -244,7 +235,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Bryce Frank.
+        &copy; Copyright 2019, Bryce Frank
 
     </p>
   </div>
@@ -261,33 +252,16 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="../_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

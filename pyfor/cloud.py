@@ -68,7 +68,6 @@ class LASData(CloudData):
             writer.close()
         else:
             raise ValueError('There is no data contained in this Cloud object, it is impossible to write.')
-            print('No data to write.')
 
 class Cloud:
     """
@@ -93,16 +92,12 @@ class Cloud:
                 ply = plyfile.PlyData.read(path)
                 ply_points = ply.elements[0].data
                 points = pd.DataFrame({"x": ply_points["x"], "y": ply_points["y"], "z": ply_points["z"]})
-
-                # ply headers are very basic, this is set here for compatibility with modifications to the header downstream (for now)
-                # TODO handle ply headers
                 header = 'ply_header'
                 self.data = PLYData(points , header)
 
             else:
                 raise ValueError('File extension not supported, please input either a las, laz, ply or CloudData object.')
 
-        # If imported from a CloudData object
         elif type(path) == CloudData or isinstance(path, CloudData):
             self.data = path
 
@@ -112,8 +107,6 @@ class Cloud:
             elif self.data.header == 'ply_header':
                 self.data = PLYData(self.data.points, self.data.header)
 
-
-        # A laspy (or laxpy) File object
         elif path.__class__.__bases__[0] == laspy.file.File or type(path) == laspy.file.File:
             self._get_las_points(path)
 
@@ -152,51 +145,21 @@ class Cloud:
         """
         from os.path import getsize
 
-        # Format max and min
-        min =  [float('{0:.2f}'.format(elem)) for elem in self.data.min]
-        max =  [float('{0:.2f}'.format(elem)) for elem in self.data.max]
-
-        # TODO: Incorporate this in CloudData somehow, messy!
+        summary = {}
+        summary['Minimum (x y z)'] = [float('{0:.2f}'.format(elem)) for elem in self.data.min]
+        summary['Maximum (x y z)'] = [float('{0:.2f}'.format(elem)) for elem in self.data.max]
+        summary['Number of Points'] = len(self.data.points)
         if hasattr(self, 'extension'):
+            summary['File Size'] = getsize(self.filepath)
+
             if self.extension.lower() == '.las' or self.extension.lower() == '.laz':
-                filesize = getsize(self.filepath)
-                las_version = self.data.header.version
-                out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}\nLas Version: {}
+                summary['LAS Specification'] = self.data.header.version
 
-                """.format(self.filepath, filesize, self.data.count, min, max, las_version)
-            elif self.extension.lower() == '.ply':
-                filesize = getsize(self.filepath)
-                out = """ File Path: {}\nFile Size: {}\nNumber of Points: {}\nMinimum (x y z): {}\nMaximum (x y z): {}""".format(self.filepath, filesize, self.data.count, min, max)
-        else:
-            out = """Number of Points: {}\nMinimum(x y z): {}\nMaximum (x y z): {}""".format(self.data.count, min, max)
+        if self.crs is not None:
+            summary['CRS'] = self.crs
 
-        return out
-
-
-
-    def _discrete_cmap(self, n_bin, base_cmap=None):
-        """Create an N-bin discrete colormap from the specified input map"""
-        import matplotlib.pyplot as plt
-        from matplotlib.colors import LinearSegmentedColormap
-
-        base = plt.cm.get_cmap(base_cmap)
-        color_list = base(np.linspace(0, 1, n_bin))
-        cmap_name = base.name + str(n_bin)
-        return LinearSegmentedColormap.from_list(cmap_name, color_list, n_bin)
-
-    def _set_discrete_color(self, n_bin, series):
-        """Adds a column 'random_id' to Cloud.las.points that reduces the 'user_data' column to a fewer number of random
-        integers. Used to produce clearer 3d visualizations of detected trees.
-
-        :param n_bin: Number of bins to reduce to.
-        :param series: The pandas series to reduce, usually 'user_data' which is set to a unique tree ID after detection.
-        """
-
-        random_ints = np.random.randint(1, n_bin + 1, size = len(np.unique(series)))
-        pre_merge = pd.DataFrame({'unique_id': series.unique(), 'random_id': random_ints})
-
-
-        self.data.points = pd.merge(self.data.points, pre_merge, left_on = 'user_data', right_on = 'unique_id')
+        string_list = [key + ': ' + str(val)+'\n' for key, val in summary.items()]
+        return "".join(str(x) for x in string_list)
 
     def grid(self, cell_size):
         """
@@ -234,12 +197,6 @@ class Cloud:
         import pyqtgraph as pg
         import pyqtgraph.opengl as gl
 
-        # Randomly sample down if too large
-        if dim == 'user_data' and plot_trees:
-            dim = 'random_id'
-            self._set_discrete_color(n_bin, self.data.points['user_data'])
-            cmap = self._discrete_cmap(n_bin, base_cmap=cmap)
-
         if self.data.count > max_points:
                 sample_mask = np.random.randint(self.data.count,
                                                 size = int(max_points))
@@ -252,13 +209,9 @@ class Cloud:
             color_dim = np.copy(self.data.points[dim].values)
 
         # If dim is user data (probably TREE ID or some such thing) then we want a discrete colormap
-        if dim != 'random_id':
-            color_dim = (color_dim - np.min(color_dim)) / (np.max(color_dim) - np.min(color_dim))
-            cmap = cm.get_cmap(cmap)
-            colors = cmap(color_dim)
-
-        else:
-            colors = cmap(color_dim)
+        color_dim = (color_dim - np.min(color_dim)) / (np.max(color_dim) - np.min(color_dim))
+        cmap = cm.get_cmap(cmap)
+        colors = cmap(color_dim)
 
         # Start Qt app and widget
         pg.mkQApp()
@@ -281,16 +234,26 @@ class Cloud:
         #return(view.opts)
         view.show()
 
-    def normalize(self, cell_size, **kwargs):
+    def normalize(self, cell_size, classified=False, **kwargs):
         """
         Normalize the cloud using the default Zhang et al. (2003) progressive morphological ground filter. Please see \
         the documentation in :class:`.ground_filter.Zhang2003` for more information and keyword argument definitions. \
         If you want to use a pre-computed DEM to normalize, please see :meth:`.subtract`.
+
+        :param cell_size: The resolution of the intermediate bare earth model.
+        :param classified: If True and file type is `.las` or `.laz`, uses the points classified as ground (i.e. 2) to \
+        construct the intermediate bare earth model.
         """
 
         from pyfor.ground_filter import Zhang2003
-        filter = Zhang2003(cell_size, **kwargs)
-        filter.normalize(self)
+
+        filter = Zhang2003(cell_size)
+
+        if classified:
+            filter.bem(self, classified = classified)
+            filter.normalize(self)
+        else:
+            filter.normalize(self)
 
     def subtract(self, path):
         """
@@ -365,6 +328,10 @@ class Cloud:
 
         else:
             return self.grid(cell_size).interpolate("max", "z", interp_method)
+
+    def standard_metrics(self, heightbreak=0):
+        from pyfor.metrics import standard_metrics_cloud
+        return standard_metrics_cloud(self.data.points)
 
     @property
     def convex_hull(self):
