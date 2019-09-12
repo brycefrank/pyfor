@@ -240,12 +240,18 @@ class GridMetricsTestCase(unittest.TestCase):
         rast = metrics.return_num(self.test_grid, 100)
         self.assertTrue(np.isnan(rast.array[0,0]))
 
+    def test_all_returns(self):
+        rast = metrics.all_returns(self.test_grid)
+        self.assertEqual(1531, rast.array[0,0])
+
+
     def test_total_returns(self):
         rast = metrics.total_returns(self.test_grid)
         self.assertEqual(1531, rast.array[0,0])
 
     def test_standard_metrics(self):
         metrics_dict = metrics.standard_metrics_grid(self.test_grid, 2)
+
 
 class CloudMetrcsTestCase(unittest.TestCase):
     def setUp(self):
