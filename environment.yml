@@ -2,8 +2,10 @@ name: pyfor_env
 
 dependencies:
   - python=3.7
-  - numpy
   - gdal
+  - rasterio
+  - conda-forge::pyproj
+  - numpy
   - pandas
   - scipy
   - scikit-image
@@ -12,7 +14,6 @@ dependencies:
   - matplotlib
   - pyopengl
   - numba
-  - rasterio
   - libkml
   - geopandas
   - joblib
