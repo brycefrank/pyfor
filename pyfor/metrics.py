@@ -155,6 +155,9 @@ def return_num(grid, num):
 
     return(pyfor.rasterizer.Raster(array, grid))
 
+def all_returns(grid):
+    return grid.raster('count', 'z')
+
 def total_returns(grid):
     counts = grid.cells['x'].count()
     counts = counts.reset_index()
