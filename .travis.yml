@@ -1,38 +1,52 @@
-dist: xenial
+language : shell
 
-matrix:
-  include:
-    - os: linux
-      language: python
-      python:
-        - "3.7"
-    - os: windows
-      language: sh
-      python:
-        "3.7"
-      before_install:
-        - choco install python3
-        - export PATH="/c/Python37:/c/Python37/Scripts:$PATH"
-        - python -m pip install --upgrade pip wheel
+env:
+  - CONDA_PYTHON=3.6
+  - CONDA_PYTHON=3.7
+  - CONDA_PYTHON=3.7.1
+  - CONDA_PYTHON=nightly
+
+os:
+  - linux
+  - windows
+  - osx
+
+before_install:
+  # set conda path info
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then
+      MINICONDA_PATH=$HOME/miniconda;
+      MINICONDA_SUB_PATH=$MINICONDA_PATH/bin;
+    elif [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+      MINICONDA_PATH=/c/tools/miniconda3/;
+      MINICONDA_PATH_WIN=`cygpath --windows $MINICONDA_PATH`;
+      MINICONDA_SUB_PATH=$MINICONDA_PATH/Scripts;
+    fi;
+  # obtain miniconda installer
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    elif  [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
+    fi;
 
 install:
-  - sudo apt-get update
-  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  - conda info -a
-  - conda config --add channels conda-forge
-  - conda env create -f environment.yml
-  - source activate pyfor_env
-  - pip install coveralls
-  - pip install .
+  # install miniconda
+  # pip and conda will also need OpenSSL for Windows
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then
+      bash miniconda.sh -b -p $HOME/miniconda;
+    elif  [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+      choco install openssl.light;
+      choco install miniconda3 --params="'/AddToPath:1 /D:$MINICONDA_PATH_WIN'";
+    fi;
+  - export PATH="$MINICONDA_PATH:$MINICONDA_SUB_PATH:$PATH";
+  # for conda version 4.4 or later
+  - source $MINICONDA_PATH/etc/profile.d/conda.sh;
+  - hash -r;
+  - conda config --set always_yes yes --set changeps1 no;
+  - conda update -q conda;
+  - echo "Python $CONDA_PYTHON running on $TRAVIS_OS_NAME";
+  - conda env create --name test-environment python=$CONDA_PYTHON --file=./tests/environment.${CONDA_PYTHON}.yml;
+  - conda activate test-environment;
+  - conda --version ; python --version ; pip --version;
 
-services:
-  - xvfb
 script:
-  - coverage run --source pyfor setup.py test
-after_success:
-  - coveralls
+  - conda --version && python --version && pip --version;
