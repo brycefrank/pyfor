@@ -1,15 +1,11 @@
 language : shell
 
 env:
-  - CONDA_PYTHON=3.6
   - CONDA_PYTHON=3.7
-  - CONDA_PYTHON=3.7.1
-  - CONDA_PYTHON=nightly
 
 os:
   - linux
   - windows
-  - osx
 
 before_install:
   # set conda path info
@@ -44,9 +40,13 @@ install:
   - conda config --set always_yes yes --set changeps1 no;
   - conda update -q conda;
   - echo "Python $CONDA_PYTHON running on $TRAVIS_OS_NAME";
-  - conda env create --name test-environment python=$CONDA_PYTHON --file=./tests/environment.${CONDA_PYTHON}.yml;
-  - conda activate test-environment;
-  - conda --version ; python --version ; pip --version;
-
+  - conda env create -f environment.yml
+  - source activate pyfor_env
+  - pip install coveralls
+  - pip install .
+services:
+  - xvfb
 script:
-  - conda --version && python --version && pip --version;
+  - coverage run --source pyfor setup.py test
+after_success:
+  - coveralls
