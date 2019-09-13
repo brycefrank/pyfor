@@ -1,3 +1,14 @@
+# 0.3.6
+
+Updates between September 9, 2019 and [].
+
+
+## Metrics
+1. Added `all_returns` metric, that counts the number of returns in a cell.
+
+## Testing Suite
+1. Modified `.travis.yml` for Windows testing environment.
+
 # 0.3.5
 
 Updates between April 20, 2019 and September 9, 2019
