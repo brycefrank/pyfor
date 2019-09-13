@@ -1,7 +1,20 @@
 dist: xenial
-language: python
-python:
-  - "3.7"
+
+matrix:
+  include:
+    - os: linux
+      language: python
+      python:
+        - "3.7"
+    - os: windows
+      language: sh
+      python:
+        "3.7"
+      before_install:
+        - choco install python3
+        - export PATH="/c/Python37:/c/Python37/Scripts:$PATH"
+        - python -m pip install --upgrade pip wheel
+
 install:
   - sudo apt-get update
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
@@ -16,6 +29,7 @@ install:
   - source activate pyfor_env
   - pip install coveralls
   - pip install .
+
 services:
   - xvfb
 script:
