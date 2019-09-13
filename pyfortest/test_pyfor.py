@@ -11,11 +11,6 @@ import geopandas as gpd
 import plyfile
 import matplotlib.pyplot as plt
 
-"""
-Many of these tests currently just run the function. If anyone has any more rigorous ideas, please feel free to \
-implement.
-"""
-
 data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_las = os.path.join(data_dir, 'test.las')
 test_ply = os.path.join(data_dir, 'test.ply')
@@ -76,11 +71,9 @@ class LASDataTestCase(unittest.TestCase, DataTestCase):
         os.remove(os.path.join(data_dir, "temp_test_write.las"))
 
 class CloudTestCase:
-    def test_print_summary(self):
-        print(self.test_cloud)
-
     def test_not_supported(self):
         with self.assertRaises(ValueError):
+            # Attempt to read a non-supported file type
             cloud.Cloud(os.path.join(data_dir, "clip.shp"))
 
     def test_cloud_summary(self):
