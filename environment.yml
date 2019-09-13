@@ -17,7 +17,7 @@ dependencies:
   - libkml
   - geopandas
   - joblib
-  - conda-forge::poppler
+  - poppler
   - conda-forge::lastools
   - pip:
       - laspy

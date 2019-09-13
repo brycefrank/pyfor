@@ -11,7 +11,6 @@ def test_buffered_func(pc, tile):
 def test_byfile_func(las_path):
     print(cloud.Cloud(las_path))
 
-
 def make_test_collection():
     """
     Splits the testing tile into 4 tiles to use for testing
@@ -39,7 +38,6 @@ def make_test_collection():
 
 class CollectionTestCase(unittest.TestCase):
     def setUp(self):
-        make_test_collection()
         self.test_col = collection.from_dir(os.path.join(data_dir, 'mock_collection'))
 
     def test_create_index(self):
