@@ -112,9 +112,11 @@ class LASCloudTestCase(unittest.TestCase, CloudTestCase):
         poly = gpd.read_file(test_shp)['geometry'][0]
         self.test_cloud.clip(poly)
 
+    @unittest.skip("Broken for multiple platforms")
     def test_plot(self):
         self.test_cloud.plot()
 
+    @unittest.skip("Broken for multiple platforms")
     def test_plot3d(self):
         self.test_cloud.plot3d()
         self.test_cloud.plot3d(dim='user_data')
@@ -279,6 +281,7 @@ class RasterTestCase(unittest.TestCase):
         """
         self.assertEqual(self.test_raster.array[0,0], 45.11)
 
+    @unittest.skip("Broken for multiple platforms")
     def test_plot(self):
         self.test_raster.plot()
         self.test_raster.plot(return_plot=True)
