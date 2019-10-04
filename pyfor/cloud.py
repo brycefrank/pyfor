@@ -1,5 +1,3 @@
-# An update of the cloudinfo class
-
 import laspy
 import plyfile
 import os
@@ -125,7 +123,7 @@ class Cloud:
         """
 
         # Iterate over point format specification
-        dims = ["x", "y", "z", "intensity", "return_num", "classification", "flag_byte", "scan_angle_rank",
+        dims = ["x", "y", "z", "intensity", "red", "green", "blue", "return_num", "classification", "flag_byte", "scan_angle_rank",
                 "user_data", "pt_src_id"]
 
         points = {}
