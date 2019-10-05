@@ -150,7 +150,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
         """
 
         retiler = Retiler(self)
-        self.tiles = retiler.retile_raster(cell_size, original_tile_size, buffer)
+        self.tiles = retiler.retile_raster(cell_size, target_tile_size, buffer)
 
     def reset_tiles(self):
         """
