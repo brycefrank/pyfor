@@ -18,3 +18,11 @@ htmlcov/
 htmlcov/*
 changelog_0.2.1.md
 pyfortest/temp.*
+/.idea
+/.vs
+/environment.yml~
+/CHANGELOG.md~
+/README.md~
+/.environment.yml.un~
+/.CHANGELOG.md.un~
+/temp_tif.tif
