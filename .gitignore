@@ -26,3 +26,4 @@ pyfortest/temp.*
 /.environment.yml.un~
 /.CHANGELOG.md.un~
 /temp_tif.tif
+/pyfor.sln
