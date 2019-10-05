@@ -200,6 +200,9 @@ class KrausPfeifer1998:
         """
         Runs the actual ground filter. Generally used as an internal function that is called by user functions
         (.bem, .classify, .ground_points).
+
+        :param grid: A `pyfor.rasterizer.Grid` object.
+        :return: A `pandas.DataFrame` of filtered points.
         """
         np.seterr(divide='ignore', invalid='ignore')
 
@@ -256,7 +259,9 @@ class KrausPfeifer1998:
     def classify(self, cloud, ground_int=2):
         """
         Sets the classification of the original input cloud points to ground (default 2 as per las specification). This
-        performs the adjustment of the input `Cloud` object **in place**. Only implemented for `.las` files.
+        performs the adjustment of the input `Cloud` object **in place**. Only implemented for `.las` files. Additionally,
+        the original ground classification is preserved if it exists, so this will only add additional ground points for
+        already classified point clouds.
 
         :param cloud: A cloud object.
         :param ground_int: The integer to set classified points to, the default is 2 in the las specification for ground
@@ -265,8 +270,8 @@ class KrausPfeifer1998:
 
         if cloud.extension == '.las':
             grid = cloud.grid(self.cell_size)
-            self._filter(grid)
-            grid.cloud.data.points["classification"][grid.cloud.data.points['v_i'] <= self.g + self.w] = ground_int
+            filtered_point_ids = self._filter(grid).index
+            grid.cloud.data.points["classification"][filtered_point_ids] = ground_int
         else:
             print("This is only implemented for .las files.")
 

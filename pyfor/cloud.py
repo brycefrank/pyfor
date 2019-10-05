@@ -115,6 +115,19 @@ class Cloud:
         self.normalized = None
         self.crs = None
 
+    @classmethod
+    def from_pdal(cls, ins):
+        """
+        Converts a PDAL `ins` argument from a PDAL `filters.python` into a `Cloud` object.
+
+        :param ins: The `ins` argument from PDAL.
+        """
+
+        df = pd.DataFrame(ins)
+        df = df.rename(columns={"X": "x", "Y": "y", "Z":"z", "ReturnNumber": "return_num"})
+        cloud_data = pyfor.cloud.CloudData(df, header=None)
+        return cls(cloud_data)
+
     def _get_las_points(self, las):
         """
         Reads points into pandas dataframe.

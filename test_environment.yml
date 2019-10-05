@@ -1,0 +1,27 @@
+name: pyfor_env
+
+dependencies:
+  - python=3.7
+  - gdal
+  - rasterio
+  - conda-forge::pyproj
+  - numpy
+  - pandas
+  - scipy
+  - scikit-image
+  - scikit-learn
+  - pyqtgraph
+  - matplotlib
+  - pyopengl
+  - numba
+  - libkml
+  - geopandas
+  - joblib
+  - poppler
+  - conda-forge::lastools
+  - pip:
+      - laspy
+      - laxpy
+      - sphinx_rtd_theme
+      - python-coveralls
+      - plyfile

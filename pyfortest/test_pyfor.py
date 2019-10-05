@@ -384,6 +384,10 @@ class KrausPfeifer1998(unittest.TestCase):
     def test_filter(self):
         self.test_kp_filter._filter(self.test_cloud.grid(self.test_kp_filter.cell_size))
 
+    def test_classify(self):
+        self.test_kp_filter.classify(self.test_cloud)
+        self.assertEqual(133410, np.sum(self.test_cloud.data.points["classification"] == 2))
+
 class Zhang2003TestCase(unittest.TestCase):
     def setUp(self):
         self.test_cloud = cloud.Cloud(test_las)
