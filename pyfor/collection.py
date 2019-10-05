@@ -87,6 +87,8 @@ class CloudDataFrame(gpd.GeoDataFrame):
             else:
                 pass
 
+            las.reader.close()
+
         if out_pc.data.points.shape[0] > 0:
             func(out_pc, tile)
 
@@ -104,11 +106,11 @@ class CloudDataFrame(gpd.GeoDataFrame):
                 out_pc = out_pc.clip(tile)
                 out_pc.crs = self.crs
                 i += 1
-
-
+            
             else:
                 pass
 
+        cloud.data.header.reader.close()
         if out_pc.data.points.shape[0] > 0:
             func(out_pc, tile)
 
@@ -188,7 +190,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
         :param las_path: The path of the las file to retrieve a bounding box from.
         :return: A tuple (minx, maxx, miny, maxy) of bounding box coordinates.
         """
-        # segmentation of point clouds
+
         pc = laspy.file.File(las_path)
         min_x, max_x = pc.header.min[0], pc.header.max[0]
         min_y, max_y = pc.header.min[1], pc.header.max[1]
