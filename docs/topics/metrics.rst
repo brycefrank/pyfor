@@ -14,4 +14,4 @@ The following block demonstrates a minimal example of creating standard metrics 
     tile.normalize(1)
 	
 	grid = tile.grid(20)
-	std_metrics = grid.standard_metrics(2, )
+	std_metrics = grid.standard_metrics(2)

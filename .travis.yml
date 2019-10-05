@@ -38,7 +38,6 @@ install:
   - source $MINICONDA_PATH/etc/profile.d/conda.sh;
   - hash -r;
   - conda config --set always_yes yes --set changeps1 no;
-  - conda update -q conda;
   - echo "Python $CONDA_PYTHON running on $TRAVIS_OS_NAME";
   - conda env create -f environment.yml
   - source activate pyfor_env
