@@ -2,6 +2,11 @@
 
 Updates between September 9, 2019 and [].
 
+## Cloud
+1. Added `.from_pdal` class method which converts a `PDAL` `python.filter` `ins` argument to a Cloud object.
+
+## Ground Filter
+1. Fixeed a bug where `KrausPfeifer1998.classify` was throwing a key error. Closes #62.
 
 ## Metrics
 1. Added `all_returns` metric, that counts the number of returns in a cell.
