@@ -6,10 +6,10 @@ data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 proj4str = "+proj=utm +zone=10 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
 
 def test_buffered_func(pc, tile):
-    print(pc, tile)
+    pass
 
 def test_byfile_func(las_path):
-    print(cloud.Cloud(las_path))
+    pass
 
 def make_test_collection():
     """
@@ -39,16 +39,22 @@ def make_test_collection():
 class CollectionTestCase(unittest.TestCase):
     def setUp(self):
         self.test_col = collection.from_dir(os.path.join(data_dir, 'mock_collection'))
+        self.test_col_path = os.path.join(data_dir, 'mock_collection')
 
     def test_create_index(self):
         self.test_col.create_index()
+        lax_paths = [os.path.join(self.test_col_path, lax_file) for lax_file in \
+                          os.listdir(self.test_col_path) if lax_file.endswith('.lax')]
+        self.assertEqual(len(lax_paths), 4)
 
     def test_retile_raster(self):
         self.test_col.retile_raster(10, 50, buffer=10)
+        self.assertEqual(len(self.test_col.tiles), 16)
         self.test_col.reset_tiles()
 
     def test_par_apply_buff_index(self):
         # Buffered with index
+        self.test_col.create_index()
         self.test_col.retile_raster(10, 50, buffer=10)
         self.test_col.par_apply(test_buffered_func, indexed=True)
 
@@ -59,4 +65,11 @@ class CollectionTestCase(unittest.TestCase):
     def test_par_apply_by_file(self):
         # By file
         self.test_col.par_apply(test_byfile_func, by_file=True)
+
+    def tearDown(self):
+        # Delete any .lax files
+        lax_paths = [os.path.join(self.test_col_path, lax_file) for lax_file in \
+                          os.listdir(self.test_col_path) if lax_file.endswith('.lax')]
+        for lax_path in lax_paths:
+            os.remove(lax_path)
 

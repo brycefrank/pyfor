@@ -6,6 +6,7 @@ import geopandas as gpd
 import pandas as pd
 import laxpy
 from shapely.geometry import Polygon
+from joblib import Parallel, delayed
 
 class CloudDataFrame(gpd.GeoDataFrame):
     """
@@ -130,8 +131,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
         :param indexed: Determines if `.lax` files will be leveraged to reduce memory consumption.
         :param by_file: Forces `par_apply` to operate on raw files only if True.
         """
-        from joblib import Parallel, delayed
-
         if by_file:
             return Parallel(n_jobs=self.n_threads)(delayed(func)(las_path) for las_path in self['las_path'])
         else:
@@ -198,10 +197,8 @@ class CloudDataFrame(gpd.GeoDataFrame):
         return((min_x, max_x, min_y, max_y))
 
     def _build_polygons(self):
-        """Builds the shapely polygons of the bounding boxes and adds them to self.data"""
-        from shapely.geometry import Polygon
-
-        bboxes = [self._get_bounding_box(las_path) for las_path in self['las_path']]
+        """Builds the shapely polygons of the bounding boxes and adds them to self.tiles"""
+        bboxes = Parallel(n_jobs=self.n_threads)(delayed(self._get_bounding_box)(las_path) for las_path in self['las_path'])
         self["bounding_box"] = [Polygon(((bbox[0], bbox[2]), (bbox[1], bbox[2]),
                                            (bbox[1], bbox[3]), (bbox[0], bbox[3]))) for bbox in bboxes]
         self.set_geometry("bounding_box", inplace = True)
