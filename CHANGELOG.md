@@ -5,14 +5,19 @@ Updates between September 9, 2019 and [].
 ## Cloud
 1. Added `.from_pdal` class method which converts a `PDAL` `python.filter` `ins` argument to a Cloud object.
 
+## Collection
+1. `._build_polygons` is now multithreaded.
+
 ## Ground Filter
-1. Fixeed a bug where `KrausPfeifer1998.classify` was throwing a key error. Closes #62.
+1. Fixed a bug where `KrausPfeifer1998.classify` was throwing a key error. Closes #62.
 
 ## Metrics
 1. Added `all_returns` metric, that counts the number of returns in a cell.
 
 ## Testing Suite
 1. Modified `.travis.yml` for Windows testing environment.
+2. Added additional checks for number of `.lax` files produced and length of tile change on `retile_raster` for
+collection testing. Removed printing statements.
 
 # 0.3.5
 
