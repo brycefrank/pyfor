@@ -1,9 +1,8 @@
 from setuptools import setup, find_packages, Extension
-import pyfor
 
 setup(
     name='pyfor',
-    version=pyfor.__version__,
+    version='0.3.5',
     author='Bryce Frank',
     author_email='bfrank70@gmail.com',
     packages=['pyfor', 'pyfortest'],
