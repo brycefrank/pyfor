@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from pyfor import gisexport
 import pyfor.metrics
 
+
 class Grid:
     """The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. From \
     the Grid object we can derive other useful products, most importantly, :class:`.Raster` objects.
@@ -32,13 +33,18 @@ class Grid:
         x_edges = np.arange(min_x, max_x, self.cell_size)
         y_edges = np.arange(min_y, max_y, self.cell_size)
 
-        bins_x = np.searchsorted(x_edges,   self.cloud.data.points['x'], side='right') - 1
-        bins_y = np.searchsorted(-y_edges, -self.cloud.data.points['y'], side='left', sorter=(-y_edges).argsort())
+        bins_x = np.searchsorted(x_edges, self.cloud.data.points["x"], side="right") - 1
+        bins_y = np.searchsorted(
+            -y_edges,
+            -self.cloud.data.points["y"],
+            side="left",
+            sorter=(-y_edges).argsort(),
+        )
 
         self.cloud.data.points.loc[:, "bins_x"] = bins_x
         self.cloud.data.points.loc[:, "bins_y"] = bins_y
 
-        self.cells = self.cloud.data.points.groupby(['bins_x', 'bins_y'])
+        self.cells = self.cloud.data.points.groupby(["bins_x", "bins_y"])
 
     def _update(self):
         self.cloud.data._update()
@@ -85,19 +91,20 @@ class Grid:
         :return: An interpolated array.
         """
         from scipy.interpolate import griddata
+
         # Get points and values that we already have
         cell_values = self.cells[dim].agg(func).reset_index()
 
-        points = cell_values[['bins_x', 'bins_y']].values
+        points = cell_values[["bins_x", "bins_y"]].values
         values = cell_values[dim].values
-        X, Y = np.mgrid[1:self.n+1, 1:self.m+1]
+        X, Y = np.mgrid[1 : self.n + 1, 1 : self.m + 1]
 
         # TODO generally a slow approach
         interp_grid = griddata(points, values, (X, Y), method=interp_method).T
 
         return Raster(interp_grid, self)
 
-    def metrics(self, func_dict, as_raster = False):
+    def metrics(self, func_dict, as_raster=False):
         """
         Calculates summary statistics for each grid cell in the Grid.
 
@@ -113,17 +120,22 @@ class Grid:
         else:
             rasters = []
             for column in aggregate:
-                array = np.asarray(aggregate[column].reset_index().pivot('bins_y', 'bins_x'))
+                array = np.asarray(
+                    aggregate[column].reset_index().pivot("bins_y", "bins_x")
+                )
                 raster = Raster(array, self)
                 rasters.append(raster)
             # Get list of dimension names
             dims = [tup[0] for tup in list(aggregate)]
             # Get list of metric names
             metrics = [tup[1] for tup in list(aggregate)]
-            return pd.DataFrame({'dim': dims, 'metric': metrics, 'raster': rasters}).set_index(['dim', 'metric'])
+            return pd.DataFrame(
+                {"dim": dims, "metric": metrics, "raster": rasters}
+            ).set_index(["dim", "metric"])
 
     def standard_metrics(self, heightbreak=0):
         return pyfor.metrics.standard_metrics_grid(self, heightbreak=heightbreak)
+
 
 class ImportedGrid(Grid):
     """
@@ -132,12 +144,16 @@ class ImportedGrid(Grid):
 
     def __init__(self, path, cloud):
         import rasterio
+
         self.in_raster = rasterio.open(path)
 
         # Check cell size
-        cell_size_x, cell_size_y = self.in_raster.transform[0], abs(self.in_raster.transform[4])
+        cell_size_x, cell_size_y = (
+            self.in_raster.transform[0],
+            abs(self.in_raster.transform[4]),
+        )
         if cell_size_x != cell_size_y:
-            print('Cell sizes not equal of input raster, not supported.')
+            print("Cell sizes not equal of input raster, not supported.")
             raise ValueError
         else:
             cell_size = cell_size_x
@@ -152,12 +168,16 @@ class ImportedGrid(Grid):
         self.n = self.in_raster.width
 
         # Create bins
-        bins_x = np.searchsorted(np.linspace(min_x, max_x, self.n), self.cloud.data.points["x"])
-        bins_y = np.searchsorted(np.linspace(min_y, max_y, self.m), self.cloud.data.points["y"])
+        bins_x = np.searchsorted(
+            np.linspace(min_x, max_x, self.n), self.cloud.data.points["x"]
+        )
+        bins_y = np.searchsorted(
+            np.linspace(min_y, max_y, self.m), self.cloud.data.points["y"]
+        )
 
         self.cloud.data.points["bins_x"] = bins_x
         self.cloud.data.points["bins_y"] = bins_y
-        self.cells = self.cloud.data.points.groupby(['bins_x', 'bins_y'])
+        self.cells = self.cloud.data.points.groupby(["bins_x", "bins_y"])
 
     def _update(self):
         self.cloud.data._update()
@@ -171,7 +191,12 @@ class Raster:
         self.cell_size = self.grid.cell_size
 
         self.array = array
-        self._affine = from_origin(self.grid.cloud.data.min[0], self.grid.cloud.data.max[1], self.grid.cell_size, self.grid.cell_size)
+        self._affine = from_origin(
+            self.grid.cloud.data.min[0],
+            self.grid.cloud.data.max[1],
+            self.grid.cell_size,
+            self.grid.cell_size,
+        )
 
     @classmethod
     def from_rasterio(cls):
@@ -185,65 +210,80 @@ class Raster:
         :param bbox: Coordinates of output raster as a tuple (min_x, max_x, min_y, max_y)
         """
         from rasterio.transform import from_origin
+
         new_left, new_right, new_bot, new_top = bbox
 
         m, n = self.array.shape[0], self.array.shape[1]
 
         # Maniupulate the array to fit the new affine transformation
         old_left, old_top = self.grid.cloud.data.min[0], self.grid.cloud.data.max[1]
-        old_right, old_bot = old_left + n * self.grid.cell_size, old_top - m * self.grid.cell_size
+        old_right, old_bot = (
+            old_left + n * self.grid.cell_size,
+            old_top - m * self.grid.cell_size,
+        )
 
-        left_diff, top_diff, right_diff, bot_diff = old_left - new_left, old_top - new_top, old_right - new_right, old_bot - new_bot
-        left_diff, top_diff, right_diff, bot_diff = int(np.rint(left_diff / self.cell_size)), int(np.rint(top_diff / self.cell_size)), \
-                                                    int(np.rint(right_diff / self.cell_size)), int(np.rint(bot_diff / self.cell_size))
+        left_diff, top_diff, right_diff, bot_diff = (
+            old_left - new_left,
+            old_top - new_top,
+            old_right - new_right,
+            old_bot - new_bot,
+        )
+        left_diff, top_diff, right_diff, bot_diff = (
+            int(np.rint(left_diff / self.cell_size)),
+            int(np.rint(top_diff / self.cell_size)),
+            int(np.rint(right_diff / self.cell_size)),
+            int(np.rint(bot_diff / self.cell_size)),
+        )
 
-        if (left_diff > 0 ):
+        if left_diff > 0:
             # bbox left is outside of raster left, we need to add columns of nans
             emptys = np.empty((m, left_diff))
             emptys[:] = np.nan
             self.array = np.insert(self.array, 0, np.transpose(emptys), axis=1)
-        elif left_diff !=0:
+        elif left_diff != 0:
             # bbox left is inside of raster left, we need to remove left diff columns
-            self.array = self.array[:, abs(left_diff):]
+            self.array = self.array[:, abs(left_diff) :]
 
-        if (top_diff < 0):
+        if top_diff < 0:
             # bbox top is outside of raster top, we need to add rows of nans
             emptys = np.empty((abs(top_diff), self.array.shape[1]))
             emptys[:] = np.nan
             self.array = np.insert(self.array, 0, emptys, axis=0)
-        elif top_diff !=0:
+        elif top_diff != 0:
             # bbox top is inside of raster top, we need to remove rows of nans
-            self.array = self.array[abs(top_diff):, :]
+            self.array = self.array[abs(top_diff) :, :]
 
-        if (right_diff < 0):
+        if right_diff < 0:
             # bbox right is outside of raster right, we need to add columns of nans
             emptys = np.empty((self.array.shape[0], abs(right_diff)))
             emptys[:] = np.nan
             self.array = np.append(self.array, emptys, axis=1)
-        elif right_diff !=0:
+        elif right_diff != 0:
             # bbox right is inside raster right, we need to remove columns
             self.array = self.array[:, :-right_diff]
 
-        if (bot_diff > 0):
+        if bot_diff > 0:
             # bbox bottom is outside of raster bottom, we need to add rows of nans
             emptys = np.empty((abs(bot_diff), self.array.shape[1]))
             emptys[:] = np.nan
             self.array = np.append(self.array, emptys, axis=0)
         elif bot_diff != 0:
             # bbox bottom is inside of raster bottom, we need to remove columns
-            self.array = self.array[:bot_diff,:]
+            self.array = self.array[:bot_diff, :]
 
         # Handle the affine transformation
-        #new_affine = from_origin(old_left + ((-left_diff) * self.grid.cell_size), old_top - (top_diff * self.grid.cell_size), self.grid.cell_size, self.grid.cell_size)
-        new_affine = from_origin(new_left, new_top, self.grid.cell_size, self.grid.cell_size)
+        # new_affine = from_origin(old_left + ((-left_diff) * self.grid.cell_size), old_top - (top_diff * self.grid.cell_size), self.grid.cell_size, self.grid.cell_size)
+        new_affine = from_origin(
+            new_left, new_top, self.grid.cell_size, self.grid.cell_size
+        )
         self._affine = new_affine
 
-    def plot(self, cmap="viridis", block = False, return_plot = False):
+    def plot(self, cmap="viridis", block=False, return_plot=False):
         """
         Default plotting method for the Raster object.
         """
 
-        #TODO implement cmap
+        # TODO implement cmap
         fig = plt.figure()
         ax = fig.add_subplot(111)
         caz = ax.matshow(self.array)
@@ -252,17 +292,23 @@ class Raster:
         ax.set_xticks(np.linspace(0, self.grid.n, 3))
         ax.set_yticks(np.flip(np.linspace(0, self.grid.m, 3)))
 
-        x_ticks, y_ticks = np.rint(np.linspace(self.grid.cloud.data.min[0], self.grid.cloud.data.max[0], 3)), \
-                           np.rint(np.linspace(self.grid.cloud.data.min[1], self.grid.cloud.data.max[1], 3))
+        x_ticks, y_ticks = (
+            np.rint(
+                np.linspace(self.grid.cloud.data.min[0], self.grid.cloud.data.max[0], 3)
+            ),
+            np.rint(
+                np.linspace(self.grid.cloud.data.min[1], self.grid.cloud.data.max[1], 3)
+            ),
+        )
 
         ax.set_xticklabels(x_ticks)
         ax.set_yticklabels(y_ticks)
 
         if return_plot == True:
-            return(ax)
+            return ax
 
         else:
-            plt.show(block = block)
+            plt.show(block=block)
 
     def pit_filter(self, kernel_size):
         """
@@ -272,6 +318,7 @@ class Raster:
         :param kernel_size: The size of the kernel window to pass over the array. For example 3 -> 3x3 kernel window.
         """
         from scipy.signal import medfilt2d
+
         self.array = medfilt2d(self.array, kernel_size=kernel_size)
 
     def write(self, path):
@@ -284,6 +331,10 @@ class Raster:
 
         if not self.grid.cloud.crs:
             from warnings import warn
-            warn('No coordinate reference system defined. Please set the .crs attribute of the Cloud object.', UserWarning)
+
+            warn(
+                "No coordinate reference system defined. Please set the .crs attribute of the Cloud object.",
+                UserWarning,
+            )
 
         gisexport.array_to_raster(self.array, self._affine, self.grid.cloud.crs, path)

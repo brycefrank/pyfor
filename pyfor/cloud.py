@@ -14,13 +14,29 @@ class CloudData:
     def __init__(self, points, header):
         self.header = header
         self.points = points
-        self.min = [np.min(self.points["x"]), np.min(self.points["y"]), np.min(self.points["z"])]
-        self.max = [np.max(self.points["x"]), np.max(self.points["y"]), np.max(self.points["z"])]
+        self.min = [
+            np.min(self.points["x"]),
+            np.min(self.points["y"]),
+            np.min(self.points["z"]),
+        ]
+        self.max = [
+            np.max(self.points["x"]),
+            np.max(self.points["y"]),
+            np.max(self.points["z"]),
+        ]
         self.count = np.alen(self.points)
 
     def _update(self):
-        self.min = [np.min(self.points["x"]), np.min(self.points["y"]), np.min(self.points["z"])]
-        self.max = [np.max(self.points["x"]), np.max(self.points["y"]), np.max(self.points["z"])]
+        self.min = [
+            np.min(self.points["x"]),
+            np.min(self.points["y"]),
+            np.min(self.points["z"]),
+        ]
+        self.max = [
+            np.max(self.points["x"]),
+            np.max(self.points["y"]),
+            np.max(self.points["z"]),
+        ]
         self.count = np.alen(self.points)
 
     def _append(self, other):
@@ -40,14 +56,16 @@ class PLYData(CloudData):
         :param path: The path of the ouput file.
         """
         if len(self.points) > 0:
-            #coordinate_array = self.points[["x", "y", "z"]].values.T
-            #vertex_array = list(zip(coordinate_array[0],coordinate_array[1], coordinate_array[2]))
-            #vertex_array = np.array(vertex_array, dtype=[('x', 'f4'), ('y', 'f4'), ('z', 'f4')])
+            # coordinate_array = self.points[["x", "y", "z"]].values.T
+            # vertex_array = list(zip(coordinate_array[0],coordinate_array[1], coordinate_array[2]))
+            # vertex_array = np.array(vertex_array, dtype=[('x', 'f4'), ('y', 'f4'), ('z', 'f4')])
             vertex_array = self.points.to_records(index=False)
-            elements = plyfile.PlyElement.describe(vertex_array, 'vertex')
+            elements = plyfile.PlyElement.describe(vertex_array, "vertex")
             plyfile.PlyData([elements]).write(path)
         else:
-            raise ValueError('There is no data contained in this Cloud object, it is impossible to write.')
+            raise ValueError(
+                "There is no data contained in this Cloud object, it is impossible to write."
+            )
 
 
 class LASData(CloudData):
@@ -57,7 +75,7 @@ class LASData(CloudData):
 
         :param path: The path of the ouput file.
         """
-        if len(self. points) > 0:
+        if len(self.points) > 0:
             writer = laspy.file.File(path, header=self.header, mode="w")
 
             for dim in self.points:
@@ -65,7 +83,10 @@ class LASData(CloudData):
 
             writer.close()
         else:
-            raise ValueError('There is no data contained in this Cloud object, it is impossible to write.')
+            raise ValueError(
+                "There is no data contained in this Cloud object, it is impossible to write."
+            )
+
 
 class Cloud:
     """
@@ -74,6 +95,7 @@ class Cloud:
     :class:`Cloud` please see the \
     `user manual <https://github.com/brycefrank/pyfor_manual/blob/master/notebooks/2-ImportsExports.ipynb>`_.
     """
+
     def __init__(self, path):
 
         if type(path) == str or type(path) == pathlib.PosixPath:
@@ -82,19 +104,23 @@ class Cloud:
             self.extension = os.path.splitext(path)[1]
 
             # A path to las or laz file
-            if self.extension.lower() == '.las' or self.extension.lower() == '.laz':
+            if self.extension.lower() == ".las" or self.extension.lower() == ".laz":
                 las = laspy.file.File(self.filepath)
                 self._get_las_points(las)
 
-            elif self.extension.lower() == '.ply':
+            elif self.extension.lower() == ".ply":
                 ply = plyfile.PlyData.read(path)
                 ply_points = ply.elements[0].data
-                points = pd.DataFrame({"x": ply_points["x"], "y": ply_points["y"], "z": ply_points["z"]})
-                header = 'ply_header'
-                self.data = PLYData(points , header)
+                points = pd.DataFrame(
+                    {"x": ply_points["x"], "y": ply_points["y"], "z": ply_points["z"]}
+                )
+                header = "ply_header"
+                self.data = PLYData(points, header)
 
             else:
-                raise ValueError('File extension not supported, please input either a las, laz, ply or CloudData object.')
+                raise ValueError(
+                    "File extension not supported, please input either a las, laz, ply or CloudData object."
+                )
 
         elif type(path) == CloudData or isinstance(path, CloudData):
             self.data = path
@@ -102,14 +128,19 @@ class Cloud:
             if type(self.data.header) == laspy.header.HeaderManager:
                 self.data = LASData(self.data.points, self.data.header)
 
-            elif self.data.header == 'ply_header':
+            elif self.data.header == "ply_header":
                 self.data = PLYData(self.data.points, self.data.header)
 
-        elif path.__class__.__bases__[0] == laspy.file.File or type(path) == laspy.file.File:
+        elif (
+            path.__class__.__bases__[0] == laspy.file.File
+            or type(path) == laspy.file.File
+        ):
             self._get_las_points(path)
 
         else:
-            raise ValueError("Object type not supported, please input either a file path with a supported extension or a CloudData object.")
+            raise ValueError(
+                "Object type not supported, please input either a file path with a supported extension or a CloudData object."
+            )
 
         # We're not sure if this is true or false yet
         self.normalized = None
@@ -124,7 +155,9 @@ class Cloud:
         """
 
         df = pd.DataFrame(ins)
-        df = df.rename(columns={"X": "x", "Y": "y", "Z":"z", "ReturnNumber": "return_num"})
+        df = df.rename(
+            columns={"X": "x", "Y": "y", "Z": "z", "ReturnNumber": "return_num"}
+        )
         cloud_data = pyfor.cloud.CloudData(df, header=None)
         return cls(cloud_data)
 
@@ -136,13 +169,26 @@ class Cloud:
         """
 
         # Iterate over point format specification
-        dims = ["x", "y", "z", "intensity", "red", "green", "blue", "return_num", "classification", "flag_byte", "scan_angle_rank",
-                "user_data", "pt_src_id"]
+        dims = [
+            "x",
+            "y",
+            "z",
+            "intensity",
+            "red",
+            "green",
+            "blue",
+            "return_num",
+            "classification",
+            "flag_byte",
+            "scan_angle_rank",
+            "user_data",
+            "pt_src_id",
+        ]
 
         points = {}
         for dim in dims:
             try:
-                points[dim] = eval('las.{}'.format(dim))
+                points[dim] = eval("las.{}".format(dim))
             except:
                 pass
         points = pd.DataFrame(points)
@@ -157,19 +203,23 @@ class Cloud:
         from os.path import getsize
 
         summary = {}
-        summary['Minimum (x y z)'] = [float('{0:.2f}'.format(elem)) for elem in self.data.min]
-        summary['Maximum (x y z)'] = [float('{0:.2f}'.format(elem)) for elem in self.data.max]
-        summary['Number of Points'] = len(self.data.points)
-        if hasattr(self, 'extension'):
-            summary['File Size'] = getsize(self.filepath)
+        summary["Minimum (x y z)"] = [
+            float("{0:.2f}".format(elem)) for elem in self.data.min
+        ]
+        summary["Maximum (x y z)"] = [
+            float("{0:.2f}".format(elem)) for elem in self.data.max
+        ]
+        summary["Number of Points"] = len(self.data.points)
+        if hasattr(self, "extension"):
+            summary["File Size"] = getsize(self.filepath)
 
-            if self.extension.lower() == '.las' or self.extension.lower() == '.laz':
-                summary['LAS Specification'] = self.data.header.version
+            if self.extension.lower() == ".las" or self.extension.lower() == ".laz":
+                summary["LAS Specification"] = self.data.header.version
 
         if self.crs is not None:
-            summary['CRS'] = self.crs
+            summary["CRS"] = self.crs
 
-        string_list = [key + ': ' + str(val)+'\n' for key, val in summary.items()]
+        string_list = [key + ": " + str(val) + "\n" for key, val in summary.items()]
         return "".join(str(x) for x in string_list)
 
     def grid(self, cell_size):
@@ -182,7 +232,7 @@ class Cloud:
         """
         return rasterizer.Grid(self, cell_size)
 
-    def plot(self, cell_size = 1, cmap = "viridis", return_plot = False, block=False):
+    def plot(self, cell_size=1, cmap="viridis", return_plot=False, block=False):
         """
         Plots a basic canopy height model of the Cloud object. This is mainly a convenience function for \
         :class:`.Raster.plot`. More robust methods exist for dealing with canopy height models. Please see the \
@@ -192,9 +242,19 @@ class Cloud:
         :param return_plot: If true, returns a matplotlib plt object.
         :return: If return_plot == True, returns matplotlib plt object. Not yet implemented.
         """
-        rasterizer.Grid(self, cell_size).raster("max", "z").plot(cmap, block = block, return_plot = return_plot)
+        rasterizer.Grid(self, cell_size).raster("max", "z").plot(
+            cmap, block=block, return_plot=return_plot
+        )
 
-    def plot3d(self, dim = "z", point_size=1, cmap='Spectral_r', max_points=5e5, n_bin=8, plot_trees=False):
+    def plot3d(
+        self,
+        dim="z",
+        point_size=1,
+        cmap="Spectral_r",
+        max_points=5e5,
+        n_bin=8,
+        plot_trees=False,
+    ):
         """
         Plots the three dimensional point cloud using a `Qt` backend. By default, if the point cloud exceeds 5e5 \
          points, then it is downsampled using a uniform random distribution. This is for performance purposes.
@@ -209,18 +269,23 @@ class Cloud:
         import pyqtgraph.opengl as gl
 
         if self.data.count > max_points:
-                sample_mask = np.random.randint(self.data.count,
-                                                size = int(max_points))
-                coordinates = np.stack([self.data.points.x, self.data.points.y, self.data.points.z], axis = 1)[sample_mask,:]
+            sample_mask = np.random.randint(self.data.count, size=int(max_points))
+            coordinates = np.stack(
+                [self.data.points.x, self.data.points.y, self.data.points.z], axis=1
+            )[sample_mask, :]
 
-                color_dim = np.copy(self.data.points[dim].iloc[sample_mask].values)
-                print("Too many points, down sampling for 3d plot performance.")
+            color_dim = np.copy(self.data.points[dim].iloc[sample_mask].values)
+            print("Too many points, down sampling for 3d plot performance.")
         else:
-            coordinates = np.stack([self.data.points.x, self.data.points.y, self.data.points.z], axis = 1)
+            coordinates = np.stack(
+                [self.data.points.x, self.data.points.y, self.data.points.z], axis=1
+            )
             color_dim = np.copy(self.data.points[dim].values)
 
         # If dim is user data (probably TREE ID or some such thing) then we want a discrete colormap
-        color_dim = (color_dim - np.min(color_dim)) / (np.max(color_dim) - np.min(color_dim))
+        color_dim = (color_dim - np.min(color_dim)) / (
+            np.max(color_dim) - np.min(color_dim)
+        )
         cmap = cm.get_cmap(cmap)
         colors = cmap(color_dim)
 
@@ -228,21 +293,20 @@ class Cloud:
         pg.mkQApp()
         view = gl.GLViewWidget()
 
-
         # Create the points, change to opaque, set size to 1
-        points = gl.GLScatterPlotItem(pos = coordinates, color = colors)
-        points.setGLOptions('opaque')
-        points.setData(size = np.repeat(point_size, len(coordinates)))
+        points = gl.GLScatterPlotItem(pos=coordinates, color=colors)
+        points.setGLOptions("opaque")
+        points.setData(size=np.repeat(point_size, len(coordinates)))
 
         # Add points to the viewer
         view.addItem(points)
 
         # Center on the arithmetic mean of the point cloud and display
-        center = np.mean(coordinates, axis = 0)
-        view.opts['center'] = pg.Vector(center[0], center[1], center[2])
+        center = np.mean(coordinates, axis=0)
+        view.opts["center"] = pg.Vector(center[0], center[1], center[2])
         # Very ad-hoc
-        view.opts['distance'] = (self.data.max[0] - self.data.min[0]) * 1.2
-        #return(view.opts)
+        view.opts["distance"] = (self.data.max[0] - self.data.min[0]) * 1.2
+        # return(view.opts)
         view.show()
 
     def normalize(self, cell_size, classified=False, **kwargs):
@@ -261,7 +325,7 @@ class Cloud:
         filter = Zhang2003(cell_size)
 
         if classified:
-            filter.bem(self, classified = classified)
+            filter.bem(self, classified=classified)
             filter.normalize(self)
         else:
             filter.normalize(self)
@@ -275,9 +339,14 @@ class Cloud:
         """
 
         imported_grid = rasterizer.ImportedGrid(path, self)
-        df = pd.DataFrame(np.flipud(imported_grid.in_raster.read(1))).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
-        df = self.data.points.reset_index().merge(df, how="left").set_index('index')
-        self.data.points['z'] = df['z'] - df['val']
+        df = (
+            pd.DataFrame(np.flipud(imported_grid.in_raster.read(1)))
+            .stack()
+            .rename_axis(["bins_y", "bins_x"])
+            .reset_index(name="val")
+        )
+        df = self.data.points.reset_index().merge(df, how="left").set_index("index")
+        self.data.points["z"] = df["z"] - df["val"]
 
     def clip(self, polygon):
         """
@@ -296,8 +365,8 @@ class Cloud:
         new_cloud.data.points = new_cloud.data.points.reset_index(drop=True)
         new_cloud.data._update()
 
-        #Warn user if the resulting cloud has no points.
-        if len(new_cloud.data.points) ==0:
+        # Warn user if the resulting cloud has no points.
+        if len(new_cloud.data.points) == 0:
             warnings.warn("The clipped point cloud has no remaining points")
 
         return new_cloud
@@ -330,11 +399,13 @@ class Cloud:
 
         # TODO make user pass the function itself?
         if pit_filter == "median":
-            raster = self.grid(cell_size).interpolate("max", "z", interp_method=interp_method)
+            raster = self.grid(cell_size).interpolate(
+                "max", "z", interp_method=interp_method
+            )
             raster.pit_filter(kernel_size=kernel_size)
             return raster
 
-        if interp_method==None:
+        if interp_method == None:
             return self.grid(cell_size).raster("max", "z")
 
         else:
@@ -342,6 +413,7 @@ class Cloud:
 
     def standard_metrics(self, heightbreak=0):
         from pyfor.metrics import standard_metrics_cloud
+
         return standard_metrics_cloud(self.data.points)
 
     @property

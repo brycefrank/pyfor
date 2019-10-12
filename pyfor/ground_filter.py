@@ -1,8 +1,10 @@
 import numpy as np
 import pandas as pd
 
+
 class GroundFilter:
     pass
+
 
 class Zhang2003:
     """
@@ -10,7 +12,10 @@ class Zhang2003:
     combined with progressively larger filtering windows to remove features that are 'too steep'. This particular
     implementation interacts only with a raster, so the output resolution will be dictated by the `cell_size` argument.
     """
-    def __init__(self, cell_size, n_windows=5, dh_max=2, dh_0=1, b=2, interp_method="nearest"):
+
+    def __init__(
+        self, cell_size, n_windows=5, dh_max=2, dh_0=1, b=2, interp_method="nearest"
+    ):
         """
         :param cloud: The input cloud object.
         :param n_windows: The number of windows to construct for filtering.
@@ -27,7 +32,7 @@ class Zhang2003:
         self.interp_method = interp_method
 
     def _window_size(self, k, b):
-        return(2 * k * b + 1)
+        return 2 * k * b + 1
 
     def _dhmax(self, elev_array):
         """
@@ -36,8 +41,7 @@ class Zhang2003:
         :param elev_array:
         :return:
         """
-        return(np.max(elev_array) - np.min(elev_array))
-
+        return np.max(elev_array) - np.min(elev_array)
 
     def _slope(self, elev_array, w_k, w_k_1):
         """
@@ -46,8 +50,7 @@ class Zhang2003:
         Returns the slope coefficient s for a given elev_aray and w_k
         """
 
-        return(self._dhmax(elev_array) / ((w_k - w_k_1) / 2))
-
+        return self._dhmax(elev_array) / ((w_k - w_k_1) / 2)
 
     def _dht(self, w_k, w_k_1, dh_0, dh_max, c):
         """"
@@ -57,14 +60,13 @@ class Zhang2003:
         :param w_k: An integer representing the window size
         :param w_k_1: An integer representing the previous window size
         """
-        #s = self._slope(elev_array, w_k, w_k_1)
+        # s = self._slope(elev_array, w_k, w_k_1)
         s = 1
-
 
         if w_k <= 3:
             dh_t = dh_0
         else:
-            dh_t = (s * (w_k - w_k_1) * c + dh_0)
+            dh_t = s * (w_k - w_k_1) * c + dh_0
 
         if dh_t > dh_max:
             dh_t = dh_max
@@ -73,6 +75,7 @@ class Zhang2003:
 
     def _filter(self, grid):
         from scipy.ndimage.morphology import grey_opening
+
         array = grid.interpolate(np.min, "z").array
 
         w_k_list = [self._window_size(i, self.b) for i in range(self.n_windows)]
@@ -89,29 +92,31 @@ class Zhang2003:
             else:
                 w_k_1 = w_k_list[k - 1]
             for i in range(0, m):
-                P_i = A[i,:]
+                P_i = A[i, :]
                 Z = P_i
-                Z_f = opened[i,:]
+                Z_f = opened[i, :]
                 for j in range(0, n):
                     if Z[j] - Z_f[j] > dh_t:
                         flag[i, j] = w_k
                 P_i = Z_f
-                A[i,:] = P_i
+                A[i, :] = P_i
 
             dh_t = self._dht(w_k, w_k_1, self.dh_0, self.dh_max, self.cell_size)
 
         if np.sum(flag) == 0:
-            raise ValueError('No pixels were determined to be ground, please adjust the filter parameters.')
+            raise ValueError(
+                "No pixels were determined to be ground, please adjust the filter parameters."
+            )
 
         # Remove interpolated cells
         empty = grid.empty_cells
-        empty_y, empty_x = empty[:,0], empty[:,1]
+        empty_y, empty_x = empty[:, 0], empty[:, 1]
         A[empty_y, empty_x] = np.nan
 
         B = np.where(flag == 0, A, np.nan)
         return B
 
-    def bem(self, cloud, classified = False):
+    def bem(self, cloud, classified=False):
         """
         Retrieve the bare earth model (BEM). Unlike :class:`.KrausPfeifer1998`, the cell size is defined upon \
         initialization of the filter, and thus it is not required to retrieve the bare earth model from the filter.
@@ -124,22 +129,29 @@ class Zhang2003:
         from pyfor.cloud import Cloud, LASData
 
         if classified:
-            sub = Cloud(LASData(cloud.data.points[cloud.data.points['classification'] == 2].copy(), cloud.data.header))
+            sub = Cloud(
+                LASData(
+                    cloud.data.points[cloud.data.points["classification"] == 2].copy(),
+                    cloud.data.header,
+                )
+            )
             grid = sub.grid(self.cell_size)
             bem = grid.interpolate(np.min, "z", interp_method=self.interp_method)
-            return(bem)
+            return bem
 
         else:
             grid = cloud.grid(self.cell_size)
             B = self._filter(grid)
 
             # Interpolate on our newly found ground cells
-            X, Y = np.mgrid[0:grid.m, 0:grid.n]
+            X, Y = np.mgrid[0 : grid.m, 0 : grid.n]
             C = np.where(np.isfinite(B) == True)
             vals = B[C[0], C[1]]
-            dem_array = griddata(np.stack((C[0], C[1]), axis = 1), vals, (X, Y), method=self.interp_method)
+            dem_array = griddata(
+                np.stack((C[0], C[1]), axis=1), vals, (X, Y), method=self.interp_method
+            )
 
-            return(Raster(dem_array, grid))
+            return Raster(dem_array, grid)
 
     def normalize(self, cloud):
         """
@@ -151,9 +163,17 @@ class Zhang2003:
 
         bem = self.bem(cloud)
         cloud.data._update()
-        df = pd.DataFrame(bem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
-        df = cloud.data.points.reset_index().merge(df, how="left").set_index('index')
-        cloud.data.points['z'] = (df['z'] - df['val']).values # For some reason .values is needed to prevent an error
+        df = (
+            pd.DataFrame(bem.array)
+            .stack()
+            .rename_axis(["bins_y", "bins_x"])
+            .reset_index(name="val")
+        )
+        df = cloud.data.points.reset_index().merge(df, how="left").set_index("index")
+        cloud.data.points["z"] = (
+            df["z"] - df["val"]
+        ).values  # For some reason .values is needed to prevent an error
+
 
 class KrausPfeifer1998:
     """
@@ -191,9 +211,9 @@ class KrausPfeifer1998:
         """
         p_i = np.zeros(v_i.shape)
         p_i[v_i <= self.g] = 1
-        middle = np.logical_and(v_i > self.g, v_i <= self.g+self.w)
-        p_i[middle] = 1 / (1 + (self.a * (v_i[middle] - self.g)**self.b))
-        p_i[v_i > self.g+self.w] = 0
+        middle = np.logical_and(v_i > self.g, v_i <= self.g + self.w)
+        p_i[middle] = 1 / (1 + (self.a * (v_i[middle] - self.g) ** self.b))
+        p_i[v_i > self.g + self.w] = 0
         return p_i
 
     def _filter(self, grid):
@@ -204,15 +224,21 @@ class KrausPfeifer1998:
         :param grid: A `pyfor.rasterizer.Grid` object.
         :return: A `pandas.DataFrame` of filtered points.
         """
-        np.seterr(divide='ignore', invalid='ignore')
+        np.seterr(divide="ignore", invalid="ignore")
 
         # TODO probably some opportunity for numba / cython optimization, but working well enough for now
-        grid.cloud.data.points['bins_z'] = grid.cloud.data.points.groupby(['bins_x', 'bins_y']).cumcount()
-        depth = np.max(grid.cloud.data.points['bins_z'])
+        grid.cloud.data.points["bins_z"] = grid.cloud.data.points.groupby(
+            ["bins_x", "bins_y"]
+        ).cumcount()
+        depth = np.max(grid.cloud.data.points["bins_z"])
         z = np.zeros((grid.m, grid.n, depth + 1))
         z[:] = np.nan
-        z[grid.cloud.data.points['bins_y'], grid.cloud.data.points['bins_x'], grid.cloud.data.points['bins_z']] = grid.cloud.data.points['z']
-        p_i = np.zeros((grid.m, grid.n, depth+1))
+        z[
+            grid.cloud.data.points["bins_y"],
+            grid.cloud.data.points["bins_x"],
+            grid.cloud.data.points["bins_z"],
+        ] = grid.cloud.data.points["z"]
+        p_i = np.zeros((grid.m, grid.n, depth + 1))
         p_i[~np.isnan(z)] = 1
 
         for i in range(self.iterations):
@@ -227,8 +253,11 @@ class KrausPfeifer1998:
         del surface
 
         ix = np.zeros((grid.m, grid.n, depth + 1))
-        ix[grid.cloud.data.points['bins_y'], grid.cloud.data.points['bins_x'],
-           grid.cloud.data.points['bins_z']] = grid.cloud.data.points.index.values
+        ix[
+            grid.cloud.data.points["bins_y"],
+            grid.cloud.data.points["bins_x"],
+            grid.cloud.data.points["bins_z"],
+        ] = grid.cloud.data.points.index.values
         ground_bins = (final_resid <= self.g + self.w).nonzero()
 
         return grid.cloud.data.points.loc[ix[ground_bins]]
@@ -239,6 +268,7 @@ class KrausPfeifer1998:
         :return:
         """
         from pyfor.cloud import CloudData, Cloud
+
         grid = cloud.grid(self.cell_size)
         ground = self._filter(grid)
         return Cloud(CloudData(ground, grid.cloud.data.header))
@@ -255,7 +285,6 @@ class KrausPfeifer1998:
         ground_cloud = self.ground_points(cloud)
         return ground_cloud.grid(cell_size).interpolate(np.min, "z")
 
-
     def classify(self, cloud, ground_int=2):
         """
         Sets the classification of the original input cloud points to ground (default 2 as per las specification). This
@@ -268,7 +297,7 @@ class KrausPfeifer1998:
         points.
         """
 
-        if cloud.extension == '.las':
+        if cloud.extension == ".las":
             grid = cloud.grid(self.cell_size)
             filtered_point_ids = self._filter(grid).index
             grid.cloud.data.points["classification"][filtered_point_ids] = ground_int
@@ -286,8 +315,13 @@ class KrausPfeifer1998:
         bem = self.bem(pc, cell_size)
         # Rebin the cloud to the new cell size
         # TODO make this into a standalone function (in raster, grid?), it is used in several other places
-        #pc.grid(cell_size)
+        # pc.grid(cell_size)
         pc.data._update()
-        df = pd.DataFrame(bem.array).stack().rename_axis(['bins_y', 'bins_x']).reset_index(name='val')
-        df = pc.data.points.reset_index().merge(df, how="left").set_index('index')
-        pc.data.points['z'] = df['z'] - df['val']
+        df = (
+            pd.DataFrame(bem.array)
+            .stack()
+            .rename_axis(["bins_y", "bins_x"])
+            .reset_index(name="val")
+        )
+        df = pc.data.points.reset_index().merge(df, how="left").set_index("index")
+        pc.data.points["z"] = df["z"] - df["val"]

@@ -27,3 +27,4 @@ pyfortest/temp.*
 /.CHANGELOG.md.un~
 /temp_tif.tif
 /pyfor.sln
+pyfortest/__pycache__
