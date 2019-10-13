@@ -18,6 +18,9 @@ Updates between September 9, 2019 and [].
 ### Metrics
 1. Added `all_returns` metric, that counts the number of returns in a cell.
 
+### Rasterizer
+1. Gridding of points has been simplified. Closes #67.
+
 ### Testing Suite
 1. Modified `.travis.yml` for Windows testing environment.
 2. Added additional checks for number of `.lax` files produced and length of tile change on `retile_raster` for

@@ -215,7 +215,7 @@ class GridTestCase(unittest.TestCase):
     def test_empty_cells(self):
         empty = self.test_grid.empty_cells
         # Check that there are the correct number
-        self.assertEqual(empty.shape, (291, 2))
+        self.assertEqual(empty.shape, (301, 2))
 
     def test_raster(self):
         raster = self.test_grid.raster("max", "z")
@@ -423,7 +423,7 @@ class KrausPfeifer1998(unittest.TestCase):
     def test_classify(self):
         self.test_kp_filter.classify(self.test_cloud)
         self.assertEqual(
-            133410, np.sum(self.test_cloud.data.points["classification"] == 2)
+            133362, np.sum(self.test_cloud.data.points["classification"] == 2)
         )
 
 

@@ -30,19 +30,8 @@ class Grid:
         self.m = int(np.ceil((max_y - min_y) / cell_size))
         self.n = int(np.ceil((max_x - min_x) / cell_size))
 
-        x_edges = np.arange(min_x, max_x, self.cell_size)
-        y_edges = np.arange(min_y, max_y, self.cell_size)
-
-        bins_x = np.searchsorted(x_edges, self.cloud.data.points["x"], side="right") - 1
-        bins_y = np.searchsorted(
-            -y_edges,
-            -self.cloud.data.points["y"],
-            side="left",
-            sorter=(-y_edges).argsort(),
-        )
-
-        self.cloud.data.points.loc[:, "bins_x"] = bins_x
-        self.cloud.data.points.loc[:, "bins_y"] = bins_y
+        self.cloud.data.points.loc[:, "bins_x"] = (np.floor((self.cloud.data.points["x"].values - min_x) / self.cell_size)).astype(np.int)
+        self.cloud.data.points.loc[:, "bins_y"] = (np.floor((max_y - self.cloud.data.points["y"].values) / self.cell_size)).astype(np.int)
 
         self.cells = self.cloud.data.points.groupby(["bins_x", "bins_y"])
 
