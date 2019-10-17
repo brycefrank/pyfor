@@ -43,9 +43,7 @@ def array_to_raster(array, affine, wkt, path):
     """Writes a GeoTIFF raster from a numpy array.
 
     :param array: 2D numpy array of cell values
-    :param pixel_size: -- Desired resolution of the output raster, in same units as wkt projection.
-    :param x_min: Minimum x coordinate (top left corner of raster)
-    :param y_max: Maximum y coordinate
+    :param affine: The affine transformation.
     :param wkt: The wkt string with desired projection
     :param path: The output bath of the GeoTIFF
     """
