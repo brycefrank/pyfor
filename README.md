@@ -39,45 +39,10 @@ is a standalone package for tree segmentation and detection.
 
 [miniconda](https://conda.io/miniconda.html) or Anaconda is required for your system before beginning. pyfor depends on many packages that are otherwise tricky and difficult to install (especially gdal and its bindings), and conda provides a quick and easy way to manage many different Python environments on your system simultaneously.
 
-The following bash commands will install this branch of pyfor. It requires installation of miniconda (see above). This will install all of the prerequisites in that environment, named `pyfor_env`. pyfor depends on a lot of heavy libraries, so expect construction of the environment to take a little time.
+As of October 14th, 2019, we are proud to announce that `pyfor` is available on `conda-forge`, greatly simplifying the installation process:
 
-```bash
-git clone https://github.com/brycefrank/pyfor.git
-cd pyfor
-conda env create -f environment.yml
-
-# For Linux / macOS:
-source activate pyfor_env
-
-# For Windows:
-activate pyfor_env
-
-pip install .
 ```
-
-Following these commands, pyfor should load in the activated Python shell.
-
-```python
-import pyfor
-```
-
-If you see no errors, you are ready to process! See the user manual and documentation 
-
-**A Note on IDEs:** One of the draws of pyfor is its 3D and 2D plotting methods. These work best in Jupyter notebooks but also work well in PyCharm interactive consoles (version 2018.1 or greater).
-
-## Updating
-
-I generally update the `master` branch every month or so, indicated in the changelog. If you need to update, the process is simple. Navigate to the folder you cloned `pyfor` in and do the following
-
-```bash
-# For Linux / macOS:
-source activate pyfor_env
-
-# For Windows:
-activate pyfor_env
-
-git pull
-pip install . --upgrade
+conda install -c conda-forge pyfor 
 ```
 
 ## Collaboration & Requests
