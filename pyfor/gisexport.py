@@ -6,15 +6,6 @@ import geopandas
 
 # This module holds internal functions for GIS processing.
 
-
-def get_las_crs():
-    """
-    Attempts to retrive CRS information from an input `laspy.file.File` object.
-    :return:
-    """
-    pass
-
-
 def project_indices(indices, raster):
     """
     Converts indices of an array (for example, those indices that describe the location of a local maxima) to the
@@ -39,12 +30,12 @@ def project_indices(indices, raster):
     return seed_xy
 
 
-def array_to_raster(array, affine, wkt, path):
+def array_to_raster(array, affine, crs, path):
     """Writes a GeoTIFF raster from a numpy array.
 
     :param array: 2D numpy array of cell values
     :param affine: The affine transformation.
-    :param wkt: The wkt string with desired projection
+    :param crs: A rasterio-compatible coordinate reference (e.g. a proj4 string)
     :param path: The output bath of the GeoTIFF
     """
     # First flip the array
@@ -57,46 +48,9 @@ def array_to_raster(array, affine, wkt, path):
         width=array.shape[1],
         count=1,
         dtype=str(array.dtype),
-        crs=wkt,
+        crs=crs,
         transform=affine,
     )
     out_dataset.write(array, 1)
     out_dataset.close()
 
-
-def array_to_polygons(array, affine=None):
-    """
-    Returns a geopandas dataframe of polygons as deduced from an array.
-
-    :param array: The 2D numpy array to polygonize.
-    :param affine: The affine transformation.
-    :return:
-    """
-    if affine == None:
-        results = [
-            {"properties": {"raster_val": v}, "geometry": s}
-            for i, (s, v) in enumerate(shapes(array))
-        ]
-    else:
-        results = [
-            {"properties": {"raster_val": v}, "geometry": s}
-            for i, (s, v) in enumerate(shapes(array, transform=affine))
-        ]
-
-    tops_df = geopandas.GeoDataFrame(
-        {
-            "geometry": [
-                shape(results[geom]["geometry"]) for geom in range(len(results))
-            ],
-            "raster_val": [
-                results[geom]["properties"]["raster_val"]
-                for geom in range(len(results))
-            ],
-        }
-    )
-
-    return tops_df
-
-
-def polygons_to_raster(polygons):
-    pass

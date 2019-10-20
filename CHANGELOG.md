@@ -12,6 +12,9 @@ Updates between September 9, 2019 and [].
 2. `.create_index` is now multithreaded. Closes #65
 3. `from_dir` now supports glob strings. Closes #66
 
+### GISExport
+1. Removed some deprecated functions that were only used for tree segmentation
+
 ### Ground Filter
 1. Fixed a bug where `KrausPfeifer1998.classify` was throwing a key error. Closes #62.
 
