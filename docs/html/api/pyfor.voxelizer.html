@@ -158,8 +158,36 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="pyfor-voxelizer-module">
-<h1>pyfor.voxelizer module<a class="headerlink" href="#pyfor-voxelizer-module" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-pyfor.voxelizer">
+<span id="pyfor-voxelizer-module"></span><h1>pyfor.voxelizer module<a class="headerlink" href="#module-pyfor.voxelizer" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pyfor.voxelizer.VoxelGrid">
+<em class="property">class </em><code class="sig-prename descclassname">pyfor.voxelizer.</code><code class="sig-name descname">VoxelGrid</code><span class="sig-paren">(</span><em class="sig-param">cloud</em>, <em class="sig-param">cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.voxelizer.VoxelGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A 3 dimensional grid representation of a point cloud. This is analagous to the rasterizer.Grid class, but
+with three axes instead of two. VoxelGrids are generally used to produce VoxelRaster objects.</p>
+<dl class="method">
+<dt id="pyfor.voxelizer.VoxelGrid.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">cloud</em>, <em class="sig-param">cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.voxelizer.VoxelGrid.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.voxelizer.VoxelGrid.voxel_raster">
+<code class="sig-name descname">voxel_raster</code><span class="sig-paren">(</span><em class="sig-param">func</em>, <em class="sig-param">dim</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.voxelizer.VoxelGrid.voxel_raster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a 3 dimensional voxel raster, analagous to rasterizer.Grid.raster.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> – The function to summarize within each voxel.</p></li>
+<li><p><strong>dim</strong> – The dimension upon which to summarize (i.e. “z”, “intensity”, etc.)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 

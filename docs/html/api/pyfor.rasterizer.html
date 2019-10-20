@@ -159,8 +159,171 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="pyfor-rasterizer-module">
-<h1>pyfor.rasterizer module<a class="headerlink" href="#pyfor-rasterizer-module" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-pyfor.rasterizer">
+<span id="pyfor-rasterizer-module"></span><h1>pyfor.rasterizer module<a class="headerlink" href="#module-pyfor.rasterizer" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pyfor.rasterizer.Grid">
+<em class="property">class </em><code class="sig-prename descclassname">pyfor.rasterizer.</code><code class="sig-name descname">Grid</code><span class="sig-paren">(</span><em class="sig-param">cloud</em>, <em class="sig-param">cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The Grid object is a representation of a point cloud that has been sorted into X and Y dimensional bins. From     the Grid object we can derive other useful products, most importantly, <a class="reference internal" href="#pyfor.rasterizer.Raster" title="pyfor.rasterizer.Raster"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raster</span></code></a> objects.</p>
+<dl class="method">
+<dt id="pyfor.rasterizer.Grid.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">cloud</em>, <em class="sig-param">cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upon initialization, the parent cloud object’s <code class="xref py py-attr docutils literal notranslate"><span class="pre">data.points</span></code> attribute is sorted into bins in place. The
+columns ‘bins_x’ and ‘bins_y’ are appended. Other useful information, such as the resolution, number of rows         and columns are also stored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cloud</strong> – The “parent” cloud object.</p></li>
+<li><p><strong>cell_size</strong> – The size of the cell for sorting in the units of the input cloud object.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Grid.empty_cells">
+<em class="property">property </em><code class="sig-name descname">empty_cells</code><a class="headerlink" href="#pyfor.rasterizer.Grid.empty_cells" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the cells with no returns in self.data</p>
+<p>return: An N x 2 numpy array where each row cooresponds to the [y x] coordinate of the empty cell.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Grid.interpolate">
+<code class="sig-name descname">interpolate</code><span class="sig-paren">(</span><em class="sig-param">func</em>, <em class="sig-param">dim</em>, <em class="sig-param">interp_method='nearest'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.interpolate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolates missing cells in the grid. This function uses scipy.griddata as a backend. Please see         documentation for that function for more details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> – The function (or function string) to calculate an array on the gridded data.</p></li>
+<li><p><strong>dim</strong> – The dimension (i.e. column name of self.cells) to cast func onto.</p></li>
+<li><p><strong>interp_method</strong> – The interpolation method call for scipy.griddata, one of any: “nearest”, “cubic”,         “linear”</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An interpolated array.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Grid.metrics">
+<code class="sig-name descname">metrics</code><span class="sig-paren">(</span><em class="sig-param">func_dict</em>, <em class="sig-param">as_raster=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates summary statistics for each grid cell in the Grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>func_dict</strong> – A dictionary containing keys corresponding to the columns of self.data and values that         correspond to the functions to be  called on those columns.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A pandas dataframe with the aggregated metrics.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Grid.raster">
+<code class="sig-name descname">raster</code><span class="sig-paren">(</span><em class="sig-param">func</em>, <em class="sig-param">dim</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.raster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates an m x n matrix with values as calculated for each cell in func. This is a raw array without         missing cells interpolated. See self.interpolate for interpolation methods.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> – A function string, i.e. “max” or a function itself, i.e. <code class="xref py py-func docutils literal notranslate"><span class="pre">np.max()</span></code>. This function must be         able to take a 1D array of the given dimension as an input and produce a single value as an output. This         single value will become the value of each cell in the array.</p></li>
+<li><p><strong>dim</strong> – A dimension to calculate on.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 2D numpy array where the value of each cell is the result of the passed function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Grid.standard_metrics">
+<code class="sig-name descname">standard_metrics</code><span class="sig-paren">(</span><em class="sig-param">heightbreak=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Grid.standard_metrics" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyfor.rasterizer.ImportedGrid">
+<em class="property">class </em><code class="sig-prename descclassname">pyfor.rasterizer.</code><code class="sig-name descname">ImportedGrid</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">cloud</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.ImportedGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyfor.rasterizer.Grid" title="pyfor.rasterizer.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyfor.rasterizer.Grid</span></code></a></p>
+<p>ImportedGrid is used to normalize a parent cloud object with an arbitrary raster file.</p>
+<dl class="method">
+<dt id="pyfor.rasterizer.ImportedGrid.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">cloud</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.ImportedGrid.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upon initialization, the parent cloud object’s <code class="xref py py-attr docutils literal notranslate"><span class="pre">data.points</span></code> attribute is sorted into bins in place. The
+columns ‘bins_x’ and ‘bins_y’ are appended. Other useful information, such as the resolution, number of rows         and columns are also stored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cloud</strong> – The “parent” cloud object.</p></li>
+<li><p><strong>cell_size</strong> – The size of the cell for sorting in the units of the input cloud object.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyfor.rasterizer.Raster">
+<em class="property">class </em><code class="sig-prename descclassname">pyfor.rasterizer.</code><code class="sig-name descname">Raster</code><span class="sig-paren">(</span><em class="sig-param">array</em>, <em class="sig-param">grid</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="pyfor.rasterizer.Raster.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">array</em>, <em class="sig-param">grid</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Raster.force_extent">
+<code class="sig-name descname">force_extent</code><span class="sig-paren">(</span><em class="sig-param">bbox</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.force_extent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets <cite>self._affine</cite> and <cite>self.array</cite> to a forced bounding box. Useful for trimming edges off of rasters when
+processing buffered tiles. This operation is done in place.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bbox</strong> – Coordinates of output raster as a tuple (min_x, max_x, min_y, max_y)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Raster.from_rasterio">
+<em class="property">classmethod </em><code class="sig-name descname">from_rasterio</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.from_rasterio" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Raster.pit_filter">
+<code class="sig-name descname">pit_filter</code><span class="sig-paren">(</span><em class="sig-param">kernel_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.pit_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters pits in the raster. Intended for use with canopy height models (i.e. grid(0.5).interpolate(“max”, “z”).
+This function modifies the raster array <strong>in place</strong>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kernel_size</strong> – The size of the kernel window to pass over the array. For example 3 -&gt; 3x3 kernel window.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Raster.plot">
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">cmap='viridis'</em>, <em class="sig-param">block=False</em>, <em class="sig-param">return_plot=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default plotting method for the Raster object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyfor.rasterizer.Raster.write">
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.rasterizer.Raster.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the raster to a geotiff. Requires the Cloud.crs attribute to be filled by a projection string (ideally         wkt or proj4).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> – The path to write to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 

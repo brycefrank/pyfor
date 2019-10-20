@@ -159,8 +159,39 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="pyfor-gisexport-module">
-<h1>pyfor.gisexport module<a class="headerlink" href="#pyfor-gisexport-module" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-pyfor.gisexport">
+<span id="pyfor-gisexport-module"></span><h1>pyfor.gisexport module<a class="headerlink" href="#module-pyfor.gisexport" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="pyfor.gisexport.array_to_raster">
+<code class="sig-prename descclassname">pyfor.gisexport.</code><code class="sig-name descname">array_to_raster</code><span class="sig-paren">(</span><em class="sig-param">array</em>, <em class="sig-param">affine</em>, <em class="sig-param">crs</em>, <em class="sig-param">path</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.gisexport.array_to_raster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a GeoTIFF raster from a numpy array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> – 2D numpy array of cell values</p></li>
+<li><p><strong>affine</strong> – The affine transformation.</p></li>
+<li><p><strong>crs</strong> – A rasterio-compatible coordinate reference (e.g. a proj4 string)</p></li>
+<li><p><strong>path</strong> – The output bath of the GeoTIFF</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfor.gisexport.project_indices">
+<code class="sig-prename descclassname">pyfor.gisexport.</code><code class="sig-name descname">project_indices</code><span class="sig-paren">(</span><em class="sig-param">indices</em>, <em class="sig-param">raster</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.gisexport.project_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts indices of an array (for example, those indices that describe the location of a local maxima) to the
+same space as the input cloud object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>indices</strong> – The indices to project, an Nx2 matrix of indices where the first column are the rows (Y) and</p>
+</dd>
+</dl>
+<p>the second column is the columns (X)
+:param raster: An object of type pyfor.rasterizer.Raster
+:return:</p>
+</dd></dl>
+
 </div>
 
 

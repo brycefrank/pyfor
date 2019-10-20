@@ -159,8 +159,60 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="pyfor-clip-module">
-<h1>pyfor.clip module<a class="headerlink" href="#pyfor-clip-module" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-pyfor.clip">
+<span id="pyfor-clip-module"></span><h1>pyfor.clip module<a class="headerlink" href="#module-pyfor.clip" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="pyfor.clip.poly_clip">
+<code class="sig-prename descclassname">pyfor.clip.</code><code class="sig-name descname">poly_clip</code><span class="sig-paren">(</span><em class="sig-param">points</em>, <em class="sig-param">poly</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip.poly_clip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the indices of <cite>points</cite> that are within a given polygon. This differs from <a class="reference internal" href="#pyfor.clip.ray_trace" title="pyfor.clip.ray_trace"><code class="xref py py-func docutils literal notranslate"><span class="pre">ray_trace()</span></code></a>     in that it enforces a small “pre-clip” optimization by first clipping to the polygon bounding box. This function     is directly called by <a class="reference internal" href="pyfor.cloud.html#pyfor.cloud.Cloud.clip" title="pyfor.cloud.Cloud.clip"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Cloud.clip()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cloud</strong> – A cloud object.</p></li>
+<li><p><strong>poly</strong> – A shapely Polygon, with coordinates in the same CRS as the point cloud.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 1D numpy array of indices corresponding to points within the given polygon.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfor.clip.ray_trace">
+<code class="sig-prename descclassname">pyfor.clip.</code><code class="sig-name descname">ray_trace</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">poly</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip.ray_trace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines for some set of x and y coordinates, which of those coordinates is within <cite>poly</cite>. Ray trace is     generally called as an internal function, see <a class="reference internal" href="#pyfor.clip.poly_clip" title="pyfor.clip.poly_clip"><code class="xref py py-func docutils literal notranslate"><span class="pre">poly_clip()</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – A 1D numpy array of x coordinates.</p></li>
+<li><p><strong>y</strong> – A 1D numpy array of y coordinates.</p></li>
+<li><p><strong>poly</strong> – The coordinates of a polygon as a numpy array (i.e. from geo_json[‘coordinates’]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 1D boolean numpy array, true values are those points that are within <cite>poly</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfor.clip.square_clip">
+<code class="sig-prename descclassname">pyfor.clip.</code><code class="sig-name descname">square_clip</code><span class="sig-paren">(</span><em class="sig-param">points</em>, <em class="sig-param">bounds</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.clip.square_clip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clips a square from a tuple describing the position of the square.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points</strong> – A N x 2 numpy array of x and y coordinates, where x is in column 0</p></li>
+<li><p><strong>bounds</strong> – A tuple of length 4, min y and max y coordinates of the square.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A boolean mask, true is within the square, false is outside of the square.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 
