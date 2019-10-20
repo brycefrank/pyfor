@@ -158,7 +158,7 @@ class Cloud:
         df = df.rename(
             columns={"X": "x", "Y": "y", "Z": "z", "ReturnNumber": "return_num"}
         )
-        cloud_data = pyfor.cloud.CloudData(df, header=None)
+        cloud_data = CloudData(df, header=None)
         return cls(cloud_data)
 
     def _get_las_points(self, las):
@@ -414,7 +414,7 @@ class Cloud:
     def standard_metrics(self, heightbreak=0):
         from pyfor.metrics import standard_metrics_cloud
 
-        return standard_metrics_cloud(self.data.points)
+        return standard_metrics_cloud(self.data.points, heightbreak)
 
     @property
     def convex_hull(self):

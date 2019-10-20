@@ -233,6 +233,8 @@ class GridTestCase(unittest.TestCase):
         self.test_grid.cloud.data.points = self.test_grid.cloud.data.points.iloc[1:50]
         self.test_grid._update()
         post = self.test_grid.m
+        self.assertEqual(pre, 200)
+        self.assertEqual(post, 1)
 
 
 class GridMetricsTestCase(unittest.TestCase):
@@ -271,6 +273,7 @@ class GridMetricsTestCase(unittest.TestCase):
 
     def test_standard_metrics(self):
         metrics_dict = metrics.standard_metrics_grid(self.test_grid, 2)
+        self.assertEqual(len(metrics_dict), 25)
 
 
 class CloudMetrcsTestCase(unittest.TestCase):
@@ -390,19 +393,6 @@ class GISExportTestCase(unittest.TestCase):
         )
         self.assertTrue(os.path.exists(os.path.join(data_dir, "temp_raster_array.tif")))
         os.remove(os.path.join(data_dir, "temp_raster_array.tif"))
-
-    def test_raster_output_transform(self):
-        """
-        Tests if the written raster output was rotated and transformed correctly.
-        :return:
-        """
-        pass
-
-    def test_array_to_polygon(self):
-        array = np.random.randint(1, 5, size=(99, 99)).astype(np.int32)
-        gisexport.array_to_polygons(array, self.test_raster._affine)
-        gisexport.array_to_polygons(array)
-
 
 class VoxelGridTestCase(unittest.TestCase):
     def setUp(self):

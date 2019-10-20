@@ -261,7 +261,6 @@ class Raster:
             self.array = self.array[:bot_diff, :]
 
         # Handle the affine transformation
-        # new_affine = from_origin(old_left + ((-left_diff) * self.grid.cell_size), old_top - (top_diff * self.grid.cell_size), self.grid.cell_size, self.grid.cell_size)
         new_affine = from_origin(
             new_left, new_top, self.grid.cell_size, self.grid.cell_size
         )
