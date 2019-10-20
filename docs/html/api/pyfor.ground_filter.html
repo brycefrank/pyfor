@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                0.3.5
+                0.3.6
               </div>
             
           
@@ -159,147 +159,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-pyfor.ground_filter">
-<span id="pyfor-ground-filter-module"></span><h1>pyfor.ground_filter module<a class="headerlink" href="#module-pyfor.ground_filter" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="pyfor.ground_filter.GroundFilter">
-<em class="property">class </em><code class="sig-prename descclassname">pyfor.ground_filter.</code><code class="sig-name descname">GroundFilter</code><a class="headerlink" href="#pyfor.ground_filter.GroundFilter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-</dd></dl>
-
-<dl class="class">
-<dt id="pyfor.ground_filter.KrausPfeifer1998">
-<em class="property">class </em><code class="sig-prename descclassname">pyfor.ground_filter.</code><code class="sig-name descname">KrausPfeifer1998</code><span class="sig-paren">(</span><em class="sig-param">cell_size</em>, <em class="sig-param">a=1</em>, <em class="sig-param">b=4</em>, <em class="sig-param">g=-2</em>, <em class="sig-param">w=2.5</em>, <em class="sig-param">iterations=5</em>, <em class="sig-param">tolerance=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.KrausPfeifer1998" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Holds functions and data for implementing Kraus and Pfeifer (1998) ground filter. The Kraus and Pfeifer ground filter
-is a simple filter that uses interpolation of errors and an iteratively constructed surface to filter ground points.
-This filter is used in FUSION software, and the same default values for the parameters are used in this implementation.</p>
-<dl class="method">
-<dt id="pyfor.ground_filter.KrausPfeifer1998.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">cell_size</em>, <em class="sig-param">a=1</em>, <em class="sig-param">b=4</em>, <em class="sig-param">g=-2</em>, <em class="sig-param">w=2.5</em>, <em class="sig-param">iterations=5</em>, <em class="sig-param">tolerance=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.KrausPfeifer1998.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>cell_size</strong> – The cell size of the intermediate surface used in filtering in the same units as the input         cloud. Values from 1 to 40 are common, depending on the units in which the original point cloud is projected.</p></li>
-<li><p><strong>a</strong> – A steepness parameter for the interpolating function.</p></li>
-<li><p><strong>b</strong> – A steepness parameter for the interpolating function.</p></li>
-<li><p><strong>g</strong> – The distance from the surface under which all points are given a weight of 1.</p></li>
-<li><p><strong>w</strong> – The window width from g up considered for weighting.</p></li>
-<li><p><strong>iterations</strong> – The number of iterations, i.e. the number of surfaces constructed.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyfor.ground_filter.KrausPfeifer1998.bem">
-<code class="sig-name descname">bem</code><span class="sig-paren">(</span><em class="sig-param">cloud</em>, <em class="sig-param">cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.KrausPfeifer1998.bem" title="Permalink to this definition">¶</a></dt>
-<dd><p>Retrieve the bare earth model (BEM).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>cloud</strong> – A cloud object.</p></li>
-<li><p><strong>cell_size</strong> – The cell size of the BEM, this is independent of the cell size used in the intermediate         surfaces.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A <cite>Raster</cite> object that represents the bare earth model.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyfor.ground_filter.KrausPfeifer1998.classify">
-<code class="sig-name descname">classify</code><span class="sig-paren">(</span><em class="sig-param">cloud</em>, <em class="sig-param">ground_int=2</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.KrausPfeifer1998.classify" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets the classification of the original input cloud points to ground (default 2 as per las specification). This
-performs the adjustment of the input <cite>Cloud</cite> object <strong>in place</strong>. Only implemented for <cite>.las</cite> files.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>cloud</strong> – A cloud object.</p></li>
-<li><p><strong>ground_int</strong> – The integer to set classified points to, the default is 2 in the las specification for ground</p></li>
-</ul>
-</dd>
-</dl>
-<p>points.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyfor.ground_filter.KrausPfeifer1998.ground_points">
-<code class="sig-name descname">ground_points</code><span class="sig-paren">(</span><em class="sig-param">cloud</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.KrausPfeifer1998.ground_points" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a new <cite>Cloud</cite> object that only contains the ground points.
-:return:</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyfor.ground_filter.KrausPfeifer1998.normalize">
-<code class="sig-name descname">normalize</code><span class="sig-paren">(</span><em class="sig-param">pc</em>, <em class="sig-param">cell_size</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.KrausPfeifer1998.normalize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Normalizes the original point cloud <strong>in place</strong>. This creates a BEM as an intermediate product, please see
-<cite>.bem()</cite> to return this directly.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>pc</strong> – A cloud object.</p></li>
-<li><p><strong>cell_size</strong> – The cell_size for the intermediate BEM. Values from 1 to 6 are common.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="pyfor.ground_filter.Zhang2003">
-<em class="property">class </em><code class="sig-prename descclassname">pyfor.ground_filter.</code><code class="sig-name descname">Zhang2003</code><span class="sig-paren">(</span><em class="sig-param">cell_size</em>, <em class="sig-param">n_windows=5</em>, <em class="sig-param">dh_max=2</em>, <em class="sig-param">dh_0=1</em>, <em class="sig-param">b=2</em>, <em class="sig-param">interp_method='nearest'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.Zhang2003" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Implements Zhang et. al (2003), a progressive morphological ground filter. This filter uses an opening operation
-combined with progressively larger filtering windows to remove features that are ‘too steep’. This particular
-implementation interacts only with a raster, so the output resolution will be dictated by the <cite>cell_size</cite> argument.</p>
-<dl class="method">
-<dt id="pyfor.ground_filter.Zhang2003.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">cell_size</em>, <em class="sig-param">n_windows=5</em>, <em class="sig-param">dh_max=2</em>, <em class="sig-param">dh_0=1</em>, <em class="sig-param">b=2</em>, <em class="sig-param">interp_method='nearest'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.Zhang2003.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>cloud</strong> – The input cloud object.</p></li>
-<li><p><strong>n_windows</strong> – The number of windows to construct for filtering.</p></li>
-<li><p><strong>dh_max</strong> – The maximum height threshold.</p></li>
-<li><p><strong>dh_0</strong> – The starting null height threshold.</p></li>
-<li><p><strong>cell_size</strong> – The cell_size used to construct the array for filtering, also the output size of the BEM.</p></li>
-<li><p><strong>interp_method</strong> – The interpolation method used to fill nan values in the final BEM.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyfor.ground_filter.Zhang2003.bem">
-<code class="sig-name descname">bem</code><span class="sig-paren">(</span><em class="sig-param">cloud</em>, <em class="sig-param">classified=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.Zhang2003.bem" title="Permalink to this definition">¶</a></dt>
-<dd><p>Retrieve the bare earth model (BEM). Unlike <a class="reference internal" href="#pyfor.ground_filter.KrausPfeifer1998" title="pyfor.ground_filter.KrausPfeifer1998"><code class="xref py py-class docutils literal notranslate"><span class="pre">KrausPfeifer1998</span></code></a>, the cell size is defined upon         initialization of the filter, and thus it is not required to retrieve the bare earth model from the filter.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>cloud</strong> – A Cloud object.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A <a class="reference internal" href="pyfor.rasterizer.html#pyfor.rasterizer.Raster" title="pyfor.rasterizer.Raster"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raster</span></code></a> object that represents the bare earth model.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyfor.ground_filter.Zhang2003.normalize">
-<code class="sig-name descname">normalize</code><span class="sig-paren">(</span><em class="sig-param">cloud</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.Zhang2003.normalize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Normalizes the original point cloud <strong>in place</strong>. This creates a BEM as an intermediate product, please see
-<cite>.bem()</cite> to return this directly.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>cloud</strong> – The input cloud object to normalize.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+  <div class="section" id="pyfor-ground-filter-module">
+<h1>pyfor.ground_filter module<a class="headerlink" href="#pyfor-ground-filter-module" title="Permalink to this headline">¶</a></h1>
 </div>
 
 

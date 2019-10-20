@@ -29,7 +29,7 @@ meters.
 Interacting with these key value pairs is natural, since the values are simply `Raster` objects.
 For example we can plot the `max_z` raster from the dictionary:
 
-.. code-block::python
+.. code-block:: python
 
     std_metrics['max_z'].plot()
 
@@ -39,9 +39,10 @@ For example we can plot the `max_z` raster from the dictionary:
 
 Or, perhaps more useful, write the raster with a custom name:
 
-.. code-block::python
+.. code-block:: python
 
     std_metrics['max_z'].write('my_max_z.tif')
+
 
 Standard Metrics Description
 ----------------------------

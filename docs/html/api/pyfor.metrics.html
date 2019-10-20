@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                0.3.5
+                0.3.6
               </div>
             
           
@@ -159,133 +159,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-pyfor.metrics">
-<span id="pyfor-metrics-module"></span><h1>pyfor.metrics module<a class="headerlink" href="#module-pyfor.metrics" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
-<dt id="pyfor.metrics.canopy_relief_ratio">
-<code class="sig-prename descclassname">pyfor.metrics.</code><code class="sig-name descname">canopy_relief_ratio</code><span class="sig-paren">(</span><em class="sig-param">grid</em>, <em class="sig-param">mean_z_arr</em>, <em class="sig-param">min_z_arr</em>, <em class="sig-param">max_z_arr</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.canopy_relief_ratio" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="pyfor.metrics.grid_percentile">
-<code class="sig-prename descclassname">pyfor.metrics.</code><code class="sig-name descname">grid_percentile</code><span class="sig-paren">(</span><em class="sig-param">grid</em>, <em class="sig-param">percentile</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.grid_percentile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates a percentile raster.
-:param percentile: The percentile (a number between 0 and 100) to compute.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyfor.metrics.pct_above_heightbreak">
-<code class="sig-prename descclassname">pyfor.metrics.</code><code class="sig-name descname">pct_above_heightbreak</code><span class="sig-paren">(</span><em class="sig-param">grid</em>, <em class="sig-param">r=0</em>, <em class="sig-param">heightbreak='mean'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.pct_above_heightbreak" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the percentage of first returns above the mean. This needs its own function because it summarizes
-multiple columns of the point cloud, and is therefore more complex than typical summarizations
-(i.e. percentiles). This returns a <cite>pyfor.rasterizer.Raster</cite> object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>grid</strong> – A <cite>pyfor.rasterizer.Grid</cite> object</p></li>
-<li><p><strong>r</strong> – The return number to constrain to. Must be a positive integer. If r=0, all points will be considered</p></li>
-</ul>
-</dd>
-</dl>
-<p>(this is the default behavior).
-:param heightbreak: The height at which to summarize. If a number is given, this will be interpreted as the height
-at which points will be considered “above”. If the string “mean” is given (this is the default), will use the mean
-height of that cell, for example, to construct the “pct_above_mean” metric.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyfor.metrics.return_num">
-<code class="sig-prename descclassname">pyfor.metrics.</code><code class="sig-name descname">return_num</code><span class="sig-paren">(</span><em class="sig-param">grid</em>, <em class="sig-param">num</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.return_num" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute the number of returns that match <cite>num</cite> for a grid object</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyfor.metrics.standard_metrics_cloud">
-<code class="sig-prename descclassname">pyfor.metrics.</code><code class="sig-name descname">standard_metrics_cloud</code><span class="sig-paren">(</span><em class="sig-param">points</em>, <em class="sig-param">heightbreak</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.standard_metrics_cloud" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="pyfor.metrics.standard_metrics_grid">
-<code class="sig-prename descclassname">pyfor.metrics.</code><code class="sig-name descname">standard_metrics_grid</code><span class="sig-paren">(</span><em class="sig-param">grid</em>, <em class="sig-param">heightbreak</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.standard_metrics_grid" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="pyfor.metrics.summarize_percentiles">
-<code class="sig-prename descclassname">pyfor.metrics.</code><code class="sig-name descname">summarize_percentiles</code><span class="sig-paren">(</span><em class="sig-param">z</em>, <em class="sig-param">pct=(1</em>, <em class="sig-param">5</em>, <em class="sig-param">10</em>, <em class="sig-param">20</em>, <em class="sig-param">25</em>, <em class="sig-param">30</em>, <em class="sig-param">40</em>, <em class="sig-param">50</em>, <em class="sig-param">60</em>, <em class="sig-param">70</em>, <em class="sig-param">75</em>, <em class="sig-param">80</em>, <em class="sig-param">90</em>, <em class="sig-param">95</em>, <em class="sig-param">99)</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.summarize_percentiles" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>z</strong> – A <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code> of z values.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyfor.metrics.summarize_return_num">
-<code class="sig-prename descclassname">pyfor.metrics.</code><code class="sig-name descname">summarize_return_num</code><span class="sig-paren">(</span><em class="sig-param">return_nums</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.summarize_return_num" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the number of returns by return number.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>return_nums</strong> – A <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code> of return number that describes the return number of each point.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code> of return number counts by return number.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyfor.metrics.total_returns">
-<code class="sig-prename descclassname">pyfor.metrics.</code><code class="sig-name descname">total_returns</code><span class="sig-paren">(</span><em class="sig-param">grid</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.total_returns" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="pyfor.metrics.vol_cov">
-<code class="sig-prename descclassname">pyfor.metrics.</code><code class="sig-name descname">vol_cov</code><span class="sig-paren">(</span><em class="sig-param">grid</em>, <em class="sig-param">r</em>, <em class="sig-param">heightbreak</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.vol_cov" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the volume covariate (percentage first returns above two meters times mean z)</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyfor.metrics.z_iqr">
-<code class="sig-prename descclassname">pyfor.metrics.</code><code class="sig-name descname">z_iqr</code><span class="sig-paren">(</span><em class="sig-param">grid</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.z_iqr" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates interquartile range of z value.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyfor.metrics.z_max">
-<code class="sig-prename descclassname">pyfor.metrics.</code><code class="sig-name descname">z_max</code><span class="sig-paren">(</span><em class="sig-param">grid</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.z_max" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates maximum z value.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyfor.metrics.z_mean">
-<code class="sig-prename descclassname">pyfor.metrics.</code><code class="sig-name descname">z_mean</code><span class="sig-paren">(</span><em class="sig-param">grid</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.z_mean" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates mean of z value.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyfor.metrics.z_mean_sq">
-<code class="sig-prename descclassname">pyfor.metrics.</code><code class="sig-name descname">z_mean_sq</code><span class="sig-paren">(</span><em class="sig-param">grid</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.z_mean_sq" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the square of the mean z value.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyfor.metrics.z_min">
-<code class="sig-prename descclassname">pyfor.metrics.</code><code class="sig-name descname">z_min</code><span class="sig-paren">(</span><em class="sig-param">grid</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.z_min" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates minimum z value.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyfor.metrics.z_std">
-<code class="sig-prename descclassname">pyfor.metrics.</code><code class="sig-name descname">z_std</code><span class="sig-paren">(</span><em class="sig-param">grid</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.z_std" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates standard deviation of z value.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyfor.metrics.z_var">
-<code class="sig-prename descclassname">pyfor.metrics.</code><code class="sig-name descname">z_var</code><span class="sig-paren">(</span><em class="sig-param">grid</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.metrics.z_var" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates variance of z value.</p>
-</dd></dl>
-
+  <div class="section" id="pyfor-metrics-module">
+<h1>pyfor.metrics module<a class="headerlink" href="#pyfor-metrics-module" title="Permalink to this headline">¶</a></h1>
 </div>
 
 

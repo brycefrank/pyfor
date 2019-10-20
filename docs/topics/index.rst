@@ -7,3 +7,4 @@ The Basics
     canopyheightmodel
     clipping
     normalization
+    metrics
