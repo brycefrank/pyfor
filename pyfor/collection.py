@@ -166,7 +166,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
     def retile_raster(self, cell_size, target_tile_size, buffer=0):
         """
         A retiling operation that creates raster-compatible sized tiles. Important for creating project-level rasters.
-        Changes `self.tiles` **in place**. Note that the target tile size is approximate, and is rounded to the neareast
+        Changes `self.tiles` **in place**. Note that the target tile size is approximate, and is rounded to the nearest
         size that is compatible with the defined  cell size.
 
         :param cell_size: The target cell size of the output raster.

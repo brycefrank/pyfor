@@ -28,3 +28,4 @@ pyfortest/temp.*
 /temp_tif.tif
 /pyfor.sln
 pyfortest/__pycache__
+pyfor.pyproj
