@@ -1,8 +1,5 @@
 import numpy as np
 import rasterio
-from rasterio.features import shapes
-from shapely.geometry import shape
-import geopandas
 
 # This module holds internal functions for GIS processing.
 

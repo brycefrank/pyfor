@@ -13,6 +13,9 @@ def test_buffered_func(pc, tile):
 def test_byfile_func(las_path):
     pass
 
+def test_func_arg(pc, tile, args):
+    return(args["test_arg"])
+
 
 def make_test_collection():
     """
@@ -67,18 +70,18 @@ class CollectionTestCase(unittest.TestCase):
         self.test_col.reset_tiles()
 
     def test_par_apply_buff_index(self):
-        # Buffered with index
         self.test_col.create_index()
         self.test_col.retile_raster(10, 50, buffer=10)
         self.test_col.par_apply(test_buffered_func, indexed=True)
 
     def test_par_apply_buff_noindex(self):
-        # Buffered without index
         self.test_col.par_apply(test_buffered_func, indexed=False)
 
     def test_par_apply_by_file(self):
-        # By file
         self.test_col.par_apply(test_byfile_func, by_file=True)
+
+    def test_par_apply_arg(self):
+        self.test_col.par_apply(test_func_arg, indexed=False, args={"test_arg": 3})
 
     def tearDown(self):
         # Delete any .lax files

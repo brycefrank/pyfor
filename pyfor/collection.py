@@ -69,7 +69,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
         las.map_polygon(polygon)
         return las.points
 
-    def _construct_tile_indexed(self, func, tile):
+    def _construct_tile_indexed(self, func, tile, args):
         """
         For a given tile, clips points from intersecting las files and loads as Cloud object.
 
@@ -100,7 +100,8 @@ class CloudDataFrame(gpd.GeoDataFrame):
         if out_pc.data.points.shape[0] > 0:
             func(out_pc, tile)
 
-    def _construct_tile_no_index(self, func, tile):
+
+    def _construct_tile_no_index(self, func, tile, args):
         i = 0
         for las_file in self._get_parents(tile)["las_path"]:
             cloud = pyfor.cloud.Cloud(las_file)
@@ -120,9 +121,12 @@ class CloudDataFrame(gpd.GeoDataFrame):
 
         cloud.data.header.reader.close()
         if out_pc.data.points.shape[0] > 0:
-            func(out_pc, tile)
+            if args is not None:
+                func(out_pc, tile, args)
+            else:
+                func(out_pc, tile)
 
-    def par_apply(self, func, indexed=True, by_file=False):
+    def par_apply(self, func, indexed=True, by_file=False, args=None):
         """
         Apply a function to the collection in parallel. There are two major use cases:
 
@@ -136,20 +140,26 @@ class CloudDataFrame(gpd.GeoDataFrame):
         :param func: A function used to process each tile or raw file (see above).
         :param indexed: Determines if `.lax` files will be leveraged to reduce memory consumption.
         :param by_file: Forces `par_apply` to operate on raw files only if True.
+        :param args: An optional dictionary of keyword arguments passed to the applying function.
         """
         if by_file:
-            return Parallel(n_jobs=self.n_threads)(
-                delayed(func)(las_path) for las_path in self["las_path"]
-            )
+            if args is not None:
+                return Parallel(n_jobs=self.n_threads)(
+                    delayed(func)(las_path, args) for las_path in self["las_path"]
+                )
+            else:
+                return Parallel(n_jobs=self.n_threads)(
+                    delayed(func)(las_path) for las_path in self["las_path"]
+                )
         else:
             if indexed == True:
                 Parallel(n_jobs=self.n_threads)(
-                    delayed(self._construct_tile_indexed)(func, tile)
+                    delayed(self._construct_tile_indexed)(func, tile, args)
                     for tile in self.tiles
                 )
             else:
                 Parallel(n_jobs=self.n_threads)(
-                    delayed(self._construct_tile_no_index)(func, tile)
+                    delayed(self._construct_tile_no_index)(func, tile, args)
                     for tile in self.tiles
                 )
 
