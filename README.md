@@ -18,7 +18,7 @@ memory optimized API for managing large collections of tiles.
 
 Current Release: 0.3.6
 
-Release Date: []
+Release Date: December 1st, 2019.
 
 Release Status: 0.3.6 is an adolescent LiDAR data processing package adequate for single tile processing and large acqusitions.
 
