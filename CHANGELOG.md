@@ -1,6 +1,6 @@
 # 0.3.6
 
-Updates between September 9, 2019 and [].
+Updates between September 9, 2019 and December 1, 2019.
 
 ## Changes to Codebase
 
@@ -13,6 +13,7 @@ Updates between September 9, 2019 and [].
 3. `from_dir` now supports glob strings. Closes #66
 4. `par_apply`  accepts optional keyword arguments using the `args` 
 parameter. These are passed to the applying function.
+5. Added date-time parsing to collections.
 
 ### GISExport
 1. Removed some deprecated functions that were only used for tree segmentation

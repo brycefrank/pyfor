@@ -83,6 +83,11 @@ class CollectionTestCase(unittest.TestCase):
     def test_par_apply_arg(self):
         self.test_col.par_apply(test_func_arg, indexed=False, args={"test_arg": 3})
 
+    def test_datetimes_retrieval(self):
+        timestamp = self.test_col['datetime'].iloc[0]
+        timestamp = timestamp.to_pydatetime()
+        self.assertEqual(timestamp.year, 2017)
+
     def tearDown(self):
         # Delete any .lax files
         lax_paths = [

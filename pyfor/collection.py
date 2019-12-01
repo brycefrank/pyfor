@@ -45,6 +45,8 @@ class CloudDataFrame(gpd.GeoDataFrame):
         if get_bounding_boxes == True:
             cdf._build_polygons()
 
+        cdf._get_datetimes()
+
         return cdf
 
     def _set_index(self, *args):
@@ -227,6 +229,18 @@ class CloudDataFrame(gpd.GeoDataFrame):
         ]
         self.set_geometry("bounding_box", inplace=True)
         self.tiles = self["bounding_box"].values
+
+    def _get_datetime(self, las_path):
+        las = laspy.file.File(las_path)
+        return(las.header.date)
+
+    def _get_datetimes(self):
+        """Retrieves the datetimes of all tiles in the collection."""
+        datetimes = Parallel(n_jobs=self.n_threads)(
+            delayed(self._get_datetime)(las_path) for las_path in self['las_path']
+        )
+
+        self["datetime"] = datetimes
 
     def _get_parents(self, polygon):
         """
