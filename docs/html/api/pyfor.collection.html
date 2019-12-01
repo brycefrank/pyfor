@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                0.3.5
+                0.3.6
               </div>
             
           
@@ -252,14 +252,15 @@ plot-level point clouds.
 
 <dl class="method">
 <dt id="pyfor.collection.CloudDataFrame.retile_raster">
-<code class="sig-name descname">retile_raster</code><span class="sig-paren">(</span><em class="sig-param">cell_size</em>, <em class="sig-param">original_tile_size</em>, <em class="sig-param">buffer=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.retile_raster" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">retile_raster</code><span class="sig-paren">(</span><em class="sig-param">cell_size</em>, <em class="sig-param">target_tile_size</em>, <em class="sig-param">buffer=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.collection.CloudDataFrame.retile_raster" title="Permalink to this definition">¶</a></dt>
 <dd><p>A retiling operation that creates raster-compatible sized tiles. Important for creating project-level rasters.
-Changes <cite>self.tiles</cite> <strong>in place</strong></p>
+Changes <cite>self.tiles</cite> <strong>in place</strong>. Note that the target tile size is approximate, and is rounded to the neareast
+size that is compatible with the defined  cell size.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>cell_size</strong> – The target cell size of the output raster.</p></li>
-<li><p><strong>original_tile_size</strong> – The original tile size of the acquisition.</p></li>
+<li><p><strong>target_tile_size</strong> – The target tile size of the retiling operation.</p></li>
 <li><p><strong>buffer</strong> – The amount to buffer each input tile.</p></li>
 </ul>
 </dd>
@@ -317,7 +318,10 @@ project level rasters.</p>
 <dd><p>Constructs a CloudDataFrame from a directory of las files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>las_dir</strong> – The directory of las files.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>las_dir</strong> – The directory of las or .laz files.</p></li>
+<li><p><strong>glob_str</strong> – A glob string to select files from the directory. For example: “<a href="#id3"><span class="problematic" id="id4">*</span></a>.laz” to select .laz files only.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>A CloudDataFrame constructed from the directory of las files.</p>

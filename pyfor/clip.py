@@ -4,6 +4,7 @@ from numba import vectorize, bool_, float64
 
 # These are the lower level clipping functions.
 
+
 def square_clip(points, bounds):
     """
     Clips a square from a tuple describing the position of the square.
@@ -22,7 +23,8 @@ def square_clip(points, bounds):
     stack = np.stack((x_in, y_in), axis=1)
     in_clip = np.all(stack, axis=1)
 
-    return(in_clip)
+    return in_clip
+
 
 def ray_trace(x, y, poly):
     """
@@ -34,6 +36,7 @@ def ray_trace(x, y, poly):
     :param poly: The coordinates of a polygon as a numpy array (i.e. from geo_json['coordinates']
     :return: A 1D boolean numpy array, true values are those points that are within `poly`.
     """
+
     @vectorize([bool_(float64, float64)])
     def ray(x, y):
         # where xy is a coordinate
@@ -54,7 +57,8 @@ def ray_trace(x, y, poly):
                             inside = not inside
             p1x, p1y = p2x, p2y
         return inside
-    return(ray(x, y))
+
+    return ray(x, y)
 
 
 def poly_clip(points, poly):
@@ -76,10 +80,11 @@ def poly_clip(points, poly):
     pre_clip_inds = np.where(pre_clip_mask)[0]
 
     # Clip the preclip
-    poly_coords = np.stack((poly.exterior.coords.xy[0],
-                            poly.exterior.coords.xy[1]), axis = 1)
+    poly_coords = np.stack(
+        (poly.exterior.coords.xy[0], poly.exterior.coords.xy[1]), axis=1
+    )
 
-    full_clip_mask = ray_trace(pre_clip[:,0], pre_clip[:,1], poly_coords)
+    full_clip_mask = ray_trace(pre_clip[:, 0], pre_clip[:, 1], poly_coords)
     clipped = pre_clip_inds[full_clip_mask]
 
-    return(clipped)
+    return clipped

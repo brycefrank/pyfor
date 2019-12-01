@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                0.3.5
+                0.3.6
               </div>
             
           
@@ -212,7 +212,9 @@ This filter is used in FUSION software, and the same default values for the para
 <dt id="pyfor.ground_filter.KrausPfeifer1998.classify">
 <code class="sig-name descname">classify</code><span class="sig-paren">(</span><em class="sig-param">cloud</em>, <em class="sig-param">ground_int=2</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.ground_filter.KrausPfeifer1998.classify" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the classification of the original input cloud points to ground (default 2 as per las specification). This
-performs the adjustment of the input <cite>Cloud</cite> object <strong>in place</strong>. Only implemented for <cite>.las</cite> files.</p>
+performs the adjustment of the input <cite>Cloud</cite> object <strong>in place</strong>. Only implemented for <cite>.las</cite> files. Additionally,
+the original ground classification is preserved if it exists, so this will only add additional ground points for
+already classified point clouds.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

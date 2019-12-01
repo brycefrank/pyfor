@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                0.3.5
+                0.3.6
               </div>
             
           
@@ -162,51 +162,20 @@
   <div class="section" id="module-pyfor.gisexport">
 <span id="pyfor-gisexport-module"></span><h1>pyfor.gisexport module<a class="headerlink" href="#module-pyfor.gisexport" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
-<dt id="pyfor.gisexport.array_to_polygons">
-<code class="sig-prename descclassname">pyfor.gisexport.</code><code class="sig-name descname">array_to_polygons</code><span class="sig-paren">(</span><em class="sig-param">array</em>, <em class="sig-param">affine=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.gisexport.array_to_polygons" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a geopandas dataframe of polygons as deduced from an array.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>array</strong> – The 2D numpy array to polygonize.</p></li>
-<li><p><strong>affine</strong> – The affine transformation.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
 <dt id="pyfor.gisexport.array_to_raster">
-<code class="sig-prename descclassname">pyfor.gisexport.</code><code class="sig-name descname">array_to_raster</code><span class="sig-paren">(</span><em class="sig-param">array</em>, <em class="sig-param">affine</em>, <em class="sig-param">wkt</em>, <em class="sig-param">path</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.gisexport.array_to_raster" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyfor.gisexport.</code><code class="sig-name descname">array_to_raster</code><span class="sig-paren">(</span><em class="sig-param">array</em>, <em class="sig-param">affine</em>, <em class="sig-param">crs</em>, <em class="sig-param">path</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.gisexport.array_to_raster" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes a GeoTIFF raster from a numpy array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>array</strong> – 2D numpy array of cell values</p></li>
-<li><p><strong>pixel_size</strong> – – Desired resolution of the output raster, in same units as wkt projection.</p></li>
-<li><p><strong>x_min</strong> – Minimum x coordinate (top left corner of raster)</p></li>
-<li><p><strong>y_max</strong> – Maximum y coordinate</p></li>
-<li><p><strong>wkt</strong> – The wkt string with desired projection</p></li>
+<li><p><strong>affine</strong> – The affine transformation.</p></li>
+<li><p><strong>crs</strong> – A rasterio-compatible coordinate reference (e.g. a proj4 string)</p></li>
 <li><p><strong>path</strong> – The output bath of the GeoTIFF</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="function">
-<dt id="pyfor.gisexport.get_las_crs">
-<code class="sig-prename descclassname">pyfor.gisexport.</code><code class="sig-name descname">get_las_crs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.gisexport.get_las_crs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Attempts to retrive CRS information from an input <cite>laspy.file.File</cite> object.
-:return:</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyfor.gisexport.polygons_to_raster">
-<code class="sig-prename descclassname">pyfor.gisexport.</code><code class="sig-name descname">polygons_to_raster</code><span class="sig-paren">(</span><em class="sig-param">polygons</em><span class="sig-paren">)</span><a class="headerlink" href="#pyfor.gisexport.polygons_to_raster" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="function">
 <dt id="pyfor.gisexport.project_indices">

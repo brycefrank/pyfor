@@ -1,3 +1,43 @@
+# 0.3.6
+
+Updates between September 9, 2019 and December 1, 2019.
+
+## Changes to Codebase
+
+### Cloud
+1. Added `.from_pdal` class method which converts a `PDAL` `python.filter` `ins` argument to a Cloud object.
+
+### Collection
+1. `._build_polygons` is now multithreaded.
+2. `.create_index` is now multithreaded. Closes #65
+3. `from_dir` now supports glob strings. Closes #66
+4. `par_apply`  accepts optional keyword arguments using the `args` 
+parameter. These are passed to the applying function.
+5. Added date-time parsing to collections.
+
+### GISExport
+1. Removed some deprecated functions that were only used for tree segmentation
+
+### Ground Filter
+1. Fixed a bug where `KrausPfeifer1998.classify` was throwing a key error. Closes #62.
+
+### Metrics
+1. Added `all_returns` metric, that counts the number of returns in a cell.
+
+### Rasterizer
+1. Gridding of points has been simplified. Closes #67.
+
+### Testing Suite
+1. Modified `.travis.yml` for Windows testing environment.
+2. Added additional checks for number of `.lax` files produced and length of tile change on `retile_raster` for
+collection testing. Removed printing statements.
+
+## Installation
+1. `0.3.6` now officially supports conda installation! Dancing in the streets. Check the README for instructions.
+
+## Other
+1. Version numbers must now be set in both `setup.py` and `__init__.py` for compatibility with conda-forge
+
 # 0.3.5
 
 Updates between April 20, 2019 and September 9, 2019
