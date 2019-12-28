@@ -182,7 +182,7 @@ class KrausPfeifer1998:
     This filter is used in FUSION software, and the same default values for the parameters are used in this implementation.
     """
 
-    def __init__(self, cell_size, a=1, b=4, g=-2, w=2.5, iterations=5, tolerance=0):
+    def __init__(self, cell_size, a=1, b=4, g=-2, w=2.5, iterations=5, tolerance=None):
         """
         :param cell_size: The cell size of the intermediate surface used in filtering in the same units as the input \
         cloud. Values from 1 to 40 are common, depending on the units in which the original point cloud is projected.
@@ -191,6 +191,8 @@ class KrausPfeifer1998:
         :param g: The distance from the surface under which all points are given a weight of 1.
         :param w: The window width from g up considered for weighting.
         :param iterations: The number of iterations, i.e. the number of surfaces constructed.
+        :param tolerance: The maximum value at which residuals above this value are  discarded as non-ground points. \
+        If None this value will default to g + w.
         """
         self.cell_size = cell_size
         self.a = a
@@ -199,7 +201,9 @@ class KrausPfeifer1998:
         self.w = w
         self.iterations = iterations
 
-        if tolerance == 0:
+        if tolerance is not None:
+            self.tolerance = tolerance
+        else:
             self.tolerance = self.g + self.w
 
     def _compute_weights(self, v_i):
@@ -258,7 +262,7 @@ class KrausPfeifer1998:
             grid.cloud.data.points["bins_x"],
             grid.cloud.data.points["bins_z"],
         ] = grid.cloud.data.points.index.values
-        ground_bins = (final_resid <= self.g + self.w).nonzero()
+        ground_bins = (final_resid <= self.tolerance).nonzero()
 
         return grid.cloud.data.points.loc[ix[ground_bins]]
 

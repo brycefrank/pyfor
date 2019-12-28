@@ -416,6 +416,20 @@ class KrausPfeifer1998(unittest.TestCase):
             133362, np.sum(self.test_cloud.data.points["classification"] == 2)
         )
 
+    def test_tolerance(self):
+        kp_filter_tol1 = ground_filter.KrausPfeifer1998(3, tolerance=1)
+        kp_filter_tol2 = ground_filter.KrausPfeifer1998(3, tolerance=2)
+
+        test_cloud1 = cloud.Cloud(test_las)
+        test_cloud2 = cloud.Cloud(test_las)
+
+        kp_filter_tol1.classify(test_cloud1)
+        kp_filter_tol2.classify(test_cloud2)
+
+        test_1_gp = np.sum(test_cloud1.data.points["classification"] == 2)
+        test_2_gp = np.sum(test_cloud2.data.points["classification"] == 2)
+
+        self.assertLess(test_1_gp, test_2_gp)
 
 class Zhang2003TestCase(unittest.TestCase):
     def setUp(self):

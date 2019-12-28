@@ -39,11 +39,33 @@ is a standalone package for tree segmentation and detection.
 
 [miniconda](https://conda.io/miniconda.html) or Anaconda is required for your system before beginning. pyfor depends on many packages that are otherwise tricky and difficult to install (especially gdal and its bindings), and conda provides a quick and easy way to manage many different Python environments on your system simultaneously.
 
+## Miniconda
+
 As of October 14th, 2019, we are proud to announce that `pyfor` is available on `conda-forge`, greatly simplifying the installation process:
 
 ```
 conda install -c conda-forge pyfor 
 ```
+
+## GitHub
+
+In some cases it is useful to install directly from GitHub (i.e. for the `develop` branch). 
+
+```
+git clone https://github.com/brycefrank/pyfor.git
+cd pyfor
+conda env create -f environment.yml
+
+# For Linux / macOS:
+source activate pyfor_env
+
+# For Windows:
+activate pyfor_env
+
+pip install .
+```
+
+This will install `pyfor` and its dependencies into a `conda` environment named `pyfor_env`.
 
 ## Collaboration & Requests
 
