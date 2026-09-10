@@ -1,0 +1,18 @@
+{
+  "pipeline": [
+    {
+      "type": "readers.las",
+      "filename": "pyfortest/data/test.laz",
+      "threads": 1
+    },
+    {
+      "type": "filters.smrf"
+    },
+    {
+      "type": "filters.hag_nn"
+    },
+    {
+      "type": "writers.null"
+    }
+  ]
+}

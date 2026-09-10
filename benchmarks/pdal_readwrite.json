@@ -1,0 +1,13 @@
+{
+  "pipeline": [
+    {
+      "type": "readers.las",
+      "filename": "pyfortest/data/test.laz",
+      "threads": 1
+    },
+    {
+      "type": "writers.las",
+      "filename": "benchmarks/results/pdal_readwrite.laz"
+    }
+  ]
+}

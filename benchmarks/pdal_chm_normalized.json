@@ -1,0 +1,23 @@
+{
+  "pipeline": [
+    {
+      "type": "readers.las",
+      "filename": "pyfortest/data/test.laz",
+      "threads": 1
+    },
+    {
+      "type": "filters.smrf"
+    },
+    {
+      "type": "filters.hag_nn"
+    },
+    {
+      "type": "writers.gdal",
+      "filename": "benchmarks/results/pdal_chm_normalized.tif",
+      "resolution": 1,
+      "output_type": "max",
+      "dimension": "HeightAboveGround",
+      "binmode": true
+    }
+  ]
+}

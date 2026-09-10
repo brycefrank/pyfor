@@ -148,6 +148,29 @@ longer supported.
 7. `CloudDataFrame.plot_metrics` imported a function name that did not exist; it now calls
    `standard_metrics_cloud`.
 
+### Benchmarks
+
+1. Added `benchmarks/bench.py`, which times pyfor, lidR, and PDAL on the same tile for the same six
+   operations, pins every tool to the same raster grid, and checks that the tools produce the same
+   CHM before reporting times. `benchmarks/lidr.R`, `benchmarks/pyfor_ops.py`, and one PDAL pipeline
+   per operation are the per tool halves.
+2. `docs/topics/benchmarks.rst` reports the results, and the two problems the first run of the
+   benchmark found, both of which are fixed in this release (see the breaking changes above):
+   * rasters could not be lined up with any other tool, because the grid was anchored at the extent
+     of the data rather than snapped to the cell size;
+   * a point exactly on a horizontal cell boundary was assigned to a different cell than GDAL and
+     PDAL assign it to.
+   `benchmarks/bench.py` measures what that was worth, and reports it in `results.json` as
+   `grid_convention_effect`.
+3. Verified by the harness, so that the timings are comparisons of equivalent work:
+   * pyfor and PDAL produce identical CHMs on the test tile, 39,696 cells compared with a maximum
+     difference of 0.0 m, and pyfor matches an independent numpy binning of the same points;
+   * on a synthetic tile whose extent sits on the cell lattice, pyfor, lidR, and PDAL all produce
+     identical CHMs, 2,499 cells with a maximum difference of 0.0 m;
+   * against lidR, what remains is lidR's own conventions: a point on a grid line goes to the cell
+     below it and the raster grows a cell for points on the far edge, which changes 4 cells that
+     only pyfor fills and 15 that only lidR fills on the test tile.
+
 ### Packaging & Testing
 
 1. Dependencies moved to `pyproject.toml`, the version is read from `pyfor.__version__`, and the

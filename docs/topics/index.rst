@@ -8,3 +8,4 @@ The Basics
     clipping
     normalization
     metrics
+    benchmarks
