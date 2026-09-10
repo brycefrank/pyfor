@@ -1,4 +1,5 @@
 import numpy as np
+from pyfor.rasterizer import reduce_cells
 
 
 class VoxelGrid:
@@ -8,40 +9,47 @@ class VoxelGrid:
     def __init__(self, cloud, cell_size):
         self.cell_size = cell_size
         self.cloud = cloud
-        self.cell_size = cell_size
 
         min_x, max_x = self.cloud.data.min[0], self.cloud.data.max[0]
         min_y, max_y = self.cloud.data.min[1], self.cloud.data.max[1]
         min_z, max_z = self.cloud.data.min[2], self.cloud.data.max[2]
 
-        self.m = int(np.floor((max_y - min_y) / cell_size))
-        self.n = int(np.floor((max_x - min_x) / cell_size))
-        self.p = int(np.floor((max_z - min_z) / cell_size))
+        self.m = max(1, int(np.floor((max_y - min_y) / cell_size)))
+        self.n = max(1, int(np.floor((max_x - min_x) / cell_size)))
+        self.p = max(1, int(np.floor((max_z - min_z) / cell_size)))
+
+        points = self.cloud.data.points
 
         # Create bins
         y_edges = np.linspace(min_y, max_y, self.m)
         bins_x = np.searchsorted(
-            np.linspace(min_x, max_x, self.n), self.cloud.data.points["x"]
+            np.linspace(min_x, max_x, self.n), points["x"]
         )
         bins_y = (
             np.searchsorted(
                 -y_edges,
-                -self.cloud.data.points["y"],
+                -points["y"],
                 side="right",
                 sorter=(-y_edges).argsort(),
             )
             - 1
         )
-        bins_z = np.searchsorted(
-            np.linspace(min_z, max_z, self.p), self.cloud.data.points["z"]
+        bins_z = np.searchsorted(np.linspace(min_z, max_z, self.p), points["z"])
+
+        # The outermost edge of each search space is inclusive, so a coordinate on the boundary of the
+        # cloud can bin one past the last voxel of an axis.
+        self.bins_x = np.clip(bins_x, 0, self.n - 1)
+        self.bins_y = np.clip(bins_y, 0, self.m - 1)
+        self.bins_z = np.clip(bins_z, 0, self.p - 1)
+
+        self.cell_ids = (
+            (self.bins_x * self.m + self.bins_y) * self.p + self.bins_z
         )
 
-        self.data = self.cloud.data.points
-        self.data["bins_x"] = bins_x
-        self.data["bins_y"] = bins_y
-        self.data["bins_z"] = bins_z
-
-        self.cells = self.data.groupby(["bins_x", "bins_y", "bins_z"])
+    @property
+    def n_cells(self):
+        """:return: The total number of voxels, occupied or not."""
+        return self.m * self.n * self.p
 
     def voxel_raster(self, func, dim):
         """Creates a 3 dimensional voxel raster, analagous to rasterizer.Grid.raster.
@@ -49,14 +57,10 @@ class VoxelGrid:
         :param func: The function to summarize within each voxel.
         :param dim: The dimension upon which to summarize (i.e. "z", "intensity", etc.)
         """
-        voxel_grid = np.zeros((self.m, self.n, self.p))
-        cells = (
-            self.data.groupby(["bins_x", "bins_y", "bins_z"])
-            .agg({dim: func})
-            .reset_index()
+        voxel_grid = np.zeros(self.n_cells)
+        cells, values = reduce_cells(
+            self.cloud.data.points[dim], self.cell_ids, self.n_cells, func
         )
+        voxel_grid[cells] = values
 
-        # Set the values of the grid
-        voxel_grid[cells["bins_x"], cells["bins_y"], cells["bins_z"]] = cells[dim]
-
-        return voxel_grid
+        return voxel_grid.reshape(self.m, self.n, self.p)

@@ -1,12 +1,15 @@
+import glob
 import os
+
+import geopandas as gpd
 import laspy
 import numpy as np
-import pyfor
-import geopandas as gpd
 import pandas as pd
-import laxpy
-from shapely.geometry import Polygon
 from joblib import Parallel, delayed
+from shapely.geometry import Polygon
+
+from pyfor import cloud
+from pyfor import rasterizer
 
 
 class CloudDataFrame(gpd.GeoDataFrame):
@@ -19,7 +22,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
         super(CloudDataFrame, self).__init__(*args, **kwargs)
         self.n_threads = 1
         self.tiles = None
-        self.crs = None
 
         if "bounding_box" in self.columns.values:
             self.set_geometry("bounding_box", inplace=True)
@@ -36,9 +38,7 @@ class CloudDataFrame(gpd.GeoDataFrame):
         can be set to False.
         :return:
         """
-        import glob
-
-        las_path_init = glob.glob(os.path.join(las_dir, glob_str))
+        las_path_init = sorted(glob.glob(os.path.join(las_dir, glob_str)))
         cdf = CloudDataFrame({"las_path": las_path_init})
         cdf.n_threads = n_jobs
 
@@ -66,69 +66,37 @@ class CloudDataFrame(gpd.GeoDataFrame):
         col_bbox = np.min(minx), np.min(miny), np.max(maxx), np.max(maxy)
         return col_bbox
 
-    def map_poly(self, las_path, polygon):
-        las = laxpy.IndexedLAS(las_path)
-        las.map_polygon(polygon)
-        return las.points
-
-    def _construct_tile_indexed(self, func, tile, args):
+    def _construct_tile(self, func, tile, args):
         """
         For a given tile, clips points from intersecting las files and loads as Cloud object.
 
         :param func: The function to process the input tile.
         :param tile: Tile the tile to process
+        :param args: An optional dictionary of keyword arguments passed to the applying function.
         """
-        i = 0
+        frames = []
+        header = None
+
         for las_file in self._get_parents(tile)["las_path"]:
-            # Map the index (clip)
-            las = laxpy.IndexedLAS(las_file)
-            las.map_polygon(tile)
+            points = cloud.read_polygon(las_file, tile)
+            if len(points) > 0:
+                frames.append(points)
+                if header is None:
+                    with laspy.open(las_file) as reader:
+                        header = reader.header
 
-            if len(las.x) > 0:
-                if i == 0:
-                    out_pc = pyfor.cloud.Cloud(las)
-                else:
-                    out_pc.data._append(pyfor.cloud.Cloud(las).data)
+        if len(frames) == 0:
+            return
 
-                out_pc = out_pc.clip(tile)
-                out_pc.crs = self.crs
-                i += 1
+        out_pc = cloud.Cloud(cloud.CloudData(np.concatenate(frames), header))
+        out_pc.crs = self.crs
 
-            else:
-                pass
-
-            las.reader.close()
-
-        if out_pc.data.points.shape[0] > 0:
+        if args is not None:
+            func(out_pc, tile, args)
+        else:
             func(out_pc, tile)
 
-
-    def _construct_tile_no_index(self, func, tile, args):
-        i = 0
-        for las_file in self._get_parents(tile)["las_path"]:
-            cloud = pyfor.cloud.Cloud(las_file)
-
-            if len(cloud.data.points.x) > 0:
-                if i == 0:
-                    out_pc = cloud
-                else:
-                    out_pc.data._append(cloud.data)
-
-                out_pc = out_pc.clip(tile)
-                out_pc.crs = self.crs
-                i += 1
-
-            else:
-                pass
-
-        cloud.data.header.reader.close()
-        if out_pc.data.points.shape[0] > 0:
-            if args is not None:
-                func(out_pc, tile, args)
-            else:
-                func(out_pc, tile)
-
-    def par_apply(self, func, indexed=True, by_file=False, args=None):
+    def par_apply(self, func, by_file=False, args=None):
         """
         Apply a function to the collection in parallel. There are two major use cases:
 
@@ -140,7 +108,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
         that takes only one argument, the absolute file path to the tile at that iteration. For this case, set `by_file` to True.
 
         :param func: A function used to process each tile or raw file (see above).
-        :param indexed: Determines if `.lax` files will be leveraged to reduce memory consumption.
         :param by_file: Forces `par_apply` to operate on raw files only if True.
         :param args: An optional dictionary of keyword arguments passed to the applying function.
         """
@@ -154,16 +121,9 @@ class CloudDataFrame(gpd.GeoDataFrame):
                     delayed(func)(las_path) for las_path in self["las_path"]
                 )
         else:
-            if indexed == True:
-                Parallel(n_jobs=self.n_threads)(
-                    delayed(self._construct_tile_indexed)(func, tile, args)
-                    for tile in self.tiles
-                )
-            else:
-                Parallel(n_jobs=self.n_threads)(
-                    delayed(self._construct_tile_no_index)(func, tile, args)
-                    for tile in self.tiles
-                )
+            Parallel(n_jobs=self.n_threads)(
+                delayed(self._construct_tile)(func, tile, args) for tile in self.tiles
+            )
 
     def retile_raster(self, cell_size, target_tile_size, buffer=0):
         """
@@ -186,16 +146,20 @@ class CloudDataFrame(gpd.GeoDataFrame):
 
         self._build_polygons()
 
-    @property
-    def indexed(self):
+    def grid_spec(self, cell_size):
         """
-        :return: True if all files have an equivalent `.lax` present, otherwise False.
+        A :class:`.GridSpec` that covers the whole collection, snapped to the cell size.
+
+        Passing this spec to the processing of every tile is how per tile rasters are made to line up
+        with each other, because every tile then grids its points on the same lattice rather than on
+        its own extent. It is also what a raster trimmed to a tile boundary needs in order for
+        :meth:`.Raster.force_extent` to accept that boundary.
+
+        :param cell_size: The cell size of the rasters being produced.
+        :return: A :class:`.GridSpec` covering the collection.
         """
-        for path in self["las_path"].values:
-            lax_path = path[:-1] + "x"
-            if not os.path.isfile(lax_path):
-                return False
-        return True
+        min_x, min_y, max_x, max_y = self.bounding_box
+        return rasterizer.GridSpec.covering(min_x, min_y, max_x, max_y, cell_size)
 
     def _get_bounding_box(self, las_path):
         """
@@ -205,11 +169,9 @@ class CloudDataFrame(gpd.GeoDataFrame):
         :return: A tuple (minx, maxx, miny, maxy) of bounding box coordinates.
         """
 
-        pc = laspy.file.File(las_path)
-        min_x, max_x = pc.header.min[0], pc.header.max[0]
-        min_y, max_y = pc.header.min[1], pc.header.max[1]
-        pc.header.reader.close()
-        return (min_x, max_x, min_y, max_y)
+        with laspy.open(las_path) as reader:
+            header = reader.header
+            return (header.mins[0], header.maxs[0], header.mins[1], header.maxs[1])
 
     def _build_polygons(self):
         """Builds the shapely polygons of the bounding boxes and adds them to self.tiles"""
@@ -231,8 +193,8 @@ class CloudDataFrame(gpd.GeoDataFrame):
         self.tiles = self["bounding_box"].values
 
     def _get_datetime(self, las_path):
-        las = laspy.file.File(las_path)
-        return(las.header.date)
+        with laspy.open(las_path) as reader:
+            return pd.to_datetime(reader.header.creation_date)
 
     def _get_datetimes(self):
         """Retrieves the datetimes of all tiles in the collection."""
@@ -261,22 +223,6 @@ class CloudDataFrame(gpd.GeoDataFrame):
         plot = super(CloudDataFrame, self).plot(**kwargs)
         plot.figure.show()
 
-    def _index(self, las_path):
-        """
-        Index a single .las file. Used in parallel in `create_index`.
-        """
-
-        os.system("lasindex -i {}".format(las_path))
-
-    def create_index(self):
-        """
-        For each file in the collection, creates `.lax` files for spatial indexing using the default values.
-        """
-
-        Parallel(n_jobs=self.n_threads)(
-            delayed(self._index)(las_path) for las_path in self["las_path"].values
-        )
-
     def plot_metrics(self, heightbreak, index=None):
         """
         Retrieves a set of 29 standard metrics, including height percentiles and other summaries. Intended for use on
@@ -284,10 +230,10 @@ class CloudDataFrame(gpd.GeoDataFrame):
         :param index: An iterable of indices to set as the output dataframe index.
         :return: A pandas dataframe of standard metrics.
         """
-        from pyfor.metrics import standard_metrics
+        from pyfor.metrics import standard_metrics_cloud
 
-        get_metrics = lambda las_path: standard_metrics(
-            pyfor.cloud.Cloud(las_path).data.points, heightbreak=heightbreak
+        get_metrics = lambda las_path: standard_metrics_cloud(
+            cloud.Cloud(las_path).data.points, heightbreak=heightbreak
         )
         metrics = pd.concat(self.par_apply(get_metrics, by_file=True), sort=False)
 
@@ -341,6 +287,12 @@ class Retiler:
 
         bottom, left = self.cdf.bounding_box[1], self.cdf.bounding_box[0]
         top, right = self.cdf.bounding_box[3], self.cdf.bounding_box[2]
+
+        # Snap the tiling origin to the cell size, so that tile boundaries, and therefore rasters
+        # trimmed to them, fall on the lattice the rasters themselves are gridded on. Without this
+        # the tiling starts at the extent of the first tile and no raster lines up with another.
+        left = float(np.floor(left / target_cell_size) * target_cell_size)
+        bottom = float(np.floor(bottom / target_cell_size) * target_cell_size)
 
         new_tile_size = (
             np.ceil(original_tile_size / target_cell_size) * target_cell_size

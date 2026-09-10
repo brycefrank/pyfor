@@ -24,7 +24,7 @@ It will be useful to set the coordinate reference system for the project. This i
 .. code-block:: python
 
     import pyproj
-    crs = pyproj.proj({'init': 'epsg:26910'}).srs
+    crs = pyproj.CRS.from_epsg(26910)
     my_collection.crs = crs
 
 Here we must grapple with a few things. First, we will want to process buffered tiles to eliminate edge effects from
@@ -42,7 +42,22 @@ ensure the output rasters are exactly the correct size so that they line up corr
 
 The first argument is the desired resolution of the output raster. The second argument is the resolution of the new
 tile sets. ``500`` means they will be processed in 500m x 500m chunks. Finally ``buffer=20`` means that each tile will
-be buffered by 20 meters, such that we can process a large buffered tile to eliminate edge effects.
+be buffered by 20 meters, such that we can process a large buffered tile to eliminate edge effects. The tiling origin
+is snapped to a multiple of the cell size and the buffer has to be a whole number of cells, so that a raster trimmed
+to a tile falls on the cells it was computed on.
+
+Per tile rasters line up with each other because every tile grids its points on the same lattice of multiples
+of the cell size. Where a tile has to land on one particular grid, for example a project grid that is offset from
+the origin of the coordinate system, build it with :meth:`.CloudDataFrame.grid_spec` and pass it to the processing
+function:
+
+.. code-block:: python
+
+    spec = my_collection.grid_spec(0.5)
+
+    def my_process_func(buffered_cloud, tile):
+        chm = buffered_cloud.chm(0.5, spec=spec)
+        ...
 
 Next, we want to define a function to process each buffered tile. This is where the flexibility of the collection
 enters in.

@@ -32,22 +32,19 @@ def array_to_raster(array, affine, crs, path):
 
     :param array: 2D numpy array of cell values
     :param affine: The affine transformation.
-    :param crs: A rasterio-compatible coordinate reference (e.g. a proj4 string)
+    :param crs: A rasterio-compatible coordinate reference (e.g. a proj4 string, WKT, or EPSG code)
     :param path: The output bath of the GeoTIFF
     """
-    # First flip the array
-    # transform = rasterio.transform.from_origin(x_min, y_max, pixel_size, pixel_size)
-    out_dataset = rasterio.open(
+    with rasterio.open(
         path,
         "w",
         driver="GTiff",
         height=array.shape[0],
         width=array.shape[1],
         count=1,
-        dtype=str(array.dtype),
+        dtype=array.dtype.name,
         crs=crs,
         transform=affine,
-    )
-    out_dataset.write(array, 1)
-    out_dataset.close()
+    ) as out_dataset:
+        out_dataset.write(array, 1)
 

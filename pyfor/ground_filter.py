@@ -1,9 +1,6 @@
 import numpy as np
-import pandas as pd
 
-
-class GroundFilter:
-    pass
+from pyfor import rasterizer
 
 
 class Zhang2003:
@@ -74,7 +71,7 @@ class Zhang2003:
         return dh_t
 
     def _filter(self, grid):
-        from scipy.ndimage.morphology import grey_opening
+        from scipy.ndimage import grey_opening
 
         array = grid.interpolate(np.min, "z").array
 
@@ -116,12 +113,14 @@ class Zhang2003:
         B = np.where(flag == 0, A, np.nan)
         return B
 
-    def bem(self, cloud, classified=False):
+    def bem(self, cloud, classified=False, spec=None):
         """
         Retrieve the bare earth model (BEM). Unlike :class:`.KrausPfeifer1998`, the cell size is defined upon \
         initialization of the filter, and thus it is not required to retrieve the bare earth model from the filter.
 
         :param cloud: A Cloud object.
+        :param classified: If True, the bare earth model is constructed from the points classified as ground (2).
+        :param spec: An optional :class:`.GridSpec` for the model, see :meth:`.Cloud.grid`.
         :return: A :class:`.Raster` object that represents the bare earth model.
         """
         from scipy.interpolate import griddata
@@ -129,18 +128,25 @@ class Zhang2003:
         from pyfor.cloud import Cloud, LASData
 
         if classified:
-            sub = Cloud(
-                LASData(
-                    cloud.data.points[cloud.data.points["classification"] == 2].copy(),
-                    cloud.data.header,
+            points = cloud.data.points
+            if "classification" not in points.dtype.names:
+                raise ValueError(
+                    "The cloud has no classification dimension, it is impossible to "
+                    "construct a bare earth model from classified points."
                 )
+
+            # Grid the parent cloud at the output cell size and reduce only the ground points, so the
+            # cells of the model are the cells of the cloud it normalizes.
+            grid = cloud.grid(self.cell_size, spec=spec)
+            return grid.interpolate(
+                np.min,
+                "z",
+                interp_method=self.interp_method,
+                mask=points["classification"] == 2,
             )
-            grid = sub.grid(self.cell_size)
-            bem = grid.interpolate(np.min, "z", interp_method=self.interp_method)
-            return bem
 
         else:
-            grid = cloud.grid(self.cell_size)
+            grid = cloud.grid(self.cell_size, spec=spec)
             B = self._filter(grid)
 
             # Interpolate on our newly found ground cells
@@ -153,26 +159,21 @@ class Zhang2003:
 
             return Raster(dem_array, grid)
 
-    def normalize(self, cloud):
+    def normalize(self, cloud, classified=False, spec=None):
         """
         Normalizes the original point cloud **in place**. This creates a BEM as an intermediate product, please see
         `.bem()` to return this directly.
 
         :param cloud: The input cloud object to normalize.
+        :param classified: If True, the bare earth model is constructed from the points classified as ground (2).
+        :param spec: An optional :class:`.GridSpec` for the bare earth model, see :meth:`.Cloud.grid`.
         """
 
-        bem = self.bem(cloud)
-        cloud.data._update()
-        df = (
-            pd.DataFrame(bem.array)
-            .stack()
-            .rename_axis(["bins_y", "bins_x"])
-            .reset_index(name="val")
+        bem = self.bem(cloud, classified=classified, spec=spec)
+        cloud.data.points["z"] = cloud.data.points["z"] - rasterizer.sample_array(
+            bem.array, bem.grid.bins_x, bem.grid.bins_y
         )
-        df = cloud.data.points.reset_index().merge(df, how="left").set_index("index")
-        cloud.data.points["z"] = (
-            df["z"] - df["val"]
-        ).values  # For some reason .values is needed to prevent an error
+        cloud.data._update()
 
 
 class KrausPfeifer1998:
@@ -216,51 +217,46 @@ class KrausPfeifer1998:
         p_i[v_i > self.g + self.w] = 0
         return p_i
 
+    def _ground_mask(self, grid):
+        """
+        Runs the actual ground filter and returns the points that were determined to be ground.
+
+        :param grid: A `pyfor.rasterizer.Grid` object.
+        :return: A boolean mask over the points of the parent cloud.
+        """
+        points = grid.cloud.data.points
+        ranks = grid.cell_ranks()
+        depth = int(ranks.max()) + 1
+
+        # TODO probably some opportunity for numba / cython optimization, but working well enough for now
+        with np.errstate(divide="ignore", invalid="ignore"):
+            z = np.full((grid.m, grid.n, depth), np.nan)
+            z[grid.bins_y, grid.bins_x, ranks] = points["z"]
+            p_i = np.zeros((grid.m, grid.n, depth))
+            p_i[~np.isnan(z)] = 1
+
+            for i in range(self.iterations):
+                surface = np.nansum(z * p_i, axis=2) / np.sum(p_i, axis=2)
+                # TODO how to deal with edge effect?
+                surface = surface.reshape(grid.m, grid.n, 1)
+                p_i = self._compute_weights(z - surface)
+
+            final_resid = z - surface
+
+        # Index the residual surface with the cell and the rank within the cell of each point, so the
+        # filter is a per point decision again.
+        resid = final_resid[grid.bins_y, grid.bins_x, ranks]
+        return resid <= self.g + self.w
+
     def _filter(self, grid):
         """
         Runs the actual ground filter. Generally used as an internal function that is called by user functions
         (.bem, .classify, .ground_points).
 
         :param grid: A `pyfor.rasterizer.Grid` object.
-        :return: A `pandas.DataFrame` of filtered points.
+        :return: A structured numpy array of the filtered points.
         """
-        np.seterr(divide="ignore", invalid="ignore")
-
-        # TODO probably some opportunity for numba / cython optimization, but working well enough for now
-        grid.cloud.data.points["bins_z"] = grid.cloud.data.points.groupby(
-            ["bins_x", "bins_y"]
-        ).cumcount()
-        depth = np.max(grid.cloud.data.points["bins_z"])
-        z = np.zeros((grid.m, grid.n, depth + 1))
-        z[:] = np.nan
-        z[
-            grid.cloud.data.points["bins_y"],
-            grid.cloud.data.points["bins_x"],
-            grid.cloud.data.points["bins_z"],
-        ] = grid.cloud.data.points["z"]
-        p_i = np.zeros((grid.m, grid.n, depth + 1))
-        p_i[~np.isnan(z)] = 1
-
-        for i in range(self.iterations):
-            surface = np.nansum(z * p_i, axis=2) / np.sum(p_i, axis=2)
-            # TODO how to deal with edge effect?
-            surface = surface.reshape(grid.m, grid.n, 1)
-            p_i = self._compute_weights(z - surface)
-
-        final_resid = z - surface
-
-        del p_i
-        del surface
-
-        ix = np.zeros((grid.m, grid.n, depth + 1))
-        ix[
-            grid.cloud.data.points["bins_y"],
-            grid.cloud.data.points["bins_x"],
-            grid.cloud.data.points["bins_z"],
-        ] = grid.cloud.data.points.index.values
-        ground_bins = (final_resid <= self.g + self.w).nonzero()
-
-        return grid.cloud.data.points.loc[ix[ground_bins]]
+        return grid.cloud.data.points[self._ground_mask(grid)]
 
     def ground_points(self, cloud):
         """
@@ -273,17 +269,21 @@ class KrausPfeifer1998:
         ground = self._filter(grid)
         return Cloud(CloudData(ground, grid.cloud.data.header))
 
-    def bem(self, cloud, cell_size):
+    def bem(self, cloud, cell_size, spec=None):
         """
         Retrieve the bare earth model (BEM).
 
         :param cloud: A cloud object.
         :param cell_size: The cell size of the BEM, this is independent of the cell size used in the intermediate \
         surfaces.
+        :param spec: An optional :class:`.GridSpec` for the model, see :meth:`.Cloud.grid`.
         :return: A `Raster` object that represents the bare earth model.
         """
-        ground_cloud = self.ground_points(cloud)
-        return ground_cloud.grid(cell_size).interpolate(np.min, "z")
+        # The BEM is gridded on the parent cloud, so that the cells of the raster and the bins of the
+        # cloud it will be subtracted from are the same cells.
+        grid = cloud.grid(cell_size, spec=spec)
+        ground = self._ground_mask(cloud.grid(self.cell_size))
+        return grid.interpolate(np.min, "z", mask=ground)
 
     def classify(self, cloud, ground_int=2):
         """
@@ -297,31 +297,27 @@ class KrausPfeifer1998:
         points.
         """
 
-        if cloud.extension == ".las":
+        if getattr(cloud, "extension", None) == ".las":
             grid = cloud.grid(self.cell_size)
-            filtered_point_ids = self._filter(grid).index
-            grid.cloud.data.points["classification"][filtered_point_ids] = ground_int
+            mask = self._ground_mask(grid)
+            points = grid.cloud.data.points
+            points["classification"] = np.where(
+                mask, ground_int, points["classification"]
+            )
         else:
             print("This is only implemented for .las files.")
 
-    def normalize(self, pc, cell_size):
+    def normalize(self, pc, cell_size, spec=None):
         """
         Normalizes the original point cloud **in place**. This creates a BEM as an intermediate product, please see
         `.bem()` to return this directly.
 
         :param pc: A cloud object.
         :param cell_size: The cell_size for the intermediate BEM. Values from 1 to 6 are common.
+        :param spec: An optional :class:`.GridSpec` for the model, see :meth:`.Cloud.grid`.
         """
-        bem = self.bem(pc, cell_size)
-        # Rebin the cloud to the new cell size
-        # TODO make this into a standalone function (in raster, grid?), it is used in several other places
-        # pc.grid(cell_size)
-        pc.data._update()
-        df = (
-            pd.DataFrame(bem.array)
-            .stack()
-            .rename_axis(["bins_y", "bins_x"])
-            .reset_index(name="val")
+        bem = self.bem(pc, cell_size, spec=spec)
+        pc.data.points["z"] = pc.data.points["z"] - rasterizer.sample_array(
+            bem.array, bem.grid.bins_x, bem.grid.bins_y
         )
-        df = pc.data.points.reset_index().merge(df, how="left").set_index("index")
-        pc.data.points["z"] = df["z"] - df["val"]
+        pc.data._update()

@@ -6,8 +6,7 @@
   <a href="https://github.com/brycefrank/pyfor/issues/new">Request a Feature</a> |
   <a href="https://github.com/brycefrank/pyfor/projects/12">Road Map</a>
   <br>
-  <img src="https://camo.githubusercontent.com/033f1149793306148313011a8777f72724800836/68747470733a2f2f7472617669732d63692e6f72672f62727963656672616e6b2f7079666f722e7376673f6272616e63683d6d6173746572">
-  <img src="https://coveralls.io/repos/github/brycefrank/pyfor/badge.svg?branch=master">
+  <img src="https://github.com/brycefrank/pyfor/actions/workflows/tests.yml/badge.svg" alt="tests">
 </p>
 
 **pyfor** is a Python package that assists in the processing of point cloud data in the context of forest inventory. 
@@ -16,11 +15,13 @@ memory optimized API for managing large collections of tiles.
 
 ## Release Status
 
-Current Release: 0.3.6
+Current Release: 0.4.0
 
-Release Date: December 1st, 2019.
+Release Date: September 9th, 2026.
 
-Release Status: 0.3.6 is an adolescent LiDAR data processing package adequate for single tile processing and large acqusitions.
+Release Status: 0.4.0 is a modernization release. pyfor runs on Python 3.10 and newer against
+current versions of `laspy`, `numpy`, `pandas`, `scipy`, `geopandas`, and `rasterio`. It is
+adequate for single tile processing and large acquisitions.
 
 ## What Does pyfor Do?
 
@@ -37,17 +38,23 @@ is a standalone package for tree segmentation and detection.
 
 ## Installation
 
-[miniconda](https://conda.io/miniconda.html) or Anaconda is required for your system before beginning. pyfor depends on many packages that are otherwise tricky and difficult to install (especially gdal and its bindings), and conda provides a quick and easy way to manage many different Python environments on your system simultaneously.
-
-As of October 14th, 2019, we are proud to announce that `pyfor` is available on `conda-forge`, greatly simplifying the installation process:
+pyfor requires Python 3.10 or newer. All dependencies ship as binary wheels, so `pip` in a virtual
+environment is all that is needed:
 
 ```
-conda install -c conda-forge pyfor 
+python -m venv .venv
+source .venv/bin/activate
+pip install pyfor
 ```
+
+`pyfor` was previously distributed through `conda-forge` and required GDAL and LASTools. Neither is
+needed anymore: the .lax spatial index was replaced by chunked reads, and GIS input/output goes
+through `rasterio`.
 
 ## Collaboration & Requests
 
-If you would like to contribute, especially those experienced with `numba`, `numpy`, `gdal`, `ogr` and `pandas`, please contact me at bfrank70@gmail.com 
+If you would like to contribute, especially those experienced with `numpy`, `laspy`, point cloud
+formats (`.las`, `.laz`, COPC) and `rasterio`, please contact me at bfrank70@gmail.com 
 
 I am also willing to implement features on request. Feel free to [open an issue](https://github.com/brycefrank/pyfor/issues) with your request or email me at the address above.
 

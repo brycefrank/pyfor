@@ -3,7 +3,6 @@ import unittest
 
 # modeled heavily after laspytest
 # https://github.com/laspy/laspy/blob/master/laspytest/test_laspy.py
-import pandas as pd
 import laspy
 import os
 import numpy as np
@@ -42,7 +41,9 @@ class DataTestCase:
 
 class PLYDataTestCase(unittest.TestCase, DataTestCase):
     def setUp(self):
-        self.test_points = pd.DataFrame.from_dict(test_points).astype(np.float)
+        self.test_points = cloud.points_from_columns(
+            {name: np.asarray(values, dtype=float) for name, values in test_points.items()}
+        )
         self.test_header = 0
         self.test_data = cloud.PLYData(self.test_points, self.test_header)
         self.test_type = cloud.PLYData
@@ -55,20 +56,19 @@ class PLYDataTestCase(unittest.TestCase, DataTestCase):
 
 class LASDataTestCase(unittest.TestCase, DataTestCase):
     def setUp(self):
-        self.test_points = pd.DataFrame.from_dict(test_points)
-        self.test_header = laspy.file.File(test_las).header
+        self.test_points = cloud.points_from_columns(
+            {name: np.asarray(values) for name, values in test_points.items()}
+        )
+        with laspy.open(test_las) as reader:
+            self.test_header = reader.header
         self.column = [0, 1]
         self.test_data = cloud.LASData(self.test_points, self.test_header)
         self.test_type = cloud.LASData
 
-    def tearDown(self):
-        self.test_data.header.reader.close()
-
     def test_write(self):
         self.test_data.write(os.path.join(data_dir, "temp_test_write.las"))
-        read = laspy.file.File(os.path.join(data_dir, "temp_test_write.las"))
-        self.assertEqual(type(read), laspy.file.File)
-        read.close()
+        read = laspy.read(os.path.join(data_dir, "temp_test_write.las"))
+        self.assertEqual(type(read), laspy.LasData)
         os.remove(os.path.join(data_dir, "temp_test_write.las"))
 
 
@@ -91,16 +91,13 @@ class LASCloudTestCase(unittest.TestCase, CloudTestCase):
     def setUp(self):
         self.test_cloud = cloud.Cloud(test_las)
 
-    def tearDown(self):
-        self.test_cloud.data.header.reader.close()
-
     def test_dimensions_loaded(self):
         local_cloud = cloud.Cloud(test_las)
         self.assertEqual(type(local_cloud), cloud.Cloud)
 
         if local_cloud.extension == ".las" or local_cloud.extension == ".laz":
             self.assertListEqual(
-                list(local_cloud.data.points.columns.values),
+                list(local_cloud.data.points.dtype.names),
                 [
                     "x",
                     "y",
@@ -114,8 +111,6 @@ class LASCloudTestCase(unittest.TestCase, CloudTestCase):
                     "pt_src_id",
                 ],
             )
-
-        local_cloud.data.header.reader.close()
 
     def test_filter_z(self):
         self.test_cloud.filter(40, 41, "z")
@@ -158,7 +153,7 @@ class LASCloudTestCase(unittest.TestCase, CloudTestCase):
 
         # Allow a tolerance of 0.005 meters
         self.assertLess(
-            np.mean(normalize_z.values) - np.mean(subtracted_z.values), 0.005
+            np.mean(normalize_z) - np.mean(subtracted_z), 0.005
         )
 
         os.remove("./temp_bem.tif")
@@ -181,10 +176,9 @@ class LASCloudTestCase(unittest.TestCase, CloudTestCase):
         os.remove(os.path.join(data_dir, "test_write.las"))
 
 
-# TODO broken on Travis
-# class LAZCloudTestCase(LASCloudTestCase):
-#    def setUp(self):
-#        self.test_cloud = cloud.Cloud(test_laz)
+class LAZCloudTestCase(LASCloudTestCase):
+    def setUp(self):
+        self.test_cloud = cloud.Cloud(test_laz)
 
 
 class PLYCloudTestCase(unittest.TestCase, CloudTestCase):
@@ -200,8 +194,6 @@ class GridTestCase(unittest.TestCase):
     def setUp(self):
         self.test_grid = cloud.Cloud(test_las).grid(1)
 
-    def tearDown(self):
-        self.test_grid.cloud.data.header.reader.close()
 
     def test_m(self):
         self.assertEqual(200, self.test_grid.m)
@@ -214,8 +206,8 @@ class GridTestCase(unittest.TestCase):
 
     def test_empty_cells(self):
         empty = self.test_grid.empty_cells
-        # Check that there are the correct number
-        self.assertEqual(empty.shape, (301, 2))
+        # Check that there are the correct number for the snapped 1 m grid
+        self.assertEqual(empty.shape, (304, 2))
 
     def test_raster(self):
         raster = self.test_grid.raster("max", "z")
@@ -230,7 +222,7 @@ class GridTestCase(unittest.TestCase):
         :return:
         """
         pre = self.test_grid.m
-        self.test_grid.cloud.data.points = self.test_grid.cloud.data.points.iloc[1:50]
+        self.test_grid.cloud.data.points = self.test_grid.cloud.data.points[1:50]
         self.test_grid._update()
         post = self.test_grid.m
         self.assertEqual(pre, 200)
@@ -290,18 +282,94 @@ class RasterTestCase(unittest.TestCase):
         self.test_raster = pc.grid(1).raster("max", "z")
         self.test_raster.grid.cloud.crs = proj4str
 
-    def tearDown(self):
-        self.test_raster.grid.cloud.data.header.reader.close()
 
     def test_affine(self):
+        """
+        The affine is the snapped grid, not the extent of the data, so that rasters from different
+        tiles describe the same cells.
+        """
         affine = self.test_raster._affine
         self.assertEqual(affine[0], 1.0)
         self.assertEqual(affine[1], 0.0)
-        self.assertEqual(affine[2], 405000.01000000001)
+        self.assertEqual(affine[2], 405000.0)
         self.assertEqual(affine[3], 0.0)
         self.assertEqual(affine[4], -1.0)
-        self.assertEqual(affine[5], 3276499.9900000002)
+        self.assertEqual(affine[5], 3276500.0)
         self.assertEqual(affine[6], 0)
+
+    def test_grid_origin_is_snapped_to_the_cell_size(self):
+        grid = cloud.Cloud(test_las).grid(20)
+        self.assertEqual(grid.spec.origin_x % 20, 0)
+        self.assertEqual(grid.spec.origin_y % 20, 0)
+
+    def test_grid_spec_is_shared_between_clouds(self):
+        """
+        Two clouds gridded with one spec describe the same cells, which is what makes per tile
+        rasters line up with each other.
+        """
+        pc = cloud.Cloud(test_las)
+        spec = rasterizer.GridSpec.covering(
+            pc.data.min[0], pc.data.min[1], pc.data.max[0], pc.data.max[1], 1
+        )
+
+        left = pc.data.points[pc.data.points["x"] < 405100]
+        right = pc.data.points[pc.data.points["x"] >= 405100]
+        first = cloud.Cloud(cloud.CloudData(left, pc.data.header)).grid(1, spec=spec)
+        second = cloud.Cloud(cloud.CloudData(right, pc.data.header)).grid(1, spec=spec)
+
+        self.assertEqual(first.spec, second.spec)
+        self.assertEqual(first.raster("max", "z")._affine, second.raster("max", "z")._affine)
+        self.assertEqual(first.spec, pc.grid(1).spec)
+
+    def test_grid_spec_has_to_cover_the_cloud(self):
+        pc = cloud.Cloud(test_las)
+        too_small = rasterizer.GridSpec(
+            origin_x=405100.0, origin_y=3276300.0, cell_size=1, n=10, m=10
+        )
+        with self.assertRaises(ValueError):
+            pc.grid(1, spec=too_small)
+
+    def test_grid_spec_geometry(self):
+        spec = rasterizer.GridSpec.covering(405000.01, 3276300.01, 405199.99, 3276499.99, 1)
+
+        self.assertEqual((spec.origin_x, spec.origin_y), (405000.0, 3276300.0))
+        self.assertEqual(spec.shape, (200, 200))
+        self.assertEqual(spec.bounds, (405000.0, 3276300.0, 405200.0, 3276500.0))
+        self.assertTrue(spec.covers(405000.01, 3276300.01, 405199.99, 3276499.99))
+        self.assertFalse(spec.covers(405250.0, 3276300.01, 405260.0, 3276499.99))
+
+        affine = spec.affine
+        self.assertEqual(
+            (affine.a, affine.b, affine.c, affine.d, affine.e, affine.f),
+            (1.0, 0.0, 405000.0, 0.0, -1.0, 3276500.0),
+        )
+
+    def test_grid_cell_size_has_to_agree_with_the_spec(self):
+        pc = cloud.Cloud(test_las)
+        spec = pc.grid(1).spec
+        with self.assertRaises(ValueError):
+            pc.grid(2, spec=spec)
+
+    def test_cell_assignment_matches_gdal(self):
+        """
+        A point exactly on a horizontal cell boundary belongs to the cell above the line, which is
+        where GDAL and PDAL put it. The array is north up, so that is the row closer to index zero.
+        The point on the far edge of the extent is clipped into the outermost cell rather than
+        dropped, so the north cell holds both of them.
+        """
+        points = cloud.points_from_columns(
+            {
+                "x": np.array([0.5, 0.6, 0.55]),
+                "y": np.array([0.5, 2.0, 1.0]),
+                "z": np.array([1.0, 50.0, 99.0]),
+            }
+        )
+        pc = cloud.Cloud(cloud.CloudData(points, header="ply_header"))
+        spec = rasterizer.GridSpec(origin_x=0.0, origin_y=0.0, cell_size=1, n=1, m=2)
+
+        grid = pc.grid(1, spec=spec)
+        self.assertEqual(grid.cell_counts().tolist(), [2, 1])
+        self.assertEqual(grid.raster("max", "z").array.tolist(), [[99.0], [1.0]])
 
     def test_array_oriented_correctly(self):
         """
@@ -316,8 +384,7 @@ class RasterTestCase(unittest.TestCase):
         self.test_raster.plot(return_plot=True)
 
     def test_force_extent_contract(self):
-        min_x, min_y = self.test_raster.grid.cloud.data.header.min[0:2]
-        max_x, max_y = self.test_raster.grid.cloud.data.header.max[0:2]
+        min_x, min_y, max_x, max_y = self.test_raster.grid.spec.bounds
 
         # Test buffering in 10 meters
         buffer = 10
@@ -329,8 +396,7 @@ class RasterTestCase(unittest.TestCase):
         self.assertEqual(self.test_raster._affine[5], max_y - buffer)
 
     def test_force_extent_expand(self):
-        min_x, min_y = self.test_raster.grid.cloud.data.header.min[0:2]
-        max_x, max_y = self.test_raster.grid.cloud.data.header.max[0:2]
+        min_x, min_y, max_x, max_y = self.test_raster.grid.spec.bounds
 
         # Test buffering out 10 meters
         buffer = 10
@@ -340,6 +406,17 @@ class RasterTestCase(unittest.TestCase):
         self.assertEqual(self.test_raster.array.shape, (220, 220))
         self.assertEqual(self.test_raster._affine[2], min_x - buffer)
         self.assertEqual(self.test_raster._affine[5], max_y + buffer)
+
+    def test_force_extent_requires_cell_aligned_bbox(self):
+        """
+        A bounding box that does not fall on the cells is refused rather than rounded, because
+        rounding would leave the array labelled with a grid it is not on.
+        """
+        min_x, min_y, max_x, max_y = self.test_raster.grid.spec.bounds
+        with self.assertRaises(ValueError):
+            self.test_raster.force_extent(
+                (min_x + 0.5, max_x - 10, min_y + 10, max_y - 10)
+            )
 
     def test_write_with_crs(self):
         self.test_raster.write("./temp_tif.tif")
@@ -367,19 +444,10 @@ class GISExportTestCase(unittest.TestCase):
         self.test_grid = cloud.Cloud(test_las).grid(1)
         self.test_raster = self.test_grid.raster("max", "z")
 
-    def tearDown(self):
-        self.test_raster.grid.cloud.data.header.reader.close()
 
     def test_project_indices(self):
         test_indices = np.array([[0, 0], [1, 1]])
         gisexport.project_indices(test_indices, self.test_raster)
-
-    def test_pcs_exists(self):
-        print(os.path.realpath(__file__))
-        pcs_path = os.path.join(
-            "..", "pyfor", "pcs.csv", os.path.dirname(os.path.realpath(__file__))
-        )
-        self.assertTrue(os.path.exists(pcs_path))
 
     def test_array_to_raster_writes(self):
         test_grid = cloud.Cloud(test_las).grid(1)
@@ -413,7 +481,7 @@ class KrausPfeifer1998(unittest.TestCase):
     def test_classify(self):
         self.test_kp_filter.classify(self.test_cloud)
         self.assertEqual(
-            133362, np.sum(self.test_cloud.data.points["classification"] == 2)
+            133409, np.sum(self.test_cloud.data.points["classification"] == 2)
         )
 
 

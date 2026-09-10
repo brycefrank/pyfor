@@ -9,15 +9,16 @@ def summarize_return_num(return_nums):
     """
     Gets the number of returns by return number.
 
-    :param return_nums: A :class:`pandas.Series` of return number that describes the return number of each point.
+    :param return_nums: A :class:`numpy.ndarray` of the return number of each point.
     :return: A :class:`pandas.Series` of return number counts by return number.
     """
-    return return_nums.groupby(return_nums).agg("count")
+    numbers, counts = np.unique(return_nums, return_counts=True)
+    return pd.Series(counts, index=numbers)
 
 
 def summarize_percentiles(z, pct=all_pct):
     """
-    :param z: A :class:`pandas.Series` of z values.
+    :param z: A :class:`numpy.ndarray` of z values.
     """
     return (np.percentile(z, pct), pct)
 
@@ -36,37 +37,30 @@ def pct_above_heightbreak(grid, r=0, heightbreak="mean"):
     height of that cell, for example, to construct the "pct_above_mean" metric.
     """
 
+    points = grid.cloud.data.points
+
     if heightbreak == "mean":
         # Compute mean z in each cell
-        mean_z = grid.cells.agg({"z": np.mean})
-        mean_z = mean_z.rename(columns={"z": "mean_z"})
-        mean_z = pd.merge(grid.cloud.data.points, mean_z, on=["bins_x", "bins_y"])[
-            "mean_z"
-        ]
-        is_above = grid.cloud.data.points["z"] > mean_z
+        is_above = points["z"] > grid.expand(grid.cell_values(np.mean, "z"))
     else:
-        is_above = grid.cloud.data.points["z"] > heightbreak
+        is_above = points["z"] > heightbreak
 
     if r > 0:
-        out_col = "pct_r{}_above_{}".format(r, heightbreak)
-        grid.cloud.data.points["is_r"] = grid.cloud.data.points["return_num"] == r
-        grid.cloud.data.points["is_r_above"] = grid.cloud.data.points["is_r"] & is_above
-        cells = grid.cloud.grid(grid.cell_size).cells
-
-        summary = cells.agg({"is_r": np.sum, "is_r_above": np.sum}).reset_index()
-        summary["bins_y"] = summary["bins_y"]
-        summary[out_col] = summary["is_r_above"] / summary["is_r"]
-
+        is_r = points["return_num"] == r
+        denominator = grid.cell_counts(is_r)
+        numerator = grid.cell_counts(is_r & is_above)
     else:
-        out_col = "pct_all_above_{}".format(heightbreak)
-        grid.cloud.data.points["is_above"] = is_above
-        cells = grid.cloud.grid(grid.cell_size).cells
-        summary = cells.agg({"x": "count", "is_above": np.sum}).reset_index()
-        summary[out_col] = summary["is_above"] / summary["x"]
+        denominator = grid.cell_counts()
+        numerator = grid.cell_counts(is_above)
 
-    array = np.full((grid.m, grid.n), np.nan)
-    array[summary["bins_y"], summary["bins_x"]] = summary[out_col]
-    return pyfor.rasterizer.Raster(array, grid)
+    values = np.divide(
+        numerator,
+        denominator,
+        out=np.full(grid.n_cells, np.nan),
+        where=denominator > 0,
+    )
+
+    return pyfor.rasterizer.Raster(values.reshape(grid.m, grid.n), grid)
 
 
 def grid_percentile(grid, percentile):
@@ -74,7 +68,7 @@ def grid_percentile(grid, percentile):
     Calculates a percentile raster.
     :param percentile: The percentile (a number between 0 and 100) to compute.
     """
-    return grid.raster(lambda z: np.percentile(z, percentile), "z")
+    return grid.percentile_raster("z", percentile)
 
 
 def z_max(grid):
@@ -122,7 +116,10 @@ def z_iqr(grid):
     Calculates interquartile range of z value.
     """
 
-    return grid.raster(lambda z: np.percentile(z, 75) - np.percentile(z, 25), "z")
+    cells, percentiles = grid.cell_percentiles("z", [25, 75])
+    array = np.full(grid.n_cells, np.nan)
+    array[cells] = percentiles[1] - percentiles[0]
+    return pyfor.rasterizer.Raster(array.reshape(grid.m, grid.n), grid)
 
 
 def vol_cov(grid, r, heightbreak):
@@ -144,28 +141,25 @@ def z_mean_sq(grid):
     """
 
     rast = z_mean(grid)
-    rast.array = rast.array ^ 2
+    rast.array = rast.array**2
     return rast
 
 
 def canopy_relief_ratio(grid, mean_z_arr, min_z_arr, max_z_arr):
-    crr_arr = (mean_z_arr - min_z_arr) / (max_z_arr - min_z_arr)
+    # Cells with a single return, or with no returns at all, leave a zero denominator and are NaN.
+    with np.errstate(invalid="ignore", divide="ignore"):
+        crr_arr = (mean_z_arr - min_z_arr) / (max_z_arr - min_z_arr)
     crr_rast = pyfor.rasterizer.Raster(crr_arr, grid)
     return crr_rast
 
 
 def return_num(grid, num):
     """Compute the number of returns that match `num` for a grid object"""
-    counts = grid.cells["return_num"].value_counts()
-    counts = pd.DataFrame(counts)
-    counts = counts.rename(columns={"return_num": "occurrences"})
-    counts = counts.reset_index()
-    counts = counts.loc[counts["return_num"] == num, :]
+    points = grid.cloud.data.points
+    counts = grid.cell_counts(points["return_num"] == num).astype(float)
+    counts[counts == 0] = np.nan
 
-    array = np.full((grid.m, grid.n), np.nan)
-    array[counts["bins_y"], counts["bins_x"]] = counts["occurrences"]
-
-    return pyfor.rasterizer.Raster(array, grid)
+    return pyfor.rasterizer.Raster(counts.reshape(grid.m, grid.n), grid)
 
 
 def all_returns(grid):
@@ -173,14 +167,7 @@ def all_returns(grid):
 
 
 def total_returns(grid):
-    counts = grid.cells["x"].count()
-    counts = counts.reset_index()
-    counts = counts.rename(columns={"x": "num"})
-
-    array = np.full((grid.m, grid.n), np.nan)
-    array[counts["bins_y"], counts["bins_x"]] = counts["num"]
-
-    return pyfor.rasterizer.Raster(array, grid)
+    return all_returns(grid)
 
 
 def standard_metrics_grid(grid, heightbreak):
@@ -219,22 +206,22 @@ def standard_metrics_cloud(points, heightbreak):
     metrics = pd.DataFrame()
 
     # Some values used multiple times
-    mean_z = np.mean(points.z)
+    mean_z = np.mean(points["z"])
 
-    metrics["total_returns"] = [np.alen(points)]
+    metrics["total_returns"] = [len(points)]
 
     # Get number of returns by return number
-    for i, num in enumerate(summarize_return_num(points.return_num)):
+    for i, num in enumerate(summarize_return_num(points["return_num"])):
         metrics["r_{}".format(i + 1)] = [num]
 
-    metrics["max_z"] = [np.max(points.z)]
-    metrics["min_z"] = [np.min(points.z)]
+    metrics["max_z"] = [np.max(points["z"])]
+    metrics["min_z"] = [np.min(points["z"])]
     metrics["mean_z"] = [mean_z]
-    metrics["median_z"] = [np.median(points.z)]
-    metrics["stddev_z"] = [np.std(points.z)]
-    metrics["var_z"] = [np.var(points.z)]
+    metrics["median_z"] = [np.median(points["z"])]
+    metrics["stddev_z"] = [np.std(points["z"])]
+    metrics["var_z"] = [np.var(points["z"])]
 
-    for pct_z, pct in zip(*summarize_percentiles(points.z)):
+    for pct_z, pct in zip(*summarize_percentiles(points["z"])):
         metrics["p_{}".format(pct)] = [pct_z]
 
     # "Cover metrics"

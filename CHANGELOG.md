@@ -1,3 +1,175 @@
+# 0.4.0
+
+Modernization release, September 9, 2026.
+
+pyfor now runs on Python 3.10 and newer against current versions of its dependencies, and the point
+cloud core is numpy rather than pandas. `laspy` 1.x, Python 2.7/3.7, LASTools, and `numba` are no
+longer supported.
+
+## Breaking Changes
+
+1. `laspy` 2.x is required. All reading and writing was ported to the laspy 2 API, the `header` of a
+   `CloudData` object is a `laspy.LasHeader`, and `Cloud` accepts a `laspy.LasData` object directly.
+2. **`CloudData.points` is a structured numpy array**, not a pandas `DataFrame`. The dimension names
+   are unchanged (`x`, `y`, `z`, `intensity`, `return_num`, `classification`, `flag_byte`,
+   `scan_angle_rank`, `user_data`, `pt_src_id`, plus `red`, `green`, and `blue` where the point
+   format has them) and are listed by `points.dtype.names`. Dataframe-only access is gone:
+   `.columns`, `.head()`, `.sample()`, `.iloc`, `.loc`, and `.values` must become `dtype.names`,
+   positional slicing, `points["name"]`, and plain numpy indexing.
+3. Bins are no longer columns of the points. `Grid` and `VoxelGrid` hold their own `bins_x`,
+   `bins_y` (and `bins_z`), `cell_ids`, and `n_cells`, so binning a cloud no longer modifies the
+   point data.
+4. `.lax` spatial indexing was removed. `CloudDataFrame.create_index`, the `CloudDataFrame.indexed`
+   property, the `indexed` argument of `par_apply`, and `CloudDataFrame.map_poly` are gone, along
+   with the `laxpy` dependency and the LASTools `lasindex` binary. Polygon queries now read points in
+   chunks (`pyfor.cloud.read_polygon`) and keep only the points inside the query polygon in memory.
+5. `Grid.cells`, the pandas `GroupBy`, was replaced by explicit numpy reductions: `Grid.reduce`,
+   `Grid.cell_values`, `Grid.cell_counts`, `Grid.cell_ranks`, `Grid.cell_percentiles`,
+   `Grid.percentile_raster`, `Grid.expand`, and `Grid.n_cells`.
+6. `Grid.metrics` always returns `(dimension, function)` multiindex columns. It previously returned
+   flat columns when every dimension was given a single function.
+7. **Rasters are computed on a snapped grid.** A raster's origin used to be the extent of the data it
+   was computed from, so two tiles of one project, or a pyfor raster and a GDAL one, described
+   different cells and could not be compared or mosaicked. The origin is now snapped to a multiple
+   of the cell size, the target aligned pixels convention that `gdal_translate -tap`, terra and lidR
+   use, and a point lying exactly on a horizontal grid line now belongs to the cell above it, as it
+   does in GDAL, rasterio and PDAL. On the test tile this changes the maximum of 731 of 39,691 cells,
+   by 0.023 m on average and 17.19 m in the worst cell, so heights and metrics per cell move
+   slightly. `Raster.force_extent` now raises when a bounding box does not fall on the cells of the
+   raster instead of quietly rounding it, which used to leave an array labelled with a grid it was
+   not on.
+8. `ImportedGrid.array` is the raster as read from the file, north up. `Cloud.subtract` used to flip
+   it before looking values up.
+9. Removed `pyfor.ground_filter.GroundFilter` (an empty placeholder class),
+   `pyfor.rasterizer.Raster.from_rasterio` (an unimplemented stub that took no arguments), and
+   `ImportedGrid.in_raster` (replaced by `ImportedGrid.array`, and the file handle is now closed
+   after reading).
+10. `pyfor.rasterizer.sample_array` takes `(array, bins_x, bins_y)` and `metrics.summarize_return_num`
+   takes an array rather than a `Series`.
+11. `numba` is no longer a dependency. Clipping (`pyfor.clip.ray_trace`) is vectorized numpy and
+   returns identical results.
+12. Packaging moved to `pyproject.toml`. `setup.py`, `setup.cfg`, `MANIFEST`, and
+    `test_environment.yml` were removed, and `.travis.yml` was replaced by a GitHub Actions workflow.
+
+## Changes to Codebase
+
+### Core Data Model
+
+1. Points are built in one place, `pyfor.cloud.points_from_columns`, so every `CloudData.points`
+   array has the same layout: one field per dimension, addressable by name.
+2. `points_from_laspy` converts laspy dimensions and point records to that layout, and
+   `Cloud.read_polygon` builds it from a chunked read of a `.las`/`.laz` file.
+3. `pyfor.cloud`, `pyfor.clip`, `pyfor.ground_filter`, and `pyfor.voxelizer` no longer import pandas.
+   Pandas remains for tabular outputs only: `Grid.metrics`, the `standard_metrics*` summaries, and
+   the `CloudDataFrame` of tile geometries.
+4. `Cloud.write` dispatches to `LASData.write` or `PLYData.write` as before. `LASData.write` copies
+   the header, sizes it to the points held in memory, and calls `LasData.update_header()` so written
+   bounds and point counts always match the data.
+5. `Cloud.subtract`, `Cloud.clip`, `Cloud.filter`, and `Cloud.convex_hull` operate on arrays
+   directly. `Cloud.normalize` updates the cloud's bounds after modifying heights.
+6. `Cloud.crs` is initialized from the coordinate reference system in the file header, so rasters
+   written from a georeferenced las file carry their CRS instead of a warning. It was `None` until
+   a user set it by hand.
+
+### Cell Reductions
+
+1. Added `pyfor.rasterizer.reduce_cells`, which reduces a value per point for every occupied cell.
+   `count`/`size`, `sum`, `mean`, `min`, `max`, `std`, and `var` are computed with
+   `np.bincount`/`np.*.at` in a single pass, and any other callable is applied to the values of each
+   occupied cell in turn.
+2. Added `pyfor.rasterizer.percentile_cells`, a vectorized equivalent of calling
+   `np.percentile` on the values of every cell. Heights percentiles are the most expensive reduction
+   pyfor performs: the standard metric suite on a 1 m grid over a 200 m tile went from 22.1 s to
+   0.81 s.
+3. `Grid.cell_ranks` replaces the `groupby(...).cumcount()` used by the Kraus and Pfeifer filter.
+4. `Grid.reduce` and `Grid.interpolate` accept a boolean mask, so a reduction can be restricted to a
+   subset of the points while keeping the grid of the whole cloud. This is how the bare earth models
+   of both ground filters are now built.
+
+### Rasterizer
+
+1. Added `GridSpec`, the origin, cell size, and size in cells of a grid, with
+   `GridSpec.covering(min_x, min_y, max_x, max_y, cell_size)` for the snapped grid covering an
+   extent. `Grid`, and therefore `Cloud.grid`, `Cloud.chm`, `Cloud.normalize`, and both ground
+   filters, accept one through their `spec` keyword. A spec that does not cover the cloud it is
+   handed is refused rather than silently dropping points.
+2. `Grid.interpolate` queried the interpolation backend on a grid offset by one cell, which shifted
+   interpolated rasters (canopy height models) by one cell. The query grid is now aligned with the
+   cell bins: interpolated cells reproduce un-interpolated cell values exactly, and the previous
+   behavior was off by up to 18.9 m on the test tile.
+3. `ImportedGrid` bins points using the raster transform instead of `np.linspace`, which drifted
+   from the raster grid, and reads the raster with a context manager.
+4. `Grid`, `VoxelGrid`, and `ImportedGrid` clip bin indices to the array bounds, so a point on the
+   outermost boundary can no longer index past the end of an array. `Grid` and `VoxelGrid` also keep
+   at least one cell per dimension: a cloud narrower than the cell size used to produce a zero
+   column or row grid, which crashed on the first reduction.
+5. `np.int` was replaced with `np.int64`.
+
+### Ground Filter
+
+1. `KrausPfeifer1998` decides the ground points with a per point mask (`_ground_mask`) instead of
+   mapping three dimensional indices back to rows of a dataframe. `_filter` still returns the
+   filtered points.
+2. `KrausPfeifer1998.bem` grids the bare earth model on the parent cloud at the requested cell size
+   and interpolates only the ground points. Previously the model was interpolated on the ground
+   points' own grid and then sampled with the parent cloud's bins, which shifted the surface by up
+   to one cell whenever the ground returns did not span the extent of the cloud.
+3. `Zhang2003.bem(classified=True)` reduces the parent cloud grid to the points classified as ground
+   (2), which makes `Cloud.normalize(classified=True)` use the classified model. Previously the
+   classified model was computed and discarded, so the option did nothing.
+4. `scipy.ndimage.morphology.grey_opening` moved to `scipy.ndimage.grey_opening`, and
+   `KrausPfeifer1998._filter` uses `np.errstate` instead of modifying global numpy error state.
+
+### Metrics
+
+1. All grid metrics are computed with the cell reductions described above. `return_num` and
+   `total_returns` are `cell_counts` over a mask, and the percentile metrics use
+   `Grid.percentile_raster`.
+2. `standard_metrics_cloud` works on a structured array, and `canopy_relief_ratio` no longer emits
+   divide warnings for cells with a single return.
+3. `z_mean_sq` squared its raster with `^` (bitwise xor) instead of `**`. Fixed.
+4. `np.alen` was replaced with `len`.
+
+### Collection
+
+1. `_construct_tile_indexed` and `_construct_tile_no_index` were replaced by a single
+   `_construct_tile`, which reads the points of intersecting files with `read_polygon` and joins
+   them with `numpy.concatenate`. The `args` keyword argument is now passed to the applying function
+   in both cases; previously it was dropped when `indexed=True`.
+2. File listing is sorted, so tile order is deterministic.
+3. `_get_bounding_box` and `_get_datetime` read headers only, without loading points. Datetimes are
+   `pandas.Timestamp` values.
+4. `CloudDataFrame.grid_spec(cell_size)` builds a :class:`.GridSpec` covering the collection, to
+   hand to the processing of every tile so their rasters line up.
+5. `Retiler.retile_raster` snaps the tiling origin to the cell size, so tile boundaries fall on the
+   same lattice the rasters are gridded on.
+6. `CloudDataFrame.crs` is the geopandas CRS of the bounding box geometries. The eager
+   `crs = None` assignment that raised on frames without an active geometry column was removed.
+7. `CloudDataFrame.plot_metrics` imported a function name that did not exist; it now calls
+   `standard_metrics_cloud`.
+
+### Packaging & Testing
+
+1. Dependencies moved to `pyproject.toml`, the version is read from `pyfor.__version__`, and the
+   `plot` optional extra holds `pyqtgraph`/`PyOpenGL` for `Cloud.plot3d`.
+2. Tests were ported to laspy 2 and numpy points, and are run with pytest. `.laz` coverage,
+   previously disabled, is enabled now that `lazrs` is a dependency.
+3. Removed `test_pcs_exists`, which asserted that the test file's own directory exists, and the
+   unused `make_test_collection` helper.
+4. The suite runs about twice as fast as the pandas implementation it replaced (12.7 s to 6.6 s), and
+   the buffered tile pipeline produces byte identical GeoTIFFs before and after the change.
+
+## Fixed Issues
+
+Both issues from the 0.3.6 era listed here in earlier drafts of this release are fixed, and verified:
+
+1. `Cloud.normalize(classified=True)` now differs from `Cloud.normalize()` on the test tile (mean
+   absolute difference of 0.33 m) where it was previously identical.
+2. `KrausPfeifer1998.normalize` no longer samples a bare earth model with bins from another grid. The
+   bins carried by the raster's grid now agree exactly with the raster's affine transformation, and
+   the height error that a one cell origin mismatch used to cause (mean 0.24 m, maximum 16.1 m) can
+   no longer occur.
+
 # 0.3.6
 
 Updates between September 9, 2019 and December 1, 2019.

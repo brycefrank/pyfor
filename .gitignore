@@ -29,3 +29,14 @@ pyfortest/temp.*
 /pyfor.sln
 pyfortest/__pycache__
 pyfor.pyproj
+
+# Modern environments and builds
+.venv/
+*.egg-info/
+.pytest_cache/
+__pycache__/
+build/
+dist/
+
+# Benchmark outputs (regenerate with python benchmarks/bench.py)
+benchmarks/results/

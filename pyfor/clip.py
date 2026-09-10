@@ -1,6 +1,4 @@
-import json
 import numpy as np
-from numba import vectorize, bool_, float64
 
 # These are the lower level clipping functions.
 
@@ -9,21 +7,16 @@ def square_clip(points, bounds):
     """
     Clips a square from a tuple describing the position of the square.
 
-    :param points: A N x 2 numpy array of x and y coordinates, where x is in column 0
+    :param points: A structured numpy array of points, as held in :attr:`CloudData.points`.
     :param bounds: A tuple of length 4, min y and max y coordinates of the square.
     :return: A boolean mask, true is within the square, false is outside of the square.
     """
 
-    # Extact x y coordinates from cloud
-    xy = points[["x", "y"]]
-
     # Create masks for each axis
-    x_in = (xy["x"] >= bounds[0]) & (xy["x"] <= bounds[2])
-    y_in = (xy["y"] >= bounds[1]) & (xy["y"] <= bounds[3])
-    stack = np.stack((x_in, y_in), axis=1)
-    in_clip = np.all(stack, axis=1)
+    x_in = (points["x"] >= bounds[0]) & (points["x"] <= bounds[2])
+    y_in = (points["y"] >= bounds[1]) & (points["y"] <= bounds[3])
 
-    return in_clip
+    return x_in & y_in
 
 
 def ray_trace(x, y, poly):
@@ -36,55 +29,63 @@ def ray_trace(x, y, poly):
     :param poly: The coordinates of a polygon as a numpy array (i.e. from geo_json['coordinates']
     :return: A 1D boolean numpy array, true values are those points that are within `poly`.
     """
+    x = np.asarray(x, dtype=np.float64)
+    y = np.asarray(y, dtype=np.float64)
+    poly = np.asarray(poly, dtype=np.float64)
 
-    @vectorize([bool_(float64, float64)])
-    def ray(x, y):
-        # where xy is a coordinate
-        n = len(poly)
-        inside = False
-        p2x = 0.0
-        p2y = 0.0
-        xints = 0.0
-        p1x, p1y = poly[0]
-        for i in range(n + 1):
-            p2x, p2y = poly[i % n]
-            if y > min(p1y, p2y):
-                if y <= max(p1y, p2y):
-                    if x <= max(p1x, p2x):
-                        if p1y != p2y:
-                            xints = (y - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
-                        if p1x == p2x or x <= xints:
-                            inside = not inside
-            p1x, p1y = p2x, p2y
-        return inside
+    # Each edge of the polygon (including the closing edge) either crosses the ray cast from a point or
+    # it does not. A point is inside the polygon if an odd number of edges cross, so count the crossings
+    # per edge and check the parity once every edge has been visited.
+    p1x, p1y = np.roll(poly[:, 0], 1), np.roll(poly[:, 1], 1)
+    p2x, p2y = poly[:, 0], poly[:, 1]
 
-    return ray(x, y)
+    # A horizontal edge can never satisfy this condition, so dividing by p2y - p1y below is safe where
+    # the result is used.
+    crossings = np.zeros(x.shape, dtype=np.int64)
+    for i in range(len(poly)):
+        active = np.flatnonzero(
+            (y > min(p1y[i], p2y[i]))
+            & (y <= max(p1y[i], p2y[i]))
+            & (x <= max(p1x[i], p2x[i]))
+        )
+        if active.size == 0:
+            continue
+
+        # Only the active points reach the intersection test, and a horizontal edge is never active,
+        # so the division here is always defined.
+        active_y = y[active]
+        xints = (
+            (active_y - p1y[i]) * (p2x[i] - p1x[i]) / (p2y[i] - p1y[i]) + p1x[i]
+        )
+        crossings[active[(p1x[i] == p2x[i]) | (x[active] <= xints)]] += 1
+
+    return (crossings % 2) == 1
 
 
 def poly_clip(points, poly):
     """
     Returns the indices of `points` that are within a given polygon. This differs from :func:`.ray_trace` \
-    in that it enforces a small "pre-clip" optimization by first clipping to the polygon bounding box. This function \
+    in that it enforces a small "pre-clip" optimization by first clipping to the polygon bounding box. This function
     is directly called by :meth:`.Cloud.clip`.
 
-    :param cloud: A cloud object.
+    :param points: A structured numpy array of points, as held in :attr:`CloudData.points`.
     :param poly: A shapely Polygon, with coordinates in the same CRS as the point cloud.
     :return: A 1D numpy array of indices corresponding to points within the given polygon.
     """
     # Clip to bounding box
     bbox = poly.bounds
     pre_clip_mask = square_clip(points, bbox)
-    pre_clip = points[["x", "y"]].iloc[pre_clip_mask].values
 
     # Store old indices
-    pre_clip_inds = np.where(pre_clip_mask)[0]
+    pre_clip_inds = np.flatnonzero(pre_clip_mask)
 
     # Clip the preclip
     poly_coords = np.stack(
         (poly.exterior.coords.xy[0], poly.exterior.coords.xy[1]), axis=1
     )
 
-    full_clip_mask = ray_trace(pre_clip[:, 0], pre_clip[:, 1], poly_coords)
-    clipped = pre_clip_inds[full_clip_mask]
+    full_clip_mask = ray_trace(
+        points["x"][pre_clip_mask], points["y"][pre_clip_mask], poly_coords
+    )
 
-    return clipped
+    return pre_clip_inds[full_clip_mask]

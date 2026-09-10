@@ -1,26 +1,29 @@
 Installation
 ============
 
-`miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ or Anaconda is required for your system before beginning. pyfor depends on many
-packages that are otherwise tricky and difficult to install (especially gdal and its bindings),
-and conda provides a quick and easy way to manage many different Python environments on your
-system simultaneously.
+pyfor requires Python 3.10 or newer. All of its dependencies are available as binary wheels, so a
+virtual environment and ``pip`` are all that is needed:
 
-The following bash commands will install this branch of pyfor. It requires installation of miniconda (see above). This will install all of the prerequisites in that environment, named pyfor_env. pyfor depends on a lot of heavy libraries, so expect construction of the environment to take a little time.
+.. code:: bash
+
+    python -m venv .venv
+    source .venv/bin/activate      # Windows: .venv\Scripts\activate
+    pip install pyfor
+
+To work on pyfor itself, install the clone in editable mode instead:
 
 .. code:: bash
 
     git clone https://github.com/brycefrank/pyfor.git
     cd pyfor
-    conda env create -f environment.yml
+    pip install -e ".[test]"
 
-    # For Linux / macOS:
-    source activate pyfor_env
+The 3D plotting methods (``Cloud.plot3d``) need the optional ``plot`` dependencies, which are not
+installed by default:
 
-    # For Windows:
-    activate pyfor_env
+.. code:: bash
 
-    pip install .
+    pip install "pyfor[plot]"
 
 Following these commands, pyfor should load in an activated Python shell:
 
@@ -29,3 +32,9 @@ Following these commands, pyfor should load in an activated Python shell:
     import pyfor
 
 If you see no errors, you are ready to process.
+
+A conda environment file is also provided for those who prefer conda:
+
+.. code:: bash
+
+    conda env create -f environment.yml
