@@ -1,0 +1,17 @@
+{
+  "name": "pyfor-docs",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "gen:api": "python3 scripts/generate_api.py"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.42.0",
+    "astro": "^7.3.2",
+    "sharp": "^0.34.2"
+  }
+}

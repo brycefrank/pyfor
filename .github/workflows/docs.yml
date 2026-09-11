@@ -1,0 +1,76 @@
+name: docs
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "docs/**"
+      - "pyfor/**"
+      - ".github/workflows/docs.yml"
+  pull_request:
+    paths:
+      - "docs/**"
+      - "pyfor/**"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # griffe reads the docstrings statically, so pyfor's runtime
+      # dependencies are not needed to build the reference.
+      - run: pip install "griffe>=2,<3"
+
+      - run: npm ci
+        working-directory: docs
+
+      - run: npm run gen:api
+        working-directory: docs
+
+      # The generated pages are committed, so fail when they are stale.
+      - name: Check generated API pages are current
+        run: |
+          git add -A docs/src/content/docs/api
+          git diff --cached --exit-code
+
+      - run: npm run build
+        working-directory: docs
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/dist
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

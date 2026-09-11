@@ -1,3 +1,18 @@
+# Unreleased
+
+## Documentation
+
+The user manual moved from Sphinx to Astro Starlight and is published by the new `docs` workflow to
+GitHub Pages at https://brycefrank.com/pyfor.
+
+- Every narrative page was ported to Markdown under `docs/src/content/docs/`, and the images
+  moved with them.
+- The API reference is generated from the docstrings in `pyfor/` by
+  `docs/scripts/generate_api.py`, which reads the package statically with `griffe` and writes one
+  page per module. Anchor names keep their dotted Sphinx form, so existing deep links resolve.
+- URLs from the old site, such as `/pyfor/html/topics/normalization.html`, redirect to their new
+  pages.
+
 # 0.4.0
 
 Modernization release, September 9, 2026.
@@ -154,8 +169,9 @@ longer supported.
    operations, pins every tool to the same raster grid, and checks that the tools produce the same
    CHM before reporting times. `benchmarks/lidr.R`, `benchmarks/pyfor_ops.py`, and one PDAL pipeline
    per operation are the per tool halves.
-2. `docs/topics/benchmarks.rst` reports the results, and the two problems the first run of the
-   benchmark found, both of which are fixed in this release (see the breaking changes above):
+2. `docs/src/content/docs/topics/benchmarks.md` reports the results, and the two problems the
+   first run of the benchmark found, both of which are fixed in this release (see the breaking
+   changes above):
    * rasters could not be lined up with any other tool, because the grid was anchored at the extent
      of the data rather than snapped to the cell size;
    * a point exactly on a horizontal cell boundary was assigned to a different cell than GDAL and

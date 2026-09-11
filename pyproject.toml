@@ -35,10 +35,11 @@ dependencies = [
 [project.optional-dependencies]
 plot = ["pyqtgraph>=0.13", "PyOpenGL"]
 test = ["pytest>=7"]
+docs = ["griffe>=2,<3"]
 
 [project.urls]
 Homepage = "https://github.com/brycefrank/pyfor"
-Documentation = "http://brycefrank.com/pyfor"
+Documentation = "https://brycefrank.com/pyfor"
 Changelog = "https://github.com/brycefrank/pyfor/blob/master/CHANGELOG.md"
 
 [tool.setuptools]

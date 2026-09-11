@@ -1,7 +1,7 @@
 <p align="center">
-  <img src="docs/logo.png" width="100"><br>
+  <img src="docs/src/assets/logo.png" width="100"><br>
   <b>pyfor</b><br><br>
-  <a href="http://brycefrank.com/pyfor">Documentation</a> |
+  <a href="https://brycefrank.com/pyfor">Documentation</a> |
   <a href="https://github.com/brycefrank/pyfor/blob/master/CHANGELOG.md">Changelog</a> |
   <a href="https://github.com/brycefrank/pyfor/issues/new">Request a Feature</a> |
   <a href="https://github.com/brycefrank/pyfor/projects/12">Road Map</a>
@@ -25,13 +25,13 @@ adequate for single tile processing and large acquisitions.
 
 ## What Does pyfor Do?
 
-- [Normalization](http://brycefrank.com/pyfor/html/topics/normalization.html)
-- [Canopy Height Models](http://brycefrank.com/pyfor/html/topics/canopyheightmodel.html)
-- [Ground Filtering](http://brycefrank.com/pyfor/html/api/pyfor.ground_filter.html)
-- [Clipping](http://brycefrank.com/pyfor/html/topics/clipping.html)
-- [Large Acquisition Processing](http://brycefrank.com/pyfor/html/advanced/handlinglargeacquisitions.html)
+- [Normalization](https://brycefrank.com/pyfor/topics/normalization/)
+- [Canopy Height Models](https://brycefrank.com/pyfor/topics/canopyheightmodel/)
+- [Ground Filtering](https://brycefrank.com/pyfor/api/pyfor.ground_filter/)
+- [Clipping](https://brycefrank.com/pyfor/topics/clipping/)
+- [Large Acquisition Processing](https://brycefrank.com/pyfor/advanced/handlinglargeacquisitions/)
 
-and many other tasks. See the [documentation](http://brycefrank.com/pyfor) for examples and applications.
+and many other tasks. See the [documentation](https://brycefrank.com/pyfor) for examples and applications.
 
 What about tree segmentation? Please see pyfor's sister package [`treeseg`](https://github.com/brycefrank/treeseg) which
 is a standalone package for tree segmentation and detection.

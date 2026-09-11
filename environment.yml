@@ -6,4 +6,3 @@ dependencies:
   - pip:
       - -e .
       - pytest
-      - sphinx_rtd_theme

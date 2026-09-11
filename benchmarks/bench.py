@@ -14,9 +14,9 @@ Every measurement is the wall clock of a fresh process. A warmup run is discarde
 is warm for all measurements, and tools are pinned to one thread where they allow it, so the numbers
 compare single threaded throughput rather than each tool's parallelism defaults.
 
-The algorithms are not identical, see docs/topics/benchmarks.rst for what that means for reading
-the results. The CHM operations are directly comparable and the harness verifies that the three
-tools produce the same raster before reporting.
+The algorithms are not identical, see docs/src/content/docs/topics/benchmarks.md for what that
+means for reading the results. The CHM operations are directly comparable and the harness verifies
+that the three tools produce the same raster before reporting.
 
 Usage:
     python benchmarks/bench.py                 # all modes, all available tools, 3 runs each
