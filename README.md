@@ -3,10 +3,11 @@
   <b>pyfor</b><br><br>
   <a href="https://brycefrank.com/pyfor">Documentation</a> |
   <a href="https://github.com/brycefrank/pyfor/blob/main/CHANGELOG.md">Changelog</a> |
-  <a href="https://github.com/brycefrank/pyfor/issues/new">Request a Feature</a> |
-  <a href="https://github.com/brycefrank/pyfor/projects/12">Road Map</a>
+  <a href="https://github.com/brycefrank/pyfor/issues/new">Request a Feature</a>
   <br>
-  <img src="https://github.com/brycefrank/pyfor/actions/workflows/tests.yml/badge.svg" alt="tests">
+  <a href="https://github.com/brycefrank/pyfor/actions/workflows/tests.yml">
+    <img src="https://github.com/brycefrank/pyfor/actions/workflows/tests.yml/badge.svg" alt="tests">
+  </a>
 </p>
 
 **pyfor** is a Python package that assists in the processing of point cloud data in the context of forest inventory. 
@@ -58,5 +59,7 @@ formats (`.las`, `.laz`, COPC) and `rasterio`, please contact me at bfrank70@gma
 
 I am also willing to implement features on request. Feel free to [open an issue](https://github.com/brycefrank/pyfor/issues) with your request or email me at the address above.
 
-pyfor will always remain a free service. Its development takes time, energy and a bit of money to maintain source code and host documentation. If you are so inclined, donations are accepted at the donation button at the top of the readme.
+pyfor will always remain a free service. Its development takes time, energy and a bit of money to
+maintain source code and host documentation. If you would like to support it, email me at the
+address above.
 
