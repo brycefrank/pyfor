@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 382" role="img" aria-label="seconds per operation for pyfor, lidR, pdal" font-family="inherit" font-size="12">
+<rect x="140" y="5" width="11" height="11" rx="2" fill="var(--sl-color-accent-high)" fill-opacity="1"/>
+<text x="157" y="14" fill="currentColor" font-size="12.5">pyfor</text>
+<rect x="219" y="5" width="11" height="11" rx="2" fill="currentColor" fill-opacity="0.42"/>
+<text x="236" y="14" fill="currentColor" font-size="12.5">lidR</text>
+<rect x="290" y="5" width="11" height="11" rx="2" fill="currentColor" fill-opacity="0.2"/>
+<text x="307" y="14" fill="currentColor" font-size="12.5">pdal</text>
+<line x1="140.0" y1="40" x2="140.0" y2="372" stroke="currentColor" stroke-opacity="0.12"/>
+<text x="140.0" y="33" fill="currentColor" fill-opacity="0.65" font-size="10.5" text-anchor="middle">0</text>
+<line x1="273.5" y1="40" x2="273.5" y2="372" stroke="currentColor" stroke-opacity="0.12"/>
+<text x="273.5" y="33" fill="currentColor" fill-opacity="0.65" font-size="10.5" text-anchor="middle">2</text>
+<line x1="407.0" y1="40" x2="407.0" y2="372" stroke="currentColor" stroke-opacity="0.12"/>
+<text x="407.0" y="33" fill="currentColor" fill-opacity="0.65" font-size="10.5" text-anchor="middle">4</text>
+<line x1="540.5" y1="40" x2="540.5" y2="372" stroke="currentColor" stroke-opacity="0.12"/>
+<text x="540.5" y="33" fill="currentColor" fill-opacity="0.65" font-size="10.5" text-anchor="middle">6</text>
+<line x1="674.0" y1="40" x2="674.0" y2="372" stroke="currentColor" stroke-opacity="0.12"/>
+<text x="674.0" y="33" fill="currentColor" fill-opacity="0.65" font-size="10.5" text-anchor="middle">8</text>
+<text x="674" y="14" fill="currentColor" fill-opacity="0.65" font-size="11" text-anchor="end">seconds</text>
+<line x1="140" y1="40" x2="674" y2="40" stroke="currentColor" stroke-opacity="0.35"/>
+<text x="132" y="73.0" fill="currentColor" font-size="13" text-anchor="end">read</text>
+<rect x="140" y="48.0" width="109.7" height="12" rx="2" fill="var(--sl-color-accent-high)" fill-opacity="1"/>
+<text x="255.7" y="58.0" fill="currentColor" fill-opacity="0.8" font-size="11.5">1.64</text>
+<rect x="140" y="63.0" width="350.5" height="12" rx="2" fill="currentColor" fill-opacity="0.42"/>
+<text x="496.5" y="73.0" fill="currentColor" fill-opacity="0.8" font-size="11.5">5.25</text>
+<rect x="140" y="78.0" width="14.6" height="12" rx="2" fill="currentColor" fill-opacity="0.2"/>
+<text x="160.6" y="88.0" fill="currentColor" fill-opacity="0.8" font-size="11.5">0.22</text>
+<text x="132" y="129.0" fill="currentColor" font-size="13" text-anchor="end">read + write</text>
+<rect x="140" y="104.0" width="116.9" height="12" rx="2" fill="var(--sl-color-accent-high)" fill-opacity="1"/>
+<text x="262.9" y="114.0" fill="currentColor" fill-opacity="0.8" font-size="11.5">1.75</text>
+<rect x="140" y="119.0" width="354.4" height="12" rx="2" fill="currentColor" fill-opacity="0.42"/>
+<text x="500.4" y="129.0" fill="currentColor" fill-opacity="0.8" font-size="11.5">5.31</text>
+<rect x="140" y="134.0" width="21.2" height="12" rx="2" fill="currentColor" fill-opacity="0.2"/>
+<text x="167.2" y="144.0" fill="currentColor" fill-opacity="0.8" font-size="11.5">0.32</text>
+<text x="132" y="185.0" fill="currentColor" font-size="13" text-anchor="end">normalize</text>
+<rect x="140" y="160.0" width="153.4" height="12" rx="2" fill="var(--sl-color-accent-high)" fill-opacity="1"/>
+<text x="299.4" y="170.0" fill="currentColor" fill-opacity="0.8" font-size="11.5">2.30</text>
+<rect x="140" y="175.0" width="423.9" height="12" rx="2" fill="currentColor" fill-opacity="0.42"/>
+<text x="569.9" y="185.0" fill="currentColor" fill-opacity="0.8" font-size="11.5">6.35</text>
+<rect x="140" y="190.0" width="43.7" height="12" rx="2" fill="currentColor" fill-opacity="0.2"/>
+<text x="189.7" y="200.0" fill="currentColor" fill-opacity="0.8" font-size="11.5">0.65</text>
+<text x="132" y="241.0" fill="currentColor" font-size="13" text-anchor="end">chm</text>
+<rect x="140" y="216.0" width="115.0" height="12" rx="2" fill="var(--sl-color-accent-high)" fill-opacity="1"/>
+<text x="261.0" y="226.0" fill="currentColor" fill-opacity="0.8" font-size="11.5">1.72</text>
+<rect x="140" y="231.0" width="367.5" height="12" rx="2" fill="currentColor" fill-opacity="0.42"/>
+<text x="513.5" y="241.0" fill="currentColor" fill-opacity="0.8" font-size="11.5">5.51</text>
+<rect x="140" y="246.0" width="16.0" height="12" rx="2" fill="currentColor" fill-opacity="0.2"/>
+<text x="162.0" y="256.0" fill="currentColor" fill-opacity="0.8" font-size="11.5">0.24</text>
+<text x="132" y="297.0" fill="currentColor" font-size="13" text-anchor="end">normalized chm</text>
+<rect x="140" y="272.0" width="155.8" height="12" rx="2" fill="var(--sl-color-accent-high)" fill-opacity="1"/>
+<text x="301.8" y="282.0" fill="currentColor" fill-opacity="0.8" font-size="11.5">2.33</text>
+<rect x="140" y="287.0" width="433.7" height="12" rx="2" fill="currentColor" fill-opacity="0.42"/>
+<text x="579.7" y="297.0" fill="currentColor" fill-opacity="0.8" font-size="11.5">6.50</text>
+<rect x="140" y="302.0" width="51.7" height="12" rx="2" fill="currentColor" fill-opacity="0.2"/>
+<text x="197.7" y="312.0" fill="currentColor" fill-opacity="0.8" font-size="11.5">0.78</text>
+<text x="132" y="353.0" fill="currentColor" font-size="13" text-anchor="end">metrics</text>
+<rect x="140" y="328.0" width="201.9" height="12" rx="2" fill="var(--sl-color-accent-high)" fill-opacity="1"/>
+<text x="347.9" y="338.0" fill="currentColor" fill-opacity="0.8" font-size="11.5">3.03</text>
+<rect x="140" y="343.0" width="467.3" height="12" rx="2" fill="currentColor" fill-opacity="0.42"/>
+<text x="613.3" y="353.0" fill="currentColor" fill-opacity="0.8" font-size="11.5">7.00</text>
+</svg>

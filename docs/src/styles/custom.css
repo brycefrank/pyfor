@@ -1,0 +1,14 @@
+/* Benchmark charts are inlined SVGs, so they inherit the page's colours and
+   theme. Keep them legible on narrow screens by scrolling instead of shrinking
+   the labels into the ground. */
+.bench-chart {
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.bench-chart svg {
+  display: block;
+  width: 100%;
+  min-width: 34rem;
+  height: auto;
+}

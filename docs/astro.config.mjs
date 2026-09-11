@@ -60,6 +60,7 @@ export default defineConfig({
       editLink: {
         baseUrl: "https://github.com/brycefrank/pyfor/edit/master/docs/",
       },
+      customCss: ["./src/styles/custom.css"],
       sidebar: [
         { label: "Introduction", link: "/introduction/" },
         { label: "Installation", link: "/installation/" },
