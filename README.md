@@ -2,7 +2,7 @@
   <img src="docs/src/assets/logo.png" width="100"><br>
   <b>pyfor</b><br><br>
   <a href="https://brycefrank.com/pyfor">Documentation</a> |
-  <a href="https://github.com/brycefrank/pyfor/blob/master/CHANGELOG.md">Changelog</a> |
+  <a href="https://github.com/brycefrank/pyfor/blob/main/CHANGELOG.md">Changelog</a> |
   <a href="https://github.com/brycefrank/pyfor/issues/new">Request a Feature</a> |
   <a href="https://github.com/brycefrank/pyfor/projects/12">Road Map</a>
   <br>

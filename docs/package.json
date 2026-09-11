@@ -7,7 +7,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "gen:api": "python3 scripts/generate_api.py"
+    "gen:api": "python3 scripts/generate_api.py",
+    "gen:bench": "python3 scripts/generate_benchmark_charts.py"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.42.0",

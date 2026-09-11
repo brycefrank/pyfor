@@ -40,7 +40,7 @@ docs = ["griffe>=2,<3"]
 [project.urls]
 Homepage = "https://github.com/brycefrank/pyfor"
 Documentation = "https://brycefrank.com/pyfor"
-Changelog = "https://github.com/brycefrank/pyfor/blob/master/CHANGELOG.md"
+Changelog = "https://github.com/brycefrank/pyfor/blob/main/CHANGELOG.md"
 
 [tool.setuptools]
 packages = ["pyfor", "pyfortest"]

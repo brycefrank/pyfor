@@ -1,0 +1,138 @@
+---
+title: Benchmarks
+description: pyfor, lidR, and PDAL on one tile, and what the comparison revealed.
+---
+
+import wallclock from "../../../assets/bench-wallclock.svg?raw";
+import inprocess from "../../../assets/bench-inprocess.svg?raw";
+
+How does pyfor compare to other tools that process LiDAR for forest inventory? Three tools, one
+tile, six operations. Every number here comes from
+[`benchmarks/bench.py`](https://github.com/brycefrank/pyfor/blob/main/benchmarks/bench.py), which
+is in the repository: run it on your own machine and you should get the same picture, though the
+absolute times will differ.
+
+## What was run
+
+The tile ships with pyfor: `pyfortest/data/test.laz`, 217,222 points over 200 m by 200 m. Each tool
+runs its own idiomatic version of the same six operations.
+
+| operation | pyfor | lidR | PDAL |
+| --- | --- | --- | --- |
+| `read` | `Cloud(path)` | `readLAS()` | `readers.las` |
+| `readwrite` | read, then `Cloud.write()` as `.laz` | read, then `writeLAS()` | `readers.las` then `writers.las` |
+| `normalize` | `Cloud.normalize(1)`, the Zhang et al. (2003) filter | `normalize_height(las, tin())` | `filters.smrf` then `filters.hag_nn` |
+| `chm` | `grid(1).raster("max", "z")` written to GeoTIFF | `rasterize_canopy(las, 1, p2r())` | `writers.gdal` with `output_type: max` |
+| `chm_normalized` | normalize, then the `chm` operation | `normalize_height(las, tin())`, then `chm` | `filters.smrf`, `filters.hag_nn`, then `writers.gdal` |
+| `metrics` | `normalize(1)` then `grid(20).standard_metrics(2)`, 25 rasters | `normalize_height(las, tin())` then `pixel_metrics(stdmetrics, res = 20)` | not supported |
+
+The normalization algorithms and the metric suites are **not** equivalent, so those rows compare
+workflows rather than identical arithmetic. The rasterization rows are equivalent, and the harness
+verifies that below. Every measurement is the median of three runs with a warm page cache and one
+thread per tool, after a discarded warmup.
+
+## Timings
+
+### Wall clock
+
+A fresh process per measurement, so starting the interpreter and loading libraries is included.
+
+<div class="bench-chart" set:html={wallclock} />
+
+* pyfor spends about 1.6 s of its 1.72 s `chm` run on `import pyfor`, which pulls in geopandas,
+  rasterio, matplotlib, and laspy; lidR spends about 5.0 s of 5.51 s loading R and the lidR and terra
+  stack. PDAL is a single binary that starts in about 55 ms, which is why its wall clock sits so
+  close to its cost of work.
+
+### Cost of work
+
+The time from after the interpreter and libraries are loaded to the end of the operation, as
+reported by the tool itself. PDAL reports no in-process time, so it is absent here.
+
+<div class="bench-chart" set:html={inprocess} />
+
+* Per unit of work pyfor is the fastest of the three: about 3.6x faster than lidR at rasterizing a
+  CHM, 2.0x at normalizing, and 1.4x at the metric suite.
+* The metric row is closer than it looks. lidR's `stdmetrics` computes 56 rasters where pyfor
+  computes 25, and the lidR number includes writing all 56 to a GeoTIFF while pyfor returns 25
+  rasters in memory.
+* Reading this tile costs pyfor 0.07 s of work against PDAL's 0.22 s for an entire process, and
+  writing it 0.14 s against 0.32 s.
+
+## Verification: did the tools compute the same thing?
+
+Timings only mean something if the tools did the same work, so the harness compares the CHMs.
+
+* **pyfor against PDAL.** Identical cell for cell: 39,696 of 40,000 cells compared, no cell that only
+  one tool fills, maximum difference **0.0 m**.
+* **pyfor against an independent numpy binning** of the same points: identical, maximum difference
+  0.0 m.
+* **pyfor against lidR.** 39,692 of 40,000 cells, 4 cells that only pyfor fills and 15 that only lidR
+  fills, maximum difference 16.4 m, mean absolute difference 0.024 m. On a synthetic tile whose
+  extent sits on the cell lattice all three agree exactly, cell for cell.
+
+The difference that remains against lidR is its own boundary rule, which a probe on two cells
+exposes. One point sits exactly on the grid line between them, carrying a height of 99.
+
+```text
+tool    rows north to south
+pyfor   [ 99.0,  1.0]      the boundary point goes to the north cell
+pdal    [ 99.0,  1.0]      the same
+lidR    [None,  2.0, 99.0] the point goes to the south cell, and the raster grows a cell to hold
+                           a point sitting on the outer edge
+```
+
+pyfor and PDAL follow GDAL, where a point on a grid line belongs to the cell above it. lidR puts it
+in the cell below and grows the raster by a cell for points on the far edge, which is why its raster
+is 51 by 51 where the other two are 50 by 50. `chm_normalized` also differs between pyfor and PDAL,
+by 0.47 m on average, but that is the Zhang et al. (2003) filter against SMRF plus nearest neighbour
+height assignment, not the same arithmetic implemented twice.
+
+## What the benchmark changed
+
+The first run found that pyfor's rasters could not be lined up with anyone else's. The fixes shipped
+in 0.4.0:
+
+1. **Rasters are gridded on a snapped grid.** The origin was the extent of the data, so two tiles of
+   one project described different cells and could not be mosaicked or compared. It is now snapped to
+   a multiple of the cell size, the target aligned pixels convention. On this tile the origin moved
+   from 405000.01 to 405000.0, which changes the maximum of 731 of the 39,691 cells the two grids
+   have in common, by 0.023 m on average and 17.19 m in the worst cell.
+2. **Points on a cell boundary follow GDAL.** A point exactly on a horizontal grid line now belongs
+   to the cell above it. 4,285 of the tile's 217,222 points sit on such a line.
+3. **A grid can be stated explicitly.** [GridSpec](/pyfor/api/pyfor.rasterizer/#pyfor.rasterizer.GridSpec)
+   is an origin, a cell size, and a size in cells, and it is accepted by
+   [Cloud.grid](/pyfor/api/pyfor.cloud/#pyfor.cloud.Cloud.grid),
+   [Cloud.chm](/pyfor/api/pyfor.cloud/#pyfor.cloud.Cloud.chm),
+   [Cloud.normalize](/pyfor/api/pyfor.cloud/#pyfor.cloud.Cloud.normalize) and both ground filters.
+   [CloudDataFrame.grid_spec](/pyfor/api/pyfor.collection/#pyfor.collection.CloudDataFrame.grid_spec)
+   builds one covering a whole collection.
+4. **Trimming a raster refuses to guess.**
+   [Raster.force_extent](/pyfor/api/pyfor.rasterizer/#pyfor.rasterizer.Raster.force_extent) used to
+   round a bounding box to the nearest cell, silently labelling an array with a grid it was not on.
+   It now raises instead.
+5. **Still open: startup cost.** Importing rasterio, geopandas, and matplotlib lazily, where they are
+   actually used, would remove most of the wall clock of a short script.
+
+## Reproducing this
+
+```bash
+# pyfor, from the repository
+pip install -e ".[test]"
+
+# lidR: archived on CRAN since 2026-06-09 because it depends on the archived rlas,
+# so install the last release from the archive
+Rscript -e 'install.packages("https://cran.r-project.org/src/contrib/Archive/lidR/lidR_4.3.2.tar.gz", repos = NULL, type = "source")'
+
+# PDAL: any 2.6+ build with the smrf, hag, and gdal plugins
+conda install -c conda-forge pdal
+
+python benchmarks/bench.py --pdal "$(which pdal)" --runs 3
+```
+
+`benchmarks/bench.py --help` lists the options. Results land in `benchmarks/results/results.json`,
+including the exact command line and the effective PDAL pipeline behind every number. The charts
+above are generated from that file by `docs/scripts/generate_benchmark_charts.py`.
+
+The measurements on this page were taken on 2026-09-09 with pyfor 0.4.0, laspy 2.7.0, numpy 2.5.3,
+R 4.6.0, lidR 4.3.2, rlas 1.9.5, and PDAL 2.10.2, on an Intel Core i5-1345U (12 threads, 16 GB).

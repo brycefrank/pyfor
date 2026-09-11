@@ -12,6 +12,8 @@ GitHub Pages at https://brycefrank.com/pyfor.
   page per module. Anchor names keep their dotted Sphinx form, so existing deep links resolve.
 - URLs from the old site, such as `/pyfor/html/topics/normalization.html`, redirect to their new
   pages.
+- The benchmark page reports its timings as charts, generated from
+  `benchmarks/results/results.json` by `docs/scripts/generate_benchmark_charts.py`.
 
 # 0.4.0
 
